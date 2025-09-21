@@ -1,11 +1,11 @@
 import { useState } from "react";
-import { Plus, Video, Layers, Trash2, Edit, Save, X } from "lucide-react";
+import { Plus, Video, Layers, Trash2, Edit, Save, X, Lock, Unlock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useModulos } from "@/context/ModulosContext";
 import { ModuloCarousel } from "@/components/ModuloCarousel";
 
 const Admin = () => {
-  const { modulos, adicionarModulo, adicionarAula, editarModulo } = useModulos();
+  const { modulos, adicionarModulo, adicionarAula, editarModulo, setModuloBloqueado, setAulaBloqueada } = useModulos();
   const [novoModulo, setNovoModulo] = useState({ nome: "", capa: "" });
   const [aulas, setAulas] = useState<{ titulo: string; videoUrl: string }[]>([]);
   const [novaAula, setNovaAula] = useState({ titulo: "", videoUrl: "" });
@@ -255,19 +255,35 @@ const Admin = () => {
               </div>
             ) : (
               <div key={modulo.id} className="bg-neutral-800 rounded-lg p-4 shadow-lg flex flex-col h-full">
-                <div className="mb-2">
-                  <img
-                    src={modulo.capa}
-                    alt={modulo.nome}
-                    className="w-full h-40 object-cover rounded mb-2"
-                    onError={(e) => (e.currentTarget.src = "https://placehold.co/400x200?text=Sem+Capa")}
-                  />
-                  <h2 className="text-xl font-semibold">{modulo.nome}</h2>
+                <div className="mb-2 flex items-center justify-between">
+                  <div>
+                    <img
+                      src={modulo.capa}
+                      alt={modulo.nome}
+                      className="w-full h-40 object-cover rounded mb-2"
+                      onError={(e) => (e.currentTarget.src = "https://placehold.co/400x200?text=Sem+Capa")}
+                    />
+                    <h2 className="text-xl font-semibold">{modulo.nome}</h2>
+                  </div>
+                  <button
+                    className={`ml-2 p-2 rounded ${modulo.bloqueado ? "bg-red-700" : "bg-green-700"} text-white`}
+                    onClick={() => setModuloBloqueado(modulo.id, !modulo.bloqueado)}
+                    title={modulo.bloqueado ? "Desbloquear módulo" : "Bloquear módulo"}
+                  >
+                    {modulo.bloqueado ? <Lock size={18} /> : <Unlock size={18} />}
+                  </button>
                 </div>
                 <ul>
                   {modulo.aulas.map((aula) => (
                     <li key={aula.id} className="flex items-center gap-2 mb-1">
                       <Video size={18} /> {aula.titulo}
+                      <button
+                        className={`ml-2 p-1 rounded ${aula.bloqueado ? "bg-red-700" : "bg-green-700"} text-white`}
+                        onClick={() => setAulaBloqueada(modulo.id, aula.id, !aula.bloqueado)}
+                        title={aula.bloqueado ? "Desbloquear aula" : "Bloquear aula"}
+                      >
+                        {aula.bloqueado ? <Lock size={14} /> : <Unlock size={14} />}
+                      </button>
                     </li>
                   ))}
                 </ul>

@@ -1,20 +1,22 @@
 import React from "react";
 import useEmblaCarousel from "embla-carousel-react";
-import { ChevronLeft, ChevronRight, Video } from "lucide-react";
+import { ChevronLeft, ChevronRight, Video, Lock } from "lucide-react";
 
-type Aula = { id: number; titulo: string; videoUrl: string };
-type Modulo = { id: number; nome: string; capa: string; aulas: Aula[] };
+type Aula = { id: number; titulo: string; videoUrl: string; bloqueado?: boolean };
+type Modulo = { id: number; nome: string; capa: string; aulas: Aula[]; bloqueado?: boolean };
 
 interface ModuloCarouselProps {
   modulos: Modulo[];
   onModuloClick?: (modulo: Modulo) => void;
   alunoLayout?: boolean;
+  showLocked?: boolean; // se true, mostra só bloqueados
 }
 
 export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
   modulos,
   onModuloClick,
   alunoLayout = false,
+  showLocked = false,
 }) => {
   // Para mobile: 1.5 cards visíveis se alunoLayout, senão 2
   const slidesToShow = alunoLayout ? 1.5 : 2;
@@ -59,6 +61,11 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
     ? "md:grid-cols-3 lg:grid-cols-5"
     : "md:grid-cols-2 lg:grid-cols-3";
 
+  // Filtra se for para mostrar só bloqueados
+  const filteredModulos = showLocked
+    ? modulos.filter((m) => m.bloqueado)
+    : modulos.filter((m) => !m.bloqueado);
+
   return (
     <div>
       {/* Mobile: carrossel */}
@@ -66,16 +73,28 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
         <div className="relative">
           <div className="overflow-hidden" ref={emblaRef}>
             <div className="flex">
-              {modulos.map((modulo, idx) => (
+              {filteredModulos.map((modulo, idx) => (
                 <div
                   className={`${mobileCardWidth} flex-shrink-0 px-2`}
                   style={mobilePeek}
                   key={modulo.id}
                 >
                   <div
-                    className={`bg-neutral-800 rounded-lg p-4 shadow-lg flex flex-col h-full cursor-pointer`}
-                    onClick={onModuloClick ? () => onModuloClick(modulo) : undefined}
+                    className={`bg-neutral-800 rounded-lg p-4 shadow-lg flex flex-col h-full cursor-pointer relative ${
+                      modulo.bloqueado ? "grayscale opacity-70 pointer-events-none" : ""
+                    }`}
+                    onClick={
+                      !modulo.bloqueado && onModuloClick
+                        ? () => onModuloClick(modulo)
+                        : undefined
+                    }
                   >
+                    {modulo.bloqueado && (
+                      <Lock
+                        size={28}
+                        className="absolute top-2 right-2 text-red-500 bg-neutral-900 rounded-full p-1"
+                      />
+                    )}
                     <div className="mb-2 flex flex-col items-center">
                       <img
                         src={modulo.capa}
@@ -92,6 +111,9 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
                       {modulo.aulas.map((aula) => (
                         <li key={aula.id} className="flex items-center gap-2 mb-1 text-xs">
                           <Video size={16} /> {aula.titulo}
+                          {aula.bloqueado && (
+                            <Lock size={12} className="ml-1 text-red-500" />
+                          )}
                         </li>
                       ))}
                     </ul>
@@ -123,12 +145,24 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
       </div>
       {/* Desktop: grid */}
       <div className={`hidden md:grid grid-cols-1 ${desktopGridCols} gap-4`}>
-        {modulos.map((modulo) => (
+        {filteredModulos.map((modulo) => (
           <div
             key={modulo.id}
-            className={`bg-neutral-800 rounded-lg p-3 shadow-lg flex flex-col h-full cursor-pointer`}
-            onClick={onModuloClick ? () => onModuloClick(modulo) : undefined}
+            className={`bg-neutral-800 rounded-lg p-3 shadow-lg flex flex-col h-full cursor-pointer relative ${
+              modulo.bloqueado ? "grayscale opacity-70 pointer-events-none" : ""
+            }`}
+            onClick={
+              !modulo.bloqueado && onModuloClick
+                ? () => onModuloClick(modulo)
+                : undefined
+            }
           >
+            {modulo.bloqueado && (
+              <Lock
+                size={28}
+                className="absolute top-2 right-2 text-red-500 bg-neutral-900 rounded-full p-1"
+              />
+            )}
             <div className="mb-2 flex flex-col items-center">
               <img
                 src={modulo.capa}
@@ -145,6 +179,9 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
               {modulo.aulas.map((aula) => (
                 <li key={aula.id} className="flex items-center gap-2 mb-1 text-xs">
                   <Video size={16} /> {aula.titulo}
+                  {aula.bloqueado && (
+                    <Lock size={12} className="ml-1 text-red-500" />
+                  )}
                 </li>
               ))}
             </ul>

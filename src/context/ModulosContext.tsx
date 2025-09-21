@@ -1,14 +1,16 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 
-type Aula = { id: number; titulo: string; videoUrl: string; assistida?: boolean };
-type Modulo = { id: number; nome: string; capa: string; aulas: Aula[] };
+type Aula = { id: number; titulo: string; videoUrl: string; assistida?: boolean; bloqueado?: boolean };
+type Modulo = { id: number; nome: string; capa: string; aulas: Aula[]; bloqueado?: boolean };
 
 type ModulosContextType = {
   modulos: Modulo[];
-  adicionarModulo: (nome: string, capa: string, aulas?: Omit<Aula, "id" | "assistida">[]) => void;
+  adicionarModulo: (nome: string, capa: string, aulas?: Omit<Aula, "id" | "assistida" | "bloqueado">[]) => void;
   adicionarAula: (moduloId: number, titulo: string, videoUrl: string) => void;
   marcarAulaAssistida: (moduloId: number, aulaId: number) => void;
-  editarModulo: (moduloId: number, novoNome: string, novaCapa: string, novasAulas: Omit<Aula, "id" | "assistida">[]) => void;
+  editarModulo: (moduloId: number, novoNome: string, novaCapa: string, novasAulas: Omit<Aula, "id" | "assistida" | "bloqueado">[]) => void;
+  setModuloBloqueado: (moduloId: number, bloqueado: boolean) => void;
+  setAulaBloqueada: (moduloId: number, aulaId: number, bloqueado: boolean) => void;
 };
 
 const STORAGE_KEY = "modulos_area_membros";
@@ -18,27 +20,28 @@ const getInitialModulos = (): Modulo[] => {
   if (data) {
     try {
       return JSON.parse(data);
-    } catch {
-      // fallback para padrão se corrompido
-    }
+    } catch {}
   }
   return [
     {
       id: 1,
       nome: "Módulo 1",
       capa: "https://placehold.co/400x200/222/fff?text=Módulo+1",
+      bloqueado: false,
       aulas: [
         {
           id: 1,
           titulo: "Aula 1",
           videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
           assistida: true,
+          bloqueado: false,
         },
         {
           id: 2,
           titulo: "Aula 2",
           videoUrl: "https://www.youtube.com/embed/ysz5S6PUM-U",
           assistida: false,
+          bloqueado: false,
         },
       ],
     },
@@ -46,12 +49,14 @@ const getInitialModulos = (): Modulo[] => {
       id: 2,
       nome: "Módulo 2",
       capa: "https://placehold.co/400x200/333/fff?text=Módulo+2",
+      bloqueado: false,
       aulas: [
         {
           id: 3,
           titulo: "Aula 1",
           videoUrl: "https://www.youtube.com/embed/ScMzIvxBSi4",
           assistida: false,
+          bloqueado: false,
         },
       ],
     },
@@ -63,12 +68,11 @@ const ModulosContext = createContext<ModulosContextType | undefined>(undefined);
 export const ModulosProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [modulos, setModulos] = useState<Modulo[]>(getInitialModulos);
 
-  // Salva no localStorage sempre que mudar
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(modulos));
   }, [modulos]);
 
-  const adicionarModulo = (nome: string, capa: string, aulas?: Omit<Aula, "id" | "assistida">[]) => {
+  const adicionarModulo = (nome: string, capa: string, aulas?: Omit<Aula, "id" | "assistida" | "bloqueado">[]) => {
     const novoModuloId = Date.now();
     setModulos((prev) => [
       ...prev,
@@ -76,10 +80,12 @@ export const ModulosProvider: React.FC<{ children: React.ReactNode }> = ({ child
         id: novoModuloId,
         nome,
         capa,
+        bloqueado: false,
         aulas: (aulas || []).map((aula) => ({
           ...aula,
           id: Date.now() + Math.random(),
           assistida: false,
+          bloqueado: false,
         })),
       },
     ]);
@@ -93,7 +99,7 @@ export const ModulosProvider: React.FC<{ children: React.ReactNode }> = ({ child
               ...m,
               aulas: [
                 ...m.aulas,
-                { id: Date.now() + Math.random(), titulo, videoUrl, assistida: false },
+                { id: Date.now() + Math.random(), titulo, videoUrl, assistida: false, bloqueado: false },
               ],
             }
           : m
@@ -116,7 +122,7 @@ export const ModulosProvider: React.FC<{ children: React.ReactNode }> = ({ child
     );
   };
 
-  const editarModulo = (moduloId: number, novoNome: string, novaCapa: string, novasAulas: Omit<Aula, "id" | "assistida">[]) => {
+  const editarModulo = (moduloId: number, novoNome: string, novaCapa: string, novasAulas: Omit<Aula, "id" | "assistida" | "bloqueado">[]) => {
     setModulos((prev) =>
       prev.map((m) =>
         m.id === moduloId
@@ -128,7 +134,33 @@ export const ModulosProvider: React.FC<{ children: React.ReactNode }> = ({ child
                 ...aula,
                 id: m.aulas[idx]?.id || Date.now() + Math.random(),
                 assistida: m.aulas[idx]?.assistida || false,
+                bloqueado: m.aulas[idx]?.bloqueado || false,
               })),
+            }
+          : m
+      )
+    );
+  };
+
+  const setModuloBloqueado = (moduloId: number, bloqueado: boolean) => {
+    setModulos((prev) =>
+      prev.map((m) =>
+        m.id === moduloId
+          ? { ...m, bloqueado }
+          : m
+      )
+    );
+  };
+
+  const setAulaBloqueada = (moduloId: number, aulaId: number, bloqueado: boolean) => {
+    setModulos((prev) =>
+      prev.map((m) =>
+        m.id === moduloId
+          ? {
+              ...m,
+              aulas: m.aulas.map((a) =>
+                a.id === aulaId ? { ...a, bloqueado } : a
+              ),
             }
           : m
       )
@@ -137,7 +169,7 @@ export const ModulosProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
   return (
     <ModulosContext.Provider
-      value={{ modulos, adicionarModulo, adicionarAula, marcarAulaAssistida, editarModulo }}
+      value={{ modulos, adicionarModulo, adicionarAula, marcarAulaAssistida, editarModulo, setModuloBloqueado, setAulaBloqueada }}
     >
       {children}
     </ModulosContext.Provider>

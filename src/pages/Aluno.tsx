@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Layers, ArrowLeft, Star, CheckCircle, Menu, X, BookOpen, BarChart2, Award } from "lucide-react";
+import { Layers, ArrowLeft, Star, CheckCircle, Menu, X, BookOpen, BarChart2, Award, Lock } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { useModulos } from "@/context/ModulosContext";
 import { AulaPlayer } from "@/components/AulaPlayer";
@@ -9,6 +9,7 @@ const MENU_ITEMS = [
   { key: "modulos", label: "Módulos", icon: BookOpen },
   { key: "progresso", label: "Progresso", icon: BarChart2 },
   { key: "conquistas", label: "Conquistas", icon: Award },
+  { key: "bloqueados", label: "Bloqueados", icon: Lock },
 ];
 
 export default function Aluno() {
@@ -16,7 +17,7 @@ export default function Aluno() {
   const [moduloSelecionado, setModuloSelecionado] = useState<number | null>(null);
   const [aulaSelecionada, setAulaSelecionada] = useState<number | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [mobileTab, setMobileTab] = useState<"modulos" | "progresso" | "conquistas">("modulos");
+  const [mobileTab, setMobileTab] = useState<"modulos" | "progresso" | "conquistas" | "bloqueados">("modulos");
 
   // Progresso geral
   const totalAulas = modulos.reduce((acc, m) => acc + m.aulas.length, 0);
@@ -62,6 +63,14 @@ export default function Aluno() {
           </li>
         </ul>
       </div>
+      <div className="mt-8">
+        <h3 className="font-semibold mb-2 flex items-center gap-1">
+          <Lock className="text-red-400" size={18} /> Bloqueados
+        </h3>
+        <div className="text-sm text-neutral-400">
+          Veja os cursos que ainda não estão liberados.
+        </div>
+      </div>
     </aside>
   );
 
@@ -90,39 +99,23 @@ export default function Aluno() {
           <Layers size={28} /> Aluno
         </h2>
         <nav className="flex flex-col gap-4">
-          <button
-            className={`flex items-center gap-2 px-2 py-2 rounded text-left ${
-              mobileTab === "modulos" ? "bg-neutral-800 text-white" : "text-neutral-300"
-            }`}
-            onClick={() => {
-              setMobileTab("modulos");
-              setMobileMenuOpen(false);
-            }}
-          >
-            <BookOpen size={20} /> Módulos
-          </button>
-          <button
-            className={`flex items-center gap-2 px-2 py-2 rounded text-left ${
-              mobileTab === "progresso" ? "bg-neutral-800 text-white" : "text-neutral-300"
-            }`}
-            onClick={() => {
-              setMobileTab("progresso");
-              setMobileMenuOpen(false);
-            }}
-          >
-            <BarChart2 size={20} /> Progresso
-          </button>
-          <button
-            className={`flex items-center gap-2 px-2 py-2 rounded text-left ${
-              mobileTab === "conquistas" ? "bg-neutral-800 text-white" : "text-neutral-300"
-            }`}
-            onClick={() => {
-              setMobileTab("conquistas");
-              setMobileMenuOpen(false);
-            }}
-          >
-            <Award size={20} /> Conquistas
-          </button>
+          {MENU_ITEMS.map((item) => {
+            const Icon = item.icon;
+            return (
+              <button
+                key={item.key}
+                className={`flex items-center gap-2 px-2 py-2 rounded text-left ${
+                  mobileTab === item.key ? "bg-neutral-800 text-white" : "text-neutral-300"
+                }`}
+                onClick={() => {
+                  setMobileTab(item.key as any);
+                  setMobileMenuOpen(false);
+                }}
+              >
+                <Icon size={20} /> {item.label}
+              </button>
+            );
+          })}
         </nav>
         <div className="mt-8">
           <h3 className="font-semibold mb-2">Progresso Geral</h3>
@@ -151,6 +144,14 @@ export default function Aluno() {
               Curso completo!
             </li>
           </ul>
+        </div>
+        <div className="mt-8">
+          <h3 className="font-semibold mb-2 flex items-center gap-1">
+            <Lock className="text-red-400" size={18} /> Bloqueados
+          </h3>
+          <div className="text-sm text-neutral-400">
+            Veja os cursos que ainda não estão liberados.
+          </div>
         </div>
       </div>
     </div>
@@ -200,6 +201,11 @@ export default function Aluno() {
             </>
           );
         } else {
+          // Não permite abrir módulo bloqueado
+          if (modulo.bloqueado) {
+            setModuloSelecionado(null);
+            return null;
+          }
           return (
             <>
               <button
@@ -258,9 +264,30 @@ export default function Aluno() {
           </div>
         );
       }
+      if (mobileTab === "bloqueados") {
+        return (
+          <div className="p-2 pb-20">
+            <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+              <Lock size={22} className="text-red-400" /> Bloqueados
+            </h2>
+            <ModuloCarousel modulos={modulos} alunoLayout showLocked />
+          </div>
+        );
+      }
     }
 
     // Desktop: igual antes
+    if (mobileTab === "bloqueados") {
+      return (
+        <div className="p-8">
+          <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
+            <Lock size={24} className="text-red-400" /> Bloqueados
+          </h2>
+          <ModuloCarousel modulos={modulos} alunoLayout showLocked />
+        </div>
+      );
+    }
+
     if (!modulo) {
       return (
         <>
@@ -278,6 +305,11 @@ export default function Aluno() {
         </>
       );
     } else {
+      // Não permite abrir módulo bloqueado
+      if (modulo.bloqueado) {
+        setModuloSelecionado(null);
+        return null;
+      }
       return (
         <>
           <button
