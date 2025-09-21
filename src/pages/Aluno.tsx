@@ -20,8 +20,8 @@ const Aluno = () => {
   const modulo = modulos.find((m) => m.id === moduloSelecionado);
 
   return (
-    <div className="min-h-screen bg-neutral-900 text-white flex">
-      <aside className="w-72 bg-neutral-950 p-6 flex flex-col gap-6 border-r border-neutral-800">
+    <div className="min-h-screen h-screen w-screen flex bg-neutral-900 text-white overflow-hidden">
+      <aside className="w-72 bg-neutral-950 p-6 flex flex-col gap-6 border-r border-neutral-800 h-full">
         <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
           <Layers size={28} /> Aluno
         </h2>
@@ -54,11 +54,11 @@ const Aluno = () => {
           </ul>
         </div>
       </aside>
-      <main className="flex-1 p-8">
+      <main className="flex-1 h-full flex flex-col overflow-hidden">
         {!modulo ? (
           <>
-            <h1 className="text-3xl font-bold mb-6">Módulos</h1>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
+            <h1 className="text-3xl font-bold mb-6 mt-8 ml-8">Módulos</h1>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 px-8">
               {modulos.map((modulo) => (
                 <div
                   key={modulo.id}
@@ -86,17 +86,19 @@ const Aluno = () => {
         ) : (
           <>
             <button
-              className="mb-6 flex items-center gap-2 text-neutral-400 hover:text-white transition"
+              className="mb-6 mt-8 ml-8 flex items-center gap-2 text-neutral-400 hover:text-white transition"
               onClick={() => setModuloSelecionado(null)}
             >
               <ArrowLeft size={20} /> Voltar para módulos
             </button>
-            <AulaPlayer
-              modulo={modulo}
-              aulaSelecionadaId={aulaSelecionada ?? modulo.aulas[0]?.id}
-              onSelecionarAula={setAulaSelecionada}
-              onMarcarAssistida={(aulaId) => marcarAulaAssistida(modulo.id, aulaId)}
-            />
+            <div className="flex-1 flex overflow-hidden">
+              <AulaPlayer
+                modulo={modulo}
+                aulaSelecionadaId={aulaSelecionada ?? modulo.aulas[0]?.id}
+                onSelecionarAula={setAulaSelecionada}
+                onMarcarAssistida={(aulaId) => marcarAulaAssistida(modulo.id, aulaId)}
+              />
+            </div>
           </>
         )}
       </main>
