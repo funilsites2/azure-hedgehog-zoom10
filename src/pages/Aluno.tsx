@@ -62,6 +62,7 @@ const Aluno = () => {
             <div className="px-4">
               <ModuloCarousel
                 modulos={modulos}
+                alunoLayout
                 onModuloClick={(m) => {
                   setModuloSelecionado(m.id);
                   setAulaSelecionada(m.aulas[0]?.id ?? null);

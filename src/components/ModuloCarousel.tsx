@@ -8,11 +8,19 @@ type Modulo = { id: number; nome: string; capa: string; aulas: Aula[] };
 interface ModuloCarouselProps {
   modulos: Modulo[];
   onModuloClick?: (modulo: Modulo) => void;
+  alunoLayout?: boolean;
 }
 
-export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({ modulos, onModuloClick }) => {
+export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
+  modulos,
+  onModuloClick,
+  alunoLayout = false,
+}) => {
+  // Para mobile: 1.5 cards visíveis se alunoLayout, senão 2
+  const slidesToShow = alunoLayout ? 1.5 : 2;
+
   const [emblaRef, emblaApi] = useEmblaCarousel({
-    slidesToScroll: 2,
+    slidesToScroll: 1,
     containScroll: "trimSnaps",
     align: "start",
     dragFree: false,
@@ -37,7 +45,20 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({ modulos, onModul
     };
   }, [emblaApi]);
 
-  // Mobile: carrossel, Desktop: grid
+  // Tamanhos dos cards
+  const mobileCardWidth = alunoLayout
+    ? "w-[70vw] max-w-[320px] min-w-[220px]"
+    : "min-w-1/2 max-w-[90vw]";
+
+  const mobilePeek = alunoLayout
+    ? { flex: "0 0 66%", marginRight: "2vw" }
+    : { flex: "0 0 50%" };
+
+  // Desktop grid columns
+  const desktopGridCols = alunoLayout
+    ? "md:grid-cols-3 lg:grid-cols-5"
+    : "md:grid-cols-2 lg:grid-cols-3";
+
   return (
     <div>
       {/* Mobile: carrossel */}
@@ -45,10 +66,10 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({ modulos, onModul
         <div className="relative">
           <div className="overflow-hidden" ref={emblaRef}>
             <div className="flex">
-              {modulos.map((modulo) => (
+              {modulos.map((modulo, idx) => (
                 <div
-                  className="min-w-1/2 max-w-[90vw] flex-shrink-0 px-2"
-                  style={{ flex: "0 0 50%" }}
+                  className={`${mobileCardWidth} flex-shrink-0 px-2`}
+                  style={mobilePeek}
                   key={modulo.id}
                 >
                   <div
@@ -65,12 +86,12 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({ modulos, onModul
                             "https://placehold.co/300x400?text=Sem+Capa")
                         }
                       />
-                      <h2 className="text-xl font-semibold text-center">{modulo.nome}</h2>
+                      <h2 className="text-base font-semibold text-center">{modulo.nome}</h2>
                     </div>
                     <ul>
                       {modulo.aulas.map((aula) => (
-                        <li key={aula.id} className="flex items-center gap-2 mb-1">
-                          <Video size={18} /> {aula.titulo}
+                        <li key={aula.id} className="flex items-center gap-2 mb-1 text-xs">
+                          <Video size={16} /> {aula.titulo}
                         </li>
                       ))}
                     </ul>
@@ -101,11 +122,11 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({ modulos, onModul
         </div>
       </div>
       {/* Desktop: grid */}
-      <div className="hidden md:grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className={`hidden md:grid grid-cols-1 ${desktopGridCols} gap-4`}>
         {modulos.map((modulo) => (
           <div
             key={modulo.id}
-            className={`bg-neutral-800 rounded-lg p-4 shadow-lg flex flex-col h-full cursor-pointer`}
+            className={`bg-neutral-800 rounded-lg p-3 shadow-lg flex flex-col h-full cursor-pointer`}
             onClick={onModuloClick ? () => onModuloClick(modulo) : undefined}
           >
             <div className="mb-2 flex flex-col items-center">
@@ -118,12 +139,12 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({ modulos, onModul
                     "https://placehold.co/300x400?text=Sem+Capa")
                 }
               />
-              <h2 className="text-xl font-semibold text-center">{modulo.nome}</h2>
+              <h2 className="text-base font-semibold text-center">{modulo.nome}</h2>
             </div>
             <ul>
               {modulo.aulas.map((aula) => (
-                <li key={aula.id} className="flex items-center gap-2 mb-1">
-                  <Video size={18} /> {aula.titulo}
+                <li key={aula.id} className="flex items-center gap-2 mb-1 text-xs">
+                  <Video size={16} /> {aula.titulo}
                 </li>
               ))}
             </ul>
