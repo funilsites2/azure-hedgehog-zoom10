@@ -5,9 +5,10 @@ type Modulo = { id: number; nome: string; capa: string; aulas: Aula[] };
 
 type ModulosContextType = {
   modulos: Modulo[];
-  adicionarModulo: (nome: string, capa: string) => void;
+  adicionarModulo: (nome: string, capa: string, aulas?: Omit<Aula, "id" | "assistida">[]) => void;
   adicionarAula: (moduloId: number, titulo: string, videoUrl: string) => void;
   marcarAulaAssistida: (moduloId: number, aulaId: number) => void;
+  editarModulo: (moduloId: number, novoNome: string, novaCapa: string, novasAulas: Omit<Aula, "id" | "assistida">[]) => void;
 };
 
 const ModulosContext = createContext<ModulosContextType | undefined>(undefined);
@@ -48,10 +49,20 @@ export const ModulosProvider: React.FC<{ children: React.ReactNode }> = ({ child
     },
   ]);
 
-  const adicionarModulo = (nome: string, capa: string) => {
+  const adicionarModulo = (nome: string, capa: string, aulas?: Omit<Aula, "id" | "assistida">[]) => {
+    const novoModuloId = Date.now();
     setModulos((prev) => [
       ...prev,
-      { id: Date.now(), nome, capa, aulas: [] },
+      {
+        id: novoModuloId,
+        nome,
+        capa,
+        aulas: (aulas || []).map((aula) => ({
+          ...aula,
+          id: Date.now() + Math.random(),
+          assistida: false,
+        })),
+      },
     ]);
   };
 
@@ -63,7 +74,7 @@ export const ModulosProvider: React.FC<{ children: React.ReactNode }> = ({ child
               ...m,
               aulas: [
                 ...m.aulas,
-                { id: Date.now(), titulo, videoUrl, assistida: false },
+                { id: Date.now() + Math.random(), titulo, videoUrl, assistida: false },
               ],
             }
           : m
@@ -86,9 +97,28 @@ export const ModulosProvider: React.FC<{ children: React.ReactNode }> = ({ child
     );
   };
 
+  const editarModulo = (moduloId: number, novoNome: string, novaCapa: string, novasAulas: Omit<Aula, "id" | "assistida">[]) => {
+    setModulos((prev) =>
+      prev.map((m) =>
+        m.id === moduloId
+          ? {
+              ...m,
+              nome: novoNome,
+              capa: novaCapa,
+              aulas: novasAulas.map((aula, idx) => ({
+                ...aula,
+                id: m.aulas[idx]?.id || Date.now() + Math.random(),
+                assistida: m.aulas[idx]?.assistida || false,
+              })),
+            }
+          : m
+      )
+    );
+  };
+
   return (
     <ModulosContext.Provider
-      value={{ modulos, adicionarModulo, adicionarAula, marcarAulaAssistida }}
+      value={{ modulos, adicionarModulo, adicionarAula, marcarAulaAssistida, editarModulo }}
     >
       {children}
     </ModulosContext.Provider>
