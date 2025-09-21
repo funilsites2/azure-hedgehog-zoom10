@@ -7,18 +7,17 @@ type Modulo = { id: number; nome: string; capa: string; aulas: Aula[] };
 
 interface ModuloCarouselProps {
   modulos: Modulo[];
+  onModuloClick?: (modulo: Modulo) => void;
 }
 
-export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({ modulos }) => {
+export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({ modulos, onModuloClick }) => {
   const [emblaRef, emblaApi] = useEmblaCarousel({
     slidesToScroll: 2,
     containScroll: "trimSnaps",
     align: "start",
     dragFree: false,
     breakpoints: {
-      "(min-width: 768px)": { // md: grid normal, sem carrossel
-        active: false,
-      },
+      "(min-width: 768px)": { active: false },
     },
   });
 
@@ -52,18 +51,21 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({ modulos }) => {
                   style={{ flex: "0 0 50%" }}
                   key={modulo.id}
                 >
-                  <div className="bg-neutral-800 rounded-lg p-4 shadow-lg flex flex-col h-full">
-                    <div className="mb-2">
+                  <div
+                    className={`bg-neutral-800 rounded-lg p-4 shadow-lg flex flex-col h-full cursor-pointer`}
+                    onClick={onModuloClick ? () => onModuloClick(modulo) : undefined}
+                  >
+                    <div className="mb-2 flex flex-col items-center">
                       <img
                         src={modulo.capa}
                         alt={modulo.nome}
-                        className="w-full h-40 object-cover rounded mb-2"
+                        className="w-full aspect-[3/4] object-cover rounded mb-2"
                         onError={(e) =>
                           (e.currentTarget.src =
-                            "https://placehold.co/400x200?text=Sem+Capa")
+                            "https://placehold.co/300x400?text=Sem+Capa")
                         }
                       />
-                      <h2 className="text-xl font-semibold">{modulo.nome}</h2>
+                      <h2 className="text-xl font-semibold text-center">{modulo.nome}</h2>
                     </div>
                     <ul>
                       {modulo.aulas.map((aula) => (
@@ -101,18 +103,22 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({ modulos }) => {
       {/* Desktop: grid */}
       <div className="hidden md:grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {modulos.map((modulo) => (
-          <div key={modulo.id} className="bg-neutral-800 rounded-lg p-4 shadow-lg flex flex-col h-full">
-            <div className="mb-2">
+          <div
+            key={modulo.id}
+            className={`bg-neutral-800 rounded-lg p-4 shadow-lg flex flex-col h-full cursor-pointer`}
+            onClick={onModuloClick ? () => onModuloClick(modulo) : undefined}
+          >
+            <div className="mb-2 flex flex-col items-center">
               <img
                 src={modulo.capa}
                 alt={modulo.nome}
-                className="w-full h-40 object-cover rounded mb-2"
+                className="w-full aspect-[3/4] object-cover rounded mb-2"
                 onError={(e) =>
                   (e.currentTarget.src =
-                    "https://placehold.co/400x200?text=Sem+Capa")
+                    "https://placehold.co/300x400?text=Sem+Capa")
                 }
               />
-              <h2 className="text-xl font-semibold">{modulo.nome}</h2>
+              <h2 className="text-xl font-semibold text-center">{modulo.nome}</h2>
             </div>
             <ul>
               {modulo.aulas.map((aula) => (

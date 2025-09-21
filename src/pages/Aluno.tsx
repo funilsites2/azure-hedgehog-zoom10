@@ -3,6 +3,7 @@ import { Layers, ArrowLeft, Star, CheckCircle } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { useModulos } from "@/context/ModulosContext";
 import { AulaPlayer } from "@/components/AulaPlayer";
+import { ModuloCarousel } from "@/components/ModuloCarousel";
 
 const Aluno = () => {
   const { modulos, marcarAulaAssistida } = useModulos();
@@ -58,29 +59,14 @@ const Aluno = () => {
         {!modulo ? (
           <>
             <h1 className="text-3xl font-bold mb-6 mt-8 ml-8">Módulos</h1>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 px-8">
-              {modulos.map((modulo) => (
-                <div
-                  key={modulo.id}
-                  className="relative group cursor-pointer rounded-lg overflow-hidden shadow-lg bg-neutral-800 hover:scale-105 transition-transform"
-                  onClick={() => {
-                    setModuloSelecionado(modulo.id);
-                    setAulaSelecionada(modulo.aulas[0]?.id ?? null);
-                  }}
-                >
-                  <img
-                    src={modulo.capa}
-                    alt={modulo.nome}
-                    className="w-full h-48 object-cover"
-                  />
-                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
-                    <span className="text-xl font-bold">{modulo.nome}</span>
-                  </div>
-                  <div className="absolute bottom-2 left-2 bg-black/70 px-3 py-1 rounded text-xs">
-                    {modulo.aulas.length} aula{modulo.aulas.length !== 1 && "s"}
-                  </div>
-                </div>
-              ))}
+            <div className="px-4">
+              <ModuloCarousel
+                modulos={modulos}
+                onModuloClick={(m) => {
+                  setModuloSelecionado(m.id);
+                  setAulaSelecionada(m.aulas[0]?.id ?? null);
+                }}
+              />
             </div>
           </>
         ) : (
