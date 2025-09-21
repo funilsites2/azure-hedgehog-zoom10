@@ -1,12 +1,10 @@
 import { useState } from "react";
-import { Plus, Video, Layers, Image as ImageIcon } from "lucide-react";
+import { Plus, Video, Layers } from "lucide-react";
 import { Button } from "@/components/ui/button";
-
-type Aula = { id: number; titulo: string; videoUrl: string };
-type Modulo = { id: number; nome: string; capa: string; aulas: Aula[] };
+import { useModulos } from "@/context/ModulosContext";
 
 const Admin = () => {
-  const [modulos, setModulos] = useState<Modulo[]>([]);
+  const { modulos, adicionarModulo, adicionarAula } = useModulos();
   const [novoModulo, setNovoModulo] = useState({ nome: "", capa: "" });
   const [novaAula, setNovaAula] = useState<{ moduloId: number | ""; titulo: string; videoUrl: string }>({
     moduloId: "",
@@ -14,35 +12,20 @@ const Admin = () => {
     videoUrl: "",
   });
 
-  const adicionarModulo = () => {
+  const handleAdicionarModulo = () => {
     if (!novoModulo.nome.trim() || !novoModulo.capa.trim()) return;
-    setModulos([
-      ...modulos,
-      { id: Date.now(), nome: novoModulo.nome, capa: novoModulo.capa, aulas: [] },
-    ]);
+    adicionarModulo(novoModulo.nome, novoModulo.capa);
     setNovoModulo({ nome: "", capa: "" });
   };
 
-  const adicionarAula = () => {
+  const handleAdicionarAula = () => {
     if (
       !novaAula.titulo.trim() ||
       !novaAula.videoUrl.trim() ||
       novaAula.moduloId === ""
     )
       return;
-    setModulos(
-      modulos.map((m) =>
-        m.id === novaAula.moduloId
-          ? {
-              ...m,
-              aulas: [
-                ...m.aulas,
-                { id: Date.now(), titulo: novaAula.titulo, videoUrl: novaAula.videoUrl },
-              ],
-            }
-          : m
-      )
-    );
+    adicionarAula(Number(novaAula.moduloId), novaAula.titulo, novaAula.videoUrl);
     setNovaAula({ moduloId: "", titulo: "", videoUrl: "" });
   };
 
@@ -66,7 +49,7 @@ const Admin = () => {
             value={novoModulo.capa}
             onChange={(e) => setNovoModulo((m) => ({ ...m, capa: e.target.value }))}
           />
-          <Button className="w-full" onClick={adicionarModulo}>
+          <Button className="w-full" onClick={handleAdicionarModulo}>
             <Plus className="mr-2" size={16} /> Adicionar Módulo
           </Button>
         </div>
@@ -98,7 +81,7 @@ const Admin = () => {
             value={novaAula.videoUrl}
             onChange={(e) => setNovaAula((a) => ({ ...a, videoUrl: e.target.value }))}
           />
-          <Button className="w-full" onClick={adicionarAula}>
+          <Button className="w-full" onClick={handleAdicionarAula}>
             <Video className="mr-2" size={16} /> Adicionar Aula
           </Button>
         </div>

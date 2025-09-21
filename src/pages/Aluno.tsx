@@ -1,49 +1,11 @@
 import { useState } from "react";
 import { Video, CheckCircle, Star, Layers, ArrowLeft } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
-
-type Aula = { id: number; titulo: string; videoUrl: string; assistida: boolean };
-type Modulo = { id: number; nome: string; capa: string; aulas: Aula[] };
-
-// Mock inicial para demonstração
-const MODULOS_MOCK: Modulo[] = [
-  {
-    id: 1,
-    nome: "Módulo 1",
-    capa: "https://placehold.co/400x200/222/fff?text=Módulo+1",
-    aulas: [
-      {
-        id: 1,
-        titulo: "Aula 1",
-        videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
-        assistida: true,
-      },
-      {
-        id: 2,
-        titulo: "Aula 2",
-        videoUrl: "https://www.youtube.com/embed/ysz5S6PUM-U",
-        assistida: false,
-      },
-    ],
-  },
-  {
-    id: 2,
-    nome: "Módulo 2",
-    capa: "https://placehold.co/400x200/333/fff?text=Módulo+2",
-    aulas: [
-      {
-        id: 3,
-        titulo: "Aula 1",
-        videoUrl: "https://www.youtube.com/embed/ScMzIvxBSi4",
-        assistida: false,
-      },
-    ],
-  },
-];
+import { useModulos } from "@/context/ModulosContext";
 
 const Aluno = () => {
-  const [modulos, setModulos] = useState<Modulo[]>(MODULOS_MOCK);
-  const [moduloSelecionado, setModuloSelecionado] = useState<Modulo | null>(null);
+  const { modulos, marcarAulaAssistida } = useModulos();
+  const [moduloSelecionado, setModuloSelecionado] = useState<number | null>(null);
 
   // Progresso geral
   const totalAulas = modulos.reduce((acc, m) => acc + m.aulas.length, 0);
@@ -53,33 +15,7 @@ const Aluno = () => {
   );
   const progresso = totalAulas ? Math.round((aulasAssistidas / totalAulas) * 100) : 0;
 
-  // Marcar aula como assistida
-  const marcarAssistida = (moduloId: number, aulaId: number) => {
-    setModulos((prev) =>
-      prev.map((m) =>
-        m.id === moduloId
-          ? {
-              ...m,
-              aulas: m.aulas.map((a) =>
-                a.id === aulaId ? { ...a, assistida: true } : a
-              ),
-            }
-          : m
-      )
-    );
-    if (moduloSelecionado) {
-      setModuloSelecionado((m) =>
-        m
-          ? {
-              ...m,
-              aulas: m.aulas.map((a) =>
-                a.id === aulaId ? { ...a, assistida: true } : a
-              ),
-            }
-          : m
-      );
-    }
-  };
+  const modulo = modulos.find((m) => m.id === moduloSelecionado);
 
   return (
     <div className="min-h-screen bg-neutral-900 text-white flex">
@@ -117,7 +53,7 @@ const Aluno = () => {
         </div>
       </aside>
       <main className="flex-1 p-8">
-        {!moduloSelecionado ? (
+        {!modulo ? (
           <>
             <h1 className="text-3xl font-bold mb-6">Módulos</h1>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
@@ -125,7 +61,7 @@ const Aluno = () => {
                 <div
                   key={modulo.id}
                   className="relative group cursor-pointer rounded-lg overflow-hidden shadow-lg bg-neutral-800 hover:scale-105 transition-transform"
-                  onClick={() => setModuloSelecionado(modulo)}
+                  onClick={() => setModuloSelecionado(modulo.id)}
                 >
                   <img
                     src={modulo.capa}
@@ -152,14 +88,14 @@ const Aluno = () => {
             </button>
             <h1 className="text-3xl font-bold mb-6 flex items-center gap-3">
               <img
-                src={moduloSelecionado.capa}
-                alt={moduloSelecionado.nome}
+                src={modulo.capa}
+                alt={modulo.nome}
                 className="w-16 h-16 object-cover rounded"
               />
-              {moduloSelecionado.nome}
+              {modulo.nome}
             </h1>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              {moduloSelecionado.aulas.map((aula) => (
+              {modulo.aulas.map((aula) => (
                 <div
                   key={aula.id}
                   className="bg-neutral-800 rounded-lg p-4 shadow-lg flex flex-col"
@@ -180,7 +116,7 @@ const Aluno = () => {
                   {!aula.assistida ? (
                     <button
                       className="mt-2 text-xs bg-green-600 px-3 py-1 rounded hover:bg-green-700"
-                      onClick={() => marcarAssistida(moduloSelecionado.id, aula.id)}
+                      onClick={() => marcarAulaAssistida(modulo.id, aula.id)}
                     >
                       Marcar como assistida
                     </button>
