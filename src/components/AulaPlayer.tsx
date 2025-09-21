@@ -48,10 +48,10 @@ export function AulaPlayer({
   const [tab, setTab] = useState("video");
 
   return (
-    <div className="flex flex-col md:flex-row gap-8">
+    <div className="flex flex-col md:flex-row gap-6 w-full h-full">
       {/* Player + Tabs */}
-      <div className="flex-1 max-w-full md:max-w-[60%]">
-        <div className="aspect-[16/7] bg-black rounded-lg overflow-hidden mb-4 shadow-lg">
+      <div className="w-full md:w-2/3 flex flex-col">
+        <div className="aspect-video bg-black rounded-lg overflow-hidden mb-4 shadow-lg w-full">
           <iframe
             src={aula.videoUrl}
             title={aula.titulo}
@@ -115,10 +115,10 @@ export function AulaPlayer({
         </div>
       </div>
       {/* Lista lateral de aulas */}
-      <div className="w-full md:w-96 flex-shrink-0">
-        <div className="bg-neutral-800 rounded-lg p-3 shadow-lg h-full">
+      <div className="w-full md:w-1/3 flex-shrink-0 flex flex-col">
+        <div className="bg-neutral-800 rounded-lg p-3 shadow-lg h-full flex flex-col">
           <div className="font-semibold mb-2 text-neutral-200 text-center">Aulas do módulo</div>
-          <ul className="flex flex-col gap-2">
+          <ul className="flex flex-col gap-2 overflow-y-auto">
             {modulo.aulas.map((a) => {
               const thumb =
                 getYoutubeThumbnail(a.videoUrl) ||
