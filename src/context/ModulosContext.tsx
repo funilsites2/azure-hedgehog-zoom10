@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useState, useEffect } from "react";
 
 type Aula = { id: number; titulo: string; videoUrl: string; assistida?: boolean };
 type Modulo = { id: number; nome: string; capa: string; aulas: Aula[] };
@@ -11,10 +11,18 @@ type ModulosContextType = {
   editarModulo: (moduloId: number, novoNome: string, novaCapa: string, novasAulas: Omit<Aula, "id" | "assistida">[]) => void;
 };
 
-const ModulosContext = createContext<ModulosContextType | undefined>(undefined);
+const STORAGE_KEY = "modulos_area_membros";
 
-export const ModulosProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [modulos, setModulos] = useState<Modulo[]>([
+const getInitialModulos = (): Modulo[] => {
+  const data = localStorage.getItem(STORAGE_KEY);
+  if (data) {
+    try {
+      return JSON.parse(data);
+    } catch {
+      // fallback para padrão se corrompido
+    }
+  }
+  return [
     {
       id: 1,
       nome: "Módulo 1",
@@ -47,7 +55,18 @@ export const ModulosProvider: React.FC<{ children: React.ReactNode }> = ({ child
         },
       ],
     },
-  ]);
+  ];
+};
+
+const ModulosContext = createContext<ModulosContextType | undefined>(undefined);
+
+export const ModulosProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [modulos, setModulos] = useState<Modulo[]>(getInitialModulos);
+
+  // Salva no localStorage sempre que mudar
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(modulos));
+  }, [modulos]);
 
   const adicionarModulo = (nome: string, capa: string, aulas?: Omit<Aula, "id" | "assistida">[]) => {
     const novoModuloId = Date.now();
