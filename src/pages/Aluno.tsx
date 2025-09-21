@@ -44,6 +44,7 @@ const MODULOS_MOCK: Modulo[] = [
 const Aluno = () => {
   const [modulos, setModulos] = useState<Modulo[]>(MODULOS_MOCK);
   const [moduloSelecionado, setModuloSelecionado] = useState<Modulo | null>(null);
+  const [aulaSelecionada, setAulaSelecionada] = useState<Aula | null>(null);
 
   // Progresso geral
   const totalAulas = modulos.reduce((acc, m) => acc + m.aulas.length, 0);
@@ -79,6 +80,15 @@ const Aluno = () => {
           : m
       );
     }
+    if (aulaSelecionada && aulaSelecionada.id === aulaId) {
+      setAulaSelecionada((a) => a ? { ...a, assistida: true } : a);
+    }
+  };
+
+  // Quando selecionar um módulo, selecionar a primeira aula por padrão
+  const handleSelecionarModulo = (modulo: Modulo) => {
+    setModuloSelecionado(modulo);
+    setAulaSelecionada(modulo.aulas[0] || null);
   };
 
   return (
@@ -125,7 +135,7 @@ const Aluno = () => {
                 <div
                   key={modulo.id}
                   className="relative group cursor-pointer rounded-lg overflow-hidden shadow-lg bg-neutral-800 hover:scale-105 transition-transform"
-                  onClick={() => setModuloSelecionado(modulo)}
+                  onClick={() => handleSelecionarModulo(modulo)}
                 >
                   <img
                     src={modulo.capa}
@@ -146,7 +156,10 @@ const Aluno = () => {
           <>
             <button
               className="mb-6 flex items-center gap-2 text-neutral-400 hover:text-white transition"
-              onClick={() => setModuloSelecionado(null)}
+              onClick={() => {
+                setModuloSelecionado(null);
+                setAulaSelecionada(null);
+              }}
             >
               <ArrowLeft size={20} /> Voltar para módulos
             </button>
@@ -158,39 +171,67 @@ const Aluno = () => {
               />
               {moduloSelecionado.nome}
             </h1>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              {moduloSelecionado.aulas.map((aula) => (
-                <div
-                  key={aula.id}
-                  className="bg-neutral-800 rounded-lg p-4 shadow-lg flex flex-col"
-                >
-                  <div className="mb-2 font-semibold flex items-center gap-2">
-                    <Video size={20} /> {aula.titulo}
-                  </div>
-                  <div className="aspect-video mb-3 rounded overflow-hidden bg-black">
-                    <iframe
-                      src={aula.videoUrl}
-                      title={aula.titulo}
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                      allowFullScreen
-                      className="w-full h-full"
-                    />
-                  </div>
-                  <div className="flex-1" />
-                  {!aula.assistida ? (
-                    <button
-                      className="mt-2 text-xs bg-green-600 px-3 py-1 rounded hover:bg-green-700"
-                      onClick={() => marcarAssistida(moduloSelecionado.id, aula.id)}
-                    >
-                      Marcar como assistida
-                    </button>
-                  ) : (
-                    <div className="mt-2 flex items-center gap-1 text-green-400 text-xs">
-                      <CheckCircle size={16} /> Aula assistida
-                    </div>
-                  )}
+            {aulaSelecionada && (
+              <div className="mb-8">
+                <div className="mb-2 font-semibold flex items-center gap-2 text-lg">
+                  <Video size={24} /> {aulaSelecionada.titulo}
                 </div>
-              ))}
+                <div className="aspect-video mb-3 rounded overflow-hidden bg-black shadow-lg">
+                  <iframe
+                    src={aulaSelecionada.videoUrl}
+                    title={aulaSelecionada.titulo}
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                    className="w-full h-full"
+                  />
+                </div>
+                {!aulaSelecionada.assistida ? (
+                  <button
+                    className="mt-2 text-xs bg-green-600 px-3 py-1 rounded hover:bg-green-700"
+                    onClick={() => marcarAssistida(moduloSelecionado.id, aulaSelecionada.id)}
+                  >
+                    Marcar como assistida
+                  </button>
+                ) : (
+                  <div className="mt-2 flex items-center gap-1 text-green-400 text-xs">
+                    <CheckCircle size={16} /> Aula assistida
+                  </div>
+                )}
+              </div>
+            )}
+            <div>
+              <h2 className="text-xl font-bold mb-4">Aulas do módulo</h2>
+              <div className="flex gap-4 overflow-x-auto pb-2">
+                {moduloSelecionado.aulas.map((aula) => (
+                  <div
+                    key={aula.id}
+                    className={`min-w-[220px] max-w-[220px] bg-neutral-800 rounded-lg shadow-md cursor-pointer border-2 transition-all flex-shrink-0 ${
+                      aulaSelecionada && aula.id === aulaSelecionada.id
+                        ? "border-green-500 scale-105"
+                        : "border-transparent hover:border-green-700"
+                    }`}
+                    onClick={() => setAulaSelecionada(aula)}
+                  >
+                    <div className="aspect-video bg-black rounded-t-lg overflow-hidden">
+                      <iframe
+                        src={aula.videoUrl}
+                        title={aula.titulo}
+                        className="w-full h-full pointer-events-none"
+                        tabIndex={-1}
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
+                      />
+                    </div>
+                    <div className="p-3 flex items-center gap-2">
+                      <Video size={18} />
+                      <span className="truncate">{aula.titulo}</span>
+                      {aula.assistida && (
+                        <CheckCircle className="text-green-400 ml-auto" size={16} />
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           </>
         )}
