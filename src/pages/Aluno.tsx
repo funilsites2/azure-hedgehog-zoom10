@@ -1,11 +1,13 @@
 import { useState } from "react";
-import { Video, CheckCircle, Star, Layers, ArrowLeft } from "lucide-react";
+import { Layers, ArrowLeft, Star, CheckCircle } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { useModulos } from "@/context/ModulosContext";
+import { AulaPlayer } from "@/components/AulaPlayer";
 
 const Aluno = () => {
   const { modulos, marcarAulaAssistida } = useModulos();
   const [moduloSelecionado, setModuloSelecionado] = useState<number | null>(null);
+  const [aulaSelecionada, setAulaSelecionada] = useState<number | null>(null);
 
   // Progresso geral
   const totalAulas = modulos.reduce((acc, m) => acc + m.aulas.length, 0);
@@ -61,7 +63,10 @@ const Aluno = () => {
                 <div
                   key={modulo.id}
                   className="relative group cursor-pointer rounded-lg overflow-hidden shadow-lg bg-neutral-800 hover:scale-105 transition-transform"
-                  onClick={() => setModuloSelecionado(modulo.id)}
+                  onClick={() => {
+                    setModuloSelecionado(modulo.id);
+                    setAulaSelecionada(modulo.aulas[0]?.id ?? null);
+                  }}
                 >
                   <img
                     src={modulo.capa}
@@ -86,48 +91,12 @@ const Aluno = () => {
             >
               <ArrowLeft size={20} /> Voltar para módulos
             </button>
-            <h1 className="text-3xl font-bold mb-6 flex items-center gap-3">
-              <img
-                src={modulo.capa}
-                alt={modulo.nome}
-                className="w-16 h-16 object-cover rounded"
-              />
-              {modulo.nome}
-            </h1>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              {modulo.aulas.map((aula) => (
-                <div
-                  key={aula.id}
-                  className="bg-neutral-800 rounded-lg p-4 shadow-lg flex flex-col"
-                >
-                  <div className="mb-2 font-semibold flex items-center gap-2">
-                    <Video size={20} /> {aula.titulo}
-                  </div>
-                  <div className="aspect-video mb-3 rounded overflow-hidden bg-black">
-                    <iframe
-                      src={aula.videoUrl}
-                      title={aula.titulo}
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                      allowFullScreen
-                      className="w-full h-full"
-                    />
-                  </div>
-                  <div className="flex-1" />
-                  {!aula.assistida ? (
-                    <button
-                      className="mt-2 text-xs bg-green-600 px-3 py-1 rounded hover:bg-green-700"
-                      onClick={() => marcarAulaAssistida(modulo.id, aula.id)}
-                    >
-                      Marcar como assistida
-                    </button>
-                  ) : (
-                    <div className="mt-2 flex items-center gap-1 text-green-400 text-xs">
-                      <CheckCircle size={16} /> Aula assistida
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
+            <AulaPlayer
+              modulo={modulo}
+              aulaSelecionadaId={aulaSelecionada ?? modulo.aulas[0]?.id}
+              onSelecionarAula={setAulaSelecionada}
+              onMarcarAssistida={(aulaId) => marcarAulaAssistida(modulo.id, aulaId)}
+            />
           </>
         )}
       </main>
