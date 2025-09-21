@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Plus, Video, Layers, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useModulos } from "@/context/ModulosContext";
+import { ModuloCarousel } from "@/components/ModuloCarousel";
 
 const Admin = () => {
   const { modulos, adicionarModulo, adicionarAula } = useModulos();
@@ -27,9 +28,7 @@ const Admin = () => {
 
   const handleAdicionarModulo = () => {
     if (!novoModulo.nome.trim() || !novoModulo.capa.trim()) return;
-    // Adiciona o módulo com as aulas
     adicionarModulo(novoModulo.nome, novoModulo.capa);
-    // Adiciona as aulas ao módulo recém-criado
     setTimeout(() => {
       const mod = modulos.find((m) => m.nome === novoModulo.nome && m.capa === novoModulo.capa);
       const moduloId = mod ? mod.id : undefined;
@@ -146,28 +145,7 @@ const Admin = () => {
       </aside>
       <main className="flex-1 p-8">
         <h1 className="text-3xl font-bold mb-6">Módulos</h1>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {modulos.map((modulo) => (
-            <div key={modulo.id} className="bg-neutral-800 rounded-lg p-4 shadow-lg">
-              <div className="mb-2">
-                <img
-                  src={modulo.capa}
-                  alt={modulo.nome}
-                  className="w-full h-40 object-cover rounded mb-2"
-                  onError={(e) => (e.currentTarget.src = "https://placehold.co/400x200?text=Sem+Capa")}
-                />
-                <h2 className="text-xl font-semibold">{modulo.nome}</h2>
-              </div>
-              <ul>
-                {modulo.aulas.map((aula) => (
-                  <li key={aula.id} className="flex items-center gap-2 mb-1">
-                    <Video size={18} /> {aula.titulo}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </div>
+        <ModuloCarousel modulos={modulos} />
       </main>
     </div>
   );
