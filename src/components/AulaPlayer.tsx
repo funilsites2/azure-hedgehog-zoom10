@@ -115,8 +115,8 @@ export function AulaPlayer({
         </div>
       </div>
       {/* Lista lateral de aulas */}
-      <div className="w-full md:w-72 flex-shrink-0">
-        <div className="bg-neutral-800 rounded-lg p-3 shadow-lg">
+      <div className="w-full md:w-96 flex-shrink-0">
+        <div className="bg-neutral-800 rounded-lg p-3 shadow-lg h-full">
           <div className="font-semibold mb-2 text-neutral-200 text-center">Aulas do módulo</div>
           <ul className="flex flex-col gap-2">
             {modulo.aulas.map((a) => {
@@ -137,7 +137,7 @@ export function AulaPlayer({
                   <img
                     src={thumb}
                     alt="thumb"
-                    className="w-14 h-8 object-cover rounded border border-neutral-700"
+                    className="w-20 h-12 object-cover rounded border border-neutral-700"
                   />
                   <span className="flex-1 truncate text-sm">{a.titulo}</span>
                   {a.assistida && <CheckCircle size={16} className="text-green-400" />}
