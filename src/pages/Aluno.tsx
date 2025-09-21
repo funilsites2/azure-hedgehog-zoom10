@@ -1,14 +1,22 @@
 import { useState } from "react";
-import { Layers, ArrowLeft, Star, CheckCircle } from "lucide-react";
+import { Layers, ArrowLeft, Star, CheckCircle, Menu, X, BookOpen, BarChart2, Award } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { useModulos } from "@/context/ModulosContext";
 import { AulaPlayer } from "@/components/AulaPlayer";
 import { ModuloCarousel } from "@/components/ModuloCarousel";
 
-const Aluno = () => {
+const MENU_ITEMS = [
+  { key: "modulos", label: "Módulos", icon: BookOpen },
+  { key: "progresso", label: "Progresso", icon: BarChart2 },
+  { key: "conquistas", label: "Conquistas", icon: Award },
+];
+
+export default function Aluno() {
   const { modulos, marcarAulaAssistida } = useModulos();
   const [moduloSelecionado, setModuloSelecionado] = useState<number | null>(null);
   const [aulaSelecionada, setAulaSelecionada] = useState<number | null>(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [mobileTab, setMobileTab] = useState<"modulos" | "progresso" | "conquistas">("modulos");
 
   // Progresso geral
   const totalAulas = modulos.reduce((acc, m) => acc + m.aulas.length, 0);
@@ -20,13 +28,103 @@ const Aluno = () => {
 
   const modulo = modulos.find((m) => m.id === moduloSelecionado);
 
-  return (
-    <div className="min-h-screen h-screen w-screen flex bg-neutral-900 text-white overflow-hidden">
-      <aside className="w-72 bg-neutral-950 p-6 flex flex-col gap-6 border-r border-neutral-800 h-full">
+  // Renderização do menu lateral (desktop/tablet)
+  const Aside = (
+    <aside className="hidden md:flex w-72 bg-neutral-950 p-6 flex-col gap-6 border-r border-neutral-800 h-full">
+      <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
+        <Layers size={28} /> Aluno
+      </h2>
+      <div className="mb-6">
+        <h3 className="font-semibold mb-2">Progresso Geral</h3>
+        <Progress value={progresso} className="h-3 bg-neutral-800" />
+        <div className="mt-2 text-sm">{progresso}% concluído</div>
+      </div>
+      <div className="mt-8">
+        <h3 className="font-semibold mb-2 flex items-center gap-1">
+          <Star className="text-yellow-400" size={18} /> Conquistas
+        </h3>
+        <ul className="text-sm">
+          <li>
+            {aulasAssistidas >= 1 ? (
+              <CheckCircle className="inline text-green-400 mr-1" size={16} />
+            ) : (
+              <span className="inline-block w-4" />
+            )}
+            Primeira aula assistida
+          </li>
+          <li>
+            {progresso === 100 ? (
+              <CheckCircle className="inline text-green-400 mr-1" size={16} />
+            ) : (
+              <span className="inline-block w-4" />
+            )}
+            Curso completo!
+          </li>
+        </ul>
+      </div>
+    </aside>
+  );
+
+  // Renderização do drawer lateral (mobile)
+  const MobileDrawer = (
+    <div
+      className={`fixed inset-0 z-40 bg-black/60 transition-opacity duration-200 ${
+        mobileMenuOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+      }`}
+      onClick={() => setMobileMenuOpen(false)}
+    >
+      <div
+        className={`absolute left-0 top-0 h-full w-64 bg-neutral-950 p-6 flex flex-col gap-6 border-r border-neutral-800 shadow-lg transition-transform duration-200 ${
+          mobileMenuOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <button
+          className="self-end mb-4 text-neutral-400 hover:text-white"
+          onClick={() => setMobileMenuOpen(false)}
+          aria-label="Fechar menu"
+        >
+          <X size={28} />
+        </button>
         <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
           <Layers size={28} /> Aluno
         </h2>
-        <div className="mb-6">
+        <nav className="flex flex-col gap-4">
+          <button
+            className={`flex items-center gap-2 px-2 py-2 rounded text-left ${
+              mobileTab === "modulos" ? "bg-neutral-800 text-white" : "text-neutral-300"
+            }`}
+            onClick={() => {
+              setMobileTab("modulos");
+              setMobileMenuOpen(false);
+            }}
+          >
+            <BookOpen size={20} /> Módulos
+          </button>
+          <button
+            className={`flex items-center gap-2 px-2 py-2 rounded text-left ${
+              mobileTab === "progresso" ? "bg-neutral-800 text-white" : "text-neutral-300"
+            }`}
+            onClick={() => {
+              setMobileTab("progresso");
+              setMobileMenuOpen(false);
+            }}
+          >
+            <BarChart2 size={20} /> Progresso
+          </button>
+          <button
+            className={`flex items-center gap-2 px-2 py-2 rounded text-left ${
+              mobileTab === "conquistas" ? "bg-neutral-800 text-white" : "text-neutral-300"
+            }`}
+            onClick={() => {
+              setMobileTab("conquistas");
+              setMobileMenuOpen(false);
+            }}
+          >
+            <Award size={20} /> Conquistas
+          </button>
+        </nav>
+        <div className="mt-8">
           <h3 className="font-semibold mb-2">Progresso Geral</h3>
           <Progress value={progresso} className="h-3 bg-neutral-800" />
           <div className="mt-2 text-sm">{progresso}% concluído</div>
@@ -54,43 +152,173 @@ const Aluno = () => {
             </li>
           </ul>
         </div>
-      </aside>
-      <main className="flex-1 h-full flex flex-col overflow-hidden">
-        {!modulo ? (
-          <>
-            <h1 className="text-3xl font-bold mb-6 mt-8 ml-8">Módulos</h1>
-            <div className="px-4">
-              <ModuloCarousel
-                modulos={modulos}
-                alunoLayout
-                onModuloClick={(m) => {
-                  setModuloSelecionado(m.id);
-                  setAulaSelecionada(m.aulas[0]?.id ?? null);
-                }}
-              />
-            </div>
-          </>
-        ) : (
-          <>
-            <button
-              className="mb-6 mt-8 ml-8 flex items-center gap-2 text-neutral-400 hover:text-white transition"
-              onClick={() => setModuloSelecionado(null)}
-            >
-              <ArrowLeft size={20} /> Voltar para módulos
-            </button>
-            <div className="flex-1 flex overflow-hidden">
-              <AulaPlayer
-                modulo={modulo}
-                aulaSelecionadaId={aulaSelecionada ?? modulo.aulas[0]?.id}
-                onSelecionarAula={setAulaSelecionada}
-                onMarcarAssistida={(aulaId) => marcarAulaAssistida(modulo.id, aulaId)}
-              />
-            </div>
-          </>
-        )}
-      </main>
+      </div>
     </div>
   );
-};
 
-export default Aluno;
+  // Renderização do menu rodapé (mobile)
+  const MobileFooter = (
+    <nav className="fixed bottom-0 left-0 right-0 z-30 flex md:hidden bg-neutral-950 border-t border-neutral-800 h-16">
+      {MENU_ITEMS.map((item) => {
+        const Icon = item.icon;
+        const selected = mobileTab === item.key;
+        return (
+          <button
+            key={item.key}
+            className={`flex-1 flex flex-col items-center justify-center gap-1 text-xs ${
+              selected ? "text-green-400" : "text-neutral-300"
+            }`}
+            onClick={() => setMobileTab(item.key as any)}
+          >
+            <Icon size={22} />
+            {item.label}
+          </button>
+        );
+      })}
+    </nav>
+  );
+
+  // Renderização do conteúdo principal
+  function renderMainContent() {
+    // Mobile: abas
+    if (window.innerWidth < 768) {
+      if (mobileTab === "modulos") {
+        if (!modulo) {
+          return (
+            <>
+              <h1 className="text-2xl font-bold mb-4 mt-4 ml-2">Módulos</h1>
+              <div className="px-2 pb-20">
+                <ModuloCarousel
+                  modulos={modulos}
+                  alunoLayout
+                  onModuloClick={(m) => {
+                    setModuloSelecionado(m.id);
+                    setAulaSelecionada(m.aulas[0]?.id ?? null);
+                  }}
+                />
+              </div>
+            </>
+          );
+        } else {
+          return (
+            <>
+              <button
+                className="mb-4 mt-4 ml-2 flex items-center gap-2 text-neutral-400 hover:text-white transition"
+                onClick={() => setModuloSelecionado(null)}
+              >
+                <ArrowLeft size={20} /> Voltar para módulos
+              </button>
+              <div className="flex-1 flex overflow-hidden pb-20">
+                <AulaPlayer
+                  modulo={modulo}
+                  aulaSelecionadaId={aulaSelecionada ?? modulo.aulas[0]?.id}
+                  onSelecionarAula={setAulaSelecionada}
+                  onMarcarAssistida={(aulaId) => marcarAulaAssistida(modulo.id, aulaId)}
+                />
+              </div>
+            </>
+          );
+        }
+      }
+      if (mobileTab === "progresso") {
+        return (
+          <div className="p-6 pb-24">
+            <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+              <BarChart2 size={22} /> Progresso Geral
+            </h2>
+            <Progress value={progresso} className="h-4 bg-neutral-800" />
+            <div className="mt-2 text-lg">{progresso}% concluído</div>
+          </div>
+        );
+      }
+      if (mobileTab === "conquistas") {
+        return (
+          <div className="p-6 pb-24">
+            <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+              <Award size={22} className="text-yellow-400" /> Conquistas
+            </h2>
+            <ul className="text-base">
+              <li className="mb-2">
+                {aulasAssistidas >= 1 ? (
+                  <CheckCircle className="inline text-green-400 mr-1" size={18} />
+                ) : (
+                  <span className="inline-block w-5" />
+                )}
+                Primeira aula assistida
+              </li>
+              <li>
+                {progresso === 100 ? (
+                  <CheckCircle className="inline text-green-400 mr-1" size={18} />
+                ) : (
+                  <span className="inline-block w-5" />
+                )}
+                Curso completo!
+              </li>
+            </ul>
+          </div>
+        );
+      }
+    }
+
+    // Desktop: igual antes
+    if (!modulo) {
+      return (
+        <>
+          <h1 className="text-3xl font-bold mb-6 mt-8 ml-8">Módulos</h1>
+          <div className="px-4">
+            <ModuloCarousel
+              modulos={modulos}
+              alunoLayout
+              onModuloClick={(m) => {
+                setModuloSelecionado(m.id);
+                setAulaSelecionada(m.aulas[0]?.id ?? null);
+              }}
+            />
+          </div>
+        </>
+      );
+    } else {
+      return (
+        <>
+          <button
+            className="mb-6 mt-8 ml-8 flex items-center gap-2 text-neutral-400 hover:text-white transition"
+            onClick={() => setModuloSelecionado(null)}
+          >
+            <ArrowLeft size={20} /> Voltar para módulos
+          </button>
+          <div className="flex-1 flex overflow-hidden">
+            <AulaPlayer
+              modulo={modulo}
+              aulaSelecionadaId={aulaSelecionada ?? modulo.aulas[0]?.id}
+              onSelecionarAula={setAulaSelecionada}
+              onMarcarAssistida={(aulaId) => marcarAulaAssistida(modulo.id, aulaId)}
+            />
+          </div>
+        </>
+      );
+    }
+  }
+
+  return (
+    <div className="min-h-screen h-screen w-screen flex bg-neutral-900 text-white overflow-hidden relative">
+      {/* Menu hambúrguer mobile */}
+      <button
+        className="md:hidden fixed top-4 left-4 z-50 bg-neutral-950 rounded-full p-2 border border-neutral-800 shadow-lg"
+        onClick={() => setMobileMenuOpen(true)}
+        aria-label="Abrir menu"
+      >
+        <Menu size={28} />
+      </button>
+      {/* Drawer lateral mobile */}
+      {MobileDrawer}
+      {/* Menu lateral desktop */}
+      {Aside}
+      {/* Conteúdo principal */}
+      <main className="flex-1 h-full flex flex-col overflow-hidden pb-16 md:pb-0">
+        {renderMainContent()}
+      </main>
+      {/* Menu rodapé mobile */}
+      {MobileFooter}
+    </div>
+  );
+}
