@@ -1,32 +1,57 @@
 import { useState } from "react";
-import { Plus, Video, Layers } from "lucide-react";
+import { Plus, Video, Layers, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useModulos } from "@/context/ModulosContext";
 
 const Admin = () => {
   const { modulos, adicionarModulo, adicionarAula } = useModulos();
   const [novoModulo, setNovoModulo] = useState({ nome: "", capa: "" });
-  const [novaAula, setNovaAula] = useState<{ moduloId: number | ""; titulo: string; videoUrl: string }>({
+  const [aulas, setAulas] = useState<{ titulo: string; videoUrl: string }[]>([]);
+  const [novaAula, setNovaAula] = useState({ titulo: "", videoUrl: "" });
+
+  const [novaAulaExistente, setNovaAulaExistente] = useState<{ moduloId: number | ""; titulo: string; videoUrl: string }>({
     moduloId: "",
     titulo: "",
     videoUrl: "",
   });
 
-  const handleAdicionarModulo = () => {
-    if (!novoModulo.nome.trim() || !novoModulo.capa.trim()) return;
-    adicionarModulo(novoModulo.nome, novoModulo.capa);
-    setNovoModulo({ nome: "", capa: "" });
+  const handleAdicionarAulaAoNovoModulo = () => {
+    if (!novaAula.titulo.trim() || !novaAula.videoUrl.trim()) return;
+    setAulas((prev) => [...prev, { ...novaAula }]);
+    setNovaAula({ titulo: "", videoUrl: "" });
   };
 
-  const handleAdicionarAula = () => {
+  const handleRemoverAulaDoNovoModulo = (idx: number) => {
+    setAulas((prev) => prev.filter((_, i) => i !== idx));
+  };
+
+  const handleAdicionarModulo = () => {
+    if (!novoModulo.nome.trim() || !novoModulo.capa.trim()) return;
+    // Adiciona o módulo com as aulas
+    adicionarModulo(novoModulo.nome, novoModulo.capa);
+    // Adiciona as aulas ao módulo recém-criado
+    setTimeout(() => {
+      const mod = modulos.find((m) => m.nome === novoModulo.nome && m.capa === novoModulo.capa);
+      const moduloId = mod ? mod.id : undefined;
+      if (moduloId) {
+        aulas.forEach((aula) => {
+          adicionarAula(moduloId, aula.titulo, aula.videoUrl);
+        });
+      }
+    }, 0);
+    setNovoModulo({ nome: "", capa: "" });
+    setAulas([]);
+  };
+
+  const handleAdicionarAulaExistente = () => {
     if (
-      !novaAula.titulo.trim() ||
-      !novaAula.videoUrl.trim() ||
-      novaAula.moduloId === ""
+      !novaAulaExistente.titulo.trim() ||
+      !novaAulaExistente.videoUrl.trim() ||
+      novaAulaExistente.moduloId === ""
     )
       return;
-    adicionarAula(Number(novaAula.moduloId), novaAula.titulo, novaAula.videoUrl);
-    setNovaAula({ moduloId: "", titulo: "", videoUrl: "" });
+    adicionarAula(Number(novaAulaExistente.moduloId), novaAulaExistente.titulo, novaAulaExistente.videoUrl);
+    setNovaAulaExistente({ moduloId: "", titulo: "", videoUrl: "" });
   };
 
   return (
@@ -49,17 +74,50 @@ const Admin = () => {
             value={novoModulo.capa}
             onChange={(e) => setNovoModulo((m) => ({ ...m, capa: e.target.value }))}
           />
+          <div className="mb-2">
+            <div className="flex gap-2 mb-2">
+              <input
+                className="flex-1 p-2 rounded bg-neutral-800 text-white"
+                placeholder="Título da aula"
+                value={novaAula.titulo}
+                onChange={(e) => setNovaAula((a) => ({ ...a, titulo: e.target.value }))}
+              />
+              <input
+                className="flex-1 p-2 rounded bg-neutral-800 text-white"
+                placeholder="URL do vídeo"
+                value={novaAula.videoUrl}
+                onChange={(e) => setNovaAula((a) => ({ ...a, videoUrl: e.target.value }))}
+              />
+              <Button type="button" onClick={handleAdicionarAulaAoNovoModulo}>
+                <Plus size={16} />
+              </Button>
+            </div>
+            <ul className="mb-2">
+              {aulas.map((aula, idx) => (
+                <li key={idx} className="flex items-center gap-2 text-sm mb-1">
+                  <Video size={16} /> {aula.titulo}
+                  <button
+                    className="ml-2 text-red-400 hover:text-red-600"
+                    onClick={() => handleRemoverAulaDoNovoModulo(idx)}
+                    title="Remover aula"
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
           <Button className="w-full" onClick={handleAdicionarModulo}>
             <Plus className="mr-2" size={16} /> Adicionar Módulo
           </Button>
         </div>
         <div>
-          <h3 className="font-semibold mb-2 mt-6">Nova Aula</h3>
+          <h3 className="font-semibold mb-2 mt-6">Nova Aula em Módulo Existente</h3>
           <select
             className="w-full p-2 rounded bg-neutral-800 text-white mb-2"
-            value={novaAula.moduloId}
+            value={novaAulaExistente.moduloId}
             onChange={(e) =>
-              setNovaAula((a) => ({ ...a, moduloId: Number(e.target.value) }))
+              setNovaAulaExistente((a) => ({ ...a, moduloId: Number(e.target.value) }))
             }
           >
             <option value="">Selecione o módulo</option>
@@ -72,16 +130,16 @@ const Admin = () => {
           <input
             className="w-full p-2 rounded bg-neutral-800 text-white mb-2"
             placeholder="Título da aula"
-            value={novaAula.titulo}
-            onChange={(e) => setNovaAula((a) => ({ ...a, titulo: e.target.value }))}
+            value={novaAulaExistente.titulo}
+            onChange={(e) => setNovaAulaExistente((a) => ({ ...a, titulo: e.target.value }))}
           />
           <input
             className="w-full p-2 rounded bg-neutral-800 text-white mb-2"
             placeholder="URL do vídeo (YouTube, Vimeo, etc)"
-            value={novaAula.videoUrl}
-            onChange={(e) => setNovaAula((a) => ({ ...a, videoUrl: e.target.value }))}
+            value={novaAulaExistente.videoUrl}
+            onChange={(e) => setNovaAulaExistente((a) => ({ ...a, videoUrl: e.target.value }))}
           />
-          <Button className="w-full" onClick={handleAdicionarAula}>
+          <Button className="w-full" onClick={handleAdicionarAulaExistente}>
             <Video className="mr-2" size={16} /> Adicionar Aula
           </Button>
         </div>
