@@ -54,6 +54,7 @@ type ModulosContextType = {
     aulaId: number,
     delayDays: number
   ) => void;
+  duplicarModulo: (moduloId: number) => void;
 };
 
 const STORAGE_KEY = "modulos_area_membros";
@@ -155,22 +156,21 @@ export const ModulosProvider: React.FC<{ children: React.ReactNode }> = ({
   ) => {
     const now = Date.now();
     const releaseDate = now + delayDays * 24 * 60 * 60 * 1000;
-    const novoId = now;
     setModulos((prev) =>
       initializeBlocks([
         ...prev,
         {
-          id: novoId,
+          id: now,
           nome,
           capa,
           linha,
           aulas: aulas.map((a, i) => ({
-            id: novoId + i + 1,
+            id: now + i + 1,
             titulo: a.titulo,
             videoUrl: a.videoUrl,
             assistida: false,
             bloqueado: i !== 0,
-            releaseDate: releaseDate,
+            releaseDate,
           })),
           releaseDate,
         },
@@ -194,7 +194,7 @@ export const ModulosProvider: React.FC<{ children: React.ReactNode }> = ({
               aulas: [
                 ...m.aulas,
                 {
-                  id: Date.now(),
+                  id: now,
                   titulo,
                   videoUrl,
                   assistida: false,
@@ -313,6 +313,27 @@ export const ModulosProvider: React.FC<{ children: React.ReactNode }> = ({
     );
   };
 
+  const duplicarModulo = (moduloId: number) => {
+    const original = modulos.find((m) => m.id === moduloId);
+    if (!original) return;
+    const now = Date.now();
+    const clonedAulas = original.aulas.map((a, idx) => ({
+      ...a,
+      id: now + idx + 1,
+      assistida: false,
+      bloqueado: a.bloqueado,
+      releaseDate: a.releaseDate,
+    }));
+    const cloned: Modulo = {
+      ...original,
+      id: now + 1,
+      nome: `${original.nome} (Cópia)`,
+      aulas: clonedAulas,
+      releaseDate: original.releaseDate,
+    };
+    setModulos((prev) => initializeBlocks([...prev, cloned]));
+  };
+
   return (
     <ModulosContext.Provider
       value={{
@@ -324,6 +345,7 @@ export const ModulosProvider: React.FC<{ children: React.ReactNode }> = ({
         setModuloBloqueado,
         setAulaBloqueada,
         setAulaReleaseDays,
+        duplicarModulo,
       }}
     >
       {children}
