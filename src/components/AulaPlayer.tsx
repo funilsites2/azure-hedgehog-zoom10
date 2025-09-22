@@ -27,6 +27,7 @@ interface AulaPlayerProps {
   onMarcarAssistida: (aulaId: number) => void;
 }
 
+// Gera URL de thumbnail
 function getYoutubeThumbnail(url: string): string | null {
   try {
     const match = url.match(
@@ -38,6 +39,26 @@ function getYoutubeThumbnail(url: string): string | null {
     return null;
   } catch {
     return null;
+  }
+}
+
+// Converte qualquer URL do YouTube para o formato embed
+function getEmbedUrl(url: string): string {
+  try {
+    const u = new URL(url);
+    const hostname = u.hostname.replace("www.", "");
+    let videoId = "";
+    if (hostname === "youtube.com" || hostname === "m.youtube.com") {
+      videoId = u.searchParams.get("v") || "";
+    } else if (hostname === "youtu.be") {
+      videoId = u.pathname.slice(1);
+    }
+    if (!videoId && url.includes("/embed/")) {
+      return url;
+    }
+    return `https://www.youtube.com/embed/${videoId}`;
+  } catch {
+    return url;
   }
 }
 
@@ -70,6 +91,7 @@ export function AulaPlayer({
     : 0;
 
   const [tab, setTab] = useState("video");
+  const embedUrl = getEmbedUrl(aula.videoUrl);
 
   return (
     <div className="flex flex-col md:flex-row gap-6 w-full h-full">
@@ -96,7 +118,7 @@ export function AulaPlayer({
         </div>
         <div className="aspect-video bg-black rounded-lg overflow-hidden mb-4 shadow-lg">
           <iframe
-            src={aula.videoUrl}
+            src={embedUrl}
             title={aula.titulo}
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             allowFullScreen
