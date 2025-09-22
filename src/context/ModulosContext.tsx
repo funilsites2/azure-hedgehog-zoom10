@@ -112,15 +112,15 @@ const initializeBlocks = (mods: Modulo[]): Modulo[] => {
   return mods.map((m) => {
     const moduleBlocked = m.bloqueado ?? (m.releaseDate ? now < m.releaseDate : false);
     const aulas = m.aulas.map((a, i, arr) => {
-      // bloqueio manual tem prioridade
-      if (a.bloqueado && a.releaseDate === undefined) {
+      // Bloqueio manual tem prioridade
+      if (a.bloqueado) {
         return a;
       }
-      // bloqueio por releaseDate
+      // Bloqueio por releaseDate
       if (a.releaseDate && now < a.releaseDate) {
         return { ...a, bloqueado: true };
       }
-      // bloqueio sequencial
+      // Bloqueio sequencial
       if (i === 0) {
         return { ...a, bloqueado: false };
       }
