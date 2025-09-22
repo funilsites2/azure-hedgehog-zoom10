@@ -12,7 +12,9 @@ import {
   Lock,
   ChevronLeft,
   ChevronRight,
+  User,
 } from "lucide-react";
+import { Link } from "react-router-dom";
 import { Progress } from "@/components/ui/progress";
 import { useModulos } from "@/context/ModulosContext";
 import { AulaPlayer } from "@/components/AulaPlayer";
@@ -195,6 +197,13 @@ export default function Aluno() {
               <item.icon size={20} /> {item.label}
             </button>
           ))}
+          <Link
+            to="/perfil"
+            className="flex items-center gap-2 px-2 py-2 rounded text-left text-neutral-300 hover:bg-neutral-800 hover:text-white"
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            <User size={20} /> Perfil
+          </Link>
         </nav>
       </div>
     </div>
@@ -248,6 +257,13 @@ export default function Aluno() {
             {!sidebarCollapsed && item.label}
           </button>
         ))}
+        <Link
+          to="/perfil"
+          className="flex items-center gap-2 w-full px-3 py-2 my-1 rounded text-sm font-medium text-neutral-300 hover:bg-neutral-800 hover:text-white"
+        >
+          <User size={20} />
+          {!sidebarCollapsed && "Perfil"}
+        </Link>
       </nav>
     </aside>
   );
