@@ -72,10 +72,11 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
             <div className="flex">
               {filteredModulos.map((modulo) => (
                 <div key={modulo.id} className={`${mobileCardWidth} flex-shrink-0 px-2`} style={mobilePeek}>
+                  {/* Make this a group and overflow-visible so the preview can pop out */}
                   <div
-                    className={`bg-neutral-800 rounded-lg p-4 shadow-lg flex flex-col h-full cursor-pointer relative transition-transform transform hover:scale-105 ${
-                      modulo.bloqueado ? "grayscale opacity-70" : ""
-                    } ${modulo.bloqueado ? "cursor-not-allowed" : ""}`}
+                    className={`group bg-neutral-800 rounded-lg p-4 shadow-lg flex flex-col h-full relative transition-transform transform hover:scale-105 overflow-visible ${
+                      modulo.bloqueado ? "grayscale opacity-70 cursor-not-allowed" : ""
+                    }`}
                     onClick={!modulo.bloqueado && onModuloClick ? () => onModuloClick(modulo) : undefined}
                     aria-disabled={modulo.bloqueado ? true : undefined}
                   >
@@ -83,6 +84,7 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
                       <Lock size={28} className="absolute top-2 right-2 text-red-500 bg-neutral-900 rounded-full p-1" />
                     )}
                     <div className="mb-2 flex flex-col items-center w-full">
+                      {/* Allow HoverPreview to overflow the card (pop-out) */}
                       <div className="w-full aspect-[3/4] rounded mb-2 overflow-visible">
                         <HoverPreview videoUrl={modulo.aulas[0]?.videoUrl} imageSrc={modulo.capa} alt={modulo.nome} className="w-full h-full" />
                       </div>
@@ -102,10 +104,22 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
             </div>
           </div>
 
-          <button className="absolute left-0 top-1/2 -translate-y-1/2 bg-neutral-900/80 rounded-full p-2 z-10" onClick={() => emblaApi && emblaApi.scrollPrev()} disabled={!canScrollPrev} aria-label="Anterior" style={{ opacity: canScrollPrev ? 1 : 0.3 }}>
+          <button
+            className="absolute left-0 top-1/2 -translate-y-1/2 bg-neutral-900/80 rounded-full p-2 z-10"
+            onClick={() => emblaApi && emblaApi.scrollPrev()}
+            disabled={!canScrollPrev}
+            aria-label="Anterior"
+            style={{ opacity: canScrollPrev ? 1 : 0.3 }}
+          >
             <ChevronLeft size={24} />
           </button>
-          <button className="absolute right-0 top-1/2 -translate-y-1/2 bg-neutral-900/80 rounded-full p-2 z-10" onClick={() => emblaApi && emblaApi.scrollNext()} disabled={!canScrollNext} aria-label="Próximo" style={{ opacity: canScrollNext ? 1 : 0.3 }}>
+          <button
+            className="absolute right-0 top-1/2 -translate-y-1/2 bg-neutral-900/80 rounded-full p-2 z-10"
+            onClick={() => emblaApi && emblaApi.scrollNext()}
+            disabled={!canScrollNext}
+            aria-label="Próximo"
+            style={{ opacity: canScrollNext ? 1 : 0.3 }}
+          >
             <ChevronRight size={24} />
           </button>
         </div>
@@ -114,7 +128,14 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
       {/* Desktop grid */}
       <div className={`hidden md:grid grid-cols-1 ${desktopGridCols} gap-4`}>
         {filteredModulos.map((modulo) => (
-          <div key={modulo.id} className={`bg-neutral-800 rounded-lg p-3 shadow-lg flex flex-col h-full relative overflow-visible ${modulo.bloqueado ? "grayscale opacity-70" : ""}`}>
+          <div
+            key={modulo.id}
+            className={`group bg-neutral-800 rounded-lg p-3 shadow-lg flex flex-col h-full relative transition-transform transform hover:scale-105 overflow-visible ${
+              modulo.bloqueado ? "grayscale opacity-70 cursor-not-allowed" : ""
+            }`}
+            onClick={!modulo.bloqueado && onModuloClick ? () => onModuloClick(modulo) : undefined}
+            aria-disabled={modulo.bloqueado ? true : undefined}
+          >
             {modulo.bloqueado && (
               <Lock size={28} className="absolute top-2 right-2 text-red-500 bg-neutral-900 rounded-full p-1" />
             )}
