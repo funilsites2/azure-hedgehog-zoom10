@@ -30,7 +30,7 @@ interface AulaPlayerProps {
 function getYoutubeThumbnail(url: string): string | null {
   try {
     const match = url.match(
-      /(?:youtube\\.com\\/(?:embed\\/|watch\\?v=)|youtu\\.be\\/)([a-zA-Z0-9_-]{11})/
+      /(?:youtube\.com\/(?:embed\/|watch\?v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/
     );
     if (match && match[1]) {
       return `https://img.youtube.com/vi/${match[1]}/hqdefault.jpg`;
