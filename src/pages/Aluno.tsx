@@ -51,6 +51,9 @@ export default function Aluno() {
     "modulos"
   );
 
+  // para comparar datas de liberação
+  const now = Date.now();
+
   const partialAulas = modulos
     .flatMap((m) => m.aulas.map((a) => ({ modulo: m, aula: a })))
     .filter(({ aula }) => !aula.assistida);
@@ -72,7 +75,9 @@ export default function Aluno() {
     const idx = modulo.aulas.findIndex((a) => a.id === aulaId);
     const next = modulo.aulas[idx + 1];
     showSuccess(
-      `Aula concluída!${next ? ` "${next.titulo}" desbloqueada.` : " Módulo concluído!"}`
+      `Aula concluída!${
+        next ? ` "${next.titulo}" desbloqueada.` : " Módulo concluído!"
+      }`
     );
   };
 
@@ -268,8 +273,7 @@ export default function Aluno() {
           <User size={20} className="text-green-500" />
           <span>Perfil</span>
         </Link>
-      </nav>
-    </aside>
+      </aside>
   );
 
   const MobileFooter = (
@@ -325,31 +329,51 @@ export default function Aluno() {
             <div className="bg-neutral-800 bg-opacity-20 p-4 rounded-lg">
               <h3 className="text-2xl font-semibold mb-4">Continuar Assistindo</h3>
               <div className="flex overflow-x-auto gap-6 pb-2">
-                {partialAulas.map(({ modulo: m, aula: a }) => (
-                  <div
-                    key={`${m.id}-${a.id}`}
-                    className="flex-shrink-0 cursor-pointer group"
-                    onClick={() => {
-                      setModuloSelecionado(m.id);
-                      setAulaSelecionada(a.id);
-                    }}
-                  >
-                    <div className="relative rounded-lg overflow-hidden">
-                      <img
-                        src={getYoutubeThumbnail(a.videoUrl)}
-                        alt={a.titulo}
-                        className="w-56 h-auto transition-transform duration-300 transform group-hover:scale-105"
-                      />
-                      <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-colors">
-                        <Play size={48} className="text-white opacity-0 group-hover:opacity-100 transition-opacity" />
-                      </div>
-                      <div className="absolute top-0 left-0 right-0 p-2 bg-black bg-opacity-60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col">
-                        <span className="text-white text-sm font-semibold">{m.nome}</span>
-                        <span className="text-white text-xs">{a.titulo}</span>
+                {partialAulas.map(({ modulo: m, aula: a }) => {
+                  const blockedByDate = a.releaseDate ? now < a.releaseDate : false;
+                  return (
+                    <div
+                      key={`${m.id}-${a.id}`}
+                      className={`flex-shrink-0 group ${
+                        blockedByDate
+                          ? "cursor-not-allowed opacity-50"
+                          : "cursor-pointer"
+                      }`}
+                      onClick={() => {
+                        if (!blockedByDate) {
+                          setModuloSelecionado(m.id);
+                          setAulaSelecionada(a.id);
+                        }
+                      }}
+                    >
+                      <div className="relative rounded-lg overflow-hidden">
+                        {blockedByDate && (
+                          <div className="absolute top-0 inset-x-0 bg-yellow-500 text-black text-xs text-center py-1 z-10">
+                            Liberado em{" "}
+                            {new Date(a.releaseDate!).toLocaleDateString()}
+                          </div>
+                        )}
+                        <img
+                          src={getYoutubeThumbnail(a.videoUrl)}
+                          alt={a.titulo}
+                          className="w-56 h-auto transition-transform duration-300 transform group-hover:scale-105"
+                        />
+                        <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-colors">
+                          <Play
+                            size={48}
+                            className="text-white opacity-0 group-hover:opacity-100 transition-opacity"
+                          />
+                        </div>
+                        <div className="absolute top-0 left-0 right-0 p-2 bg-black bg-opacity-60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col">
+                          <span className="text-white text-sm font-semibold">
+                            {m.nome}
+                          </span>
+                          <span className="text-white text-xs">{a.titulo}</span>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           </div>
