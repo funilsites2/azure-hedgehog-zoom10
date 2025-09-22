@@ -67,6 +67,8 @@ export function AulaPlayer({
     <div className="flex flex-col md:flex-row gap-6 w-full h-full">
       {/* Vídeo */}
       <div className="w-full md:w-2/3 flex flex-col pl-4 md:pl-8">
+        {/* Nome do módulo */}
+        <h2 className="text-2xl font-bold mb-4">{modulo.nome}</h2>
         <div className="flex justify-between items-center mb-2">
           {!aula.assistida ? (
             <button
