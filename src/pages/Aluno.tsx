@@ -57,7 +57,7 @@ export default function Aluno() {
     if (mobileTab === "modulos") {
       if (!modulo) {
         return (
-          <div className="mt-8 space-y-8 px-4">
+          <div className="container mx-auto mt-8 space-y-8">
             {linhas.map((linha) => {
               const mods = modulos.filter((m) => m.linha === linha);
               if (!mods.length) return null;
@@ -321,12 +321,14 @@ export default function Aluno() {
       {DesktopSidebar}
       <div className="flex-1 flex flex-col pt-12 md:pt-0">
         {bannerUrl && moduloSelecionado === null && (
-          <div className="mb-6 mx-auto w-full max-w-[1600px] h-[200px] md:h-[400px] overflow-hidden rounded-lg">
-            <img
-              src={bannerUrl}
-              alt="Banner Aluno"
-              className="w-full h-full object-cover"
-            />
+          <div className="mb-6">
+            <div className="container mx-auto h-[200px] md:h-[400px] overflow-hidden rounded-lg">
+              <img
+                src={bannerUrl}
+                alt="Banner Aluno"
+                className="w-full h-full object-contain object-left"
+              />
+            </div>
           </div>
         )}
         <div className="flex-1 overflow-auto pb-[84px] md:pb-5">
