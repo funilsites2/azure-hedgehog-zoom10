@@ -18,6 +18,7 @@ import { useModulos } from "@/context/ModulosContext";
 import { AulaPlayer } from "@/components/AulaPlayer";
 import { ModuloCarousel } from "@/components/ModuloCarousel";
 import { useBanner } from "@/context/BannerContext";
+import { Footer } from "@/components/Footer";
 
 const MENU_ITEMS = [
   { key: "modulos", label: "Módulos", icon: BookOpen },
@@ -286,7 +287,7 @@ export default function Aluno() {
       {MobileDrawer}
       {DesktopSidebar}
       <div className="flex-1 flex flex-col pt-12 md:pt-0">
-        <main className="flex-1 overflow-auto">
+        <main className="flex-1 overflow-auto pb-16 md:pb-0">
           {bannerUrl && (
             <div className="mb-6 mx-auto w-full max-w-[1600px] h-[200px] overflow-hidden rounded-lg">
               <img
@@ -299,7 +300,8 @@ export default function Aluno() {
           {renderMainContent()}
         </main>
         {MobileFooter}
+        <Footer />
       </div>
     </div>
-);
+  );
 }
