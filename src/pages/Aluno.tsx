@@ -10,6 +10,8 @@ import {
   CheckCircle,
   User,
   Play,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import SimpleProgress from "@/components/SimpleProgress";
@@ -53,6 +55,7 @@ export default function Aluno() {
   const [mobileTab, setMobileTab] = useState<typeof MENU_ITEMS[number]["key"]>(
     "modulos"
   );
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   const now = Date.now();
 
@@ -70,6 +73,9 @@ export default function Aluno() {
     ? Math.round((aulasAssistidas / totalAulas) * 100)
     : 0;
   const modulo = modulos.find((m) => m.id === moduloSelecionado);
+
+  const sidebarWidth = sidebarCollapsed ? "w-16" : "w-64";
+  const contentMargin = sidebarCollapsed ? "md:ml-16" : "md:ml-64";
 
   const handleMarcar = (aulaId: number) => {
     if (!modulo) return;
@@ -305,21 +311,38 @@ export default function Aluno() {
   );
 
   const DesktopSidebar = (
-    <aside className="hidden md:flex fixed left-0 top-0 h-screen w-64 z-30 flex-col items-center bg-neutral-950 p-6 space-y-6 border-r border-neutral-800">
+    <aside
+      className={`hidden md:flex fixed left-0 top-0 h-screen ${sidebarWidth} z-30 flex-col items-center bg-neutral-950 p-4 md:p-6 space-y-6 border-r border-neutral-800 relative transition-all`}
+    >
+      {/* Botão recolher/expandir */}
+      <button
+        aria-label={sidebarCollapsed ? "Expandir menu" : "Recolher menu"}
+        onClick={() => setSidebarCollapsed((s) => !s)}
+        className="absolute -right-3 top-6 z-40 hidden md:flex h-7 w-7 items-center justify-center rounded-full bg-neutral-900 border border-neutral-700 text-neutral-300 hover:text-white shadow"
+      >
+        {sidebarCollapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
+      </button>
+
       {logoUrl && (
-        <img src={logoUrl} alt="Logo" className="w-12 h-12 object-contain" />
+        <img
+          src={logoUrl}
+          alt="Logo"
+          className={`object-contain ${sidebarCollapsed ? "w-8 h-8" : "w-12 h-12"}`}
+        />
       )}
 
       <img
         src={photoUrl || "/placeholder.svg"}
         alt="Foto do aluno"
-        className="w-16 h-16 rounded-full border-2 border-green-500"
+        className={`${sidebarCollapsed ? "w-10 h-10" : "w-16 h-16"} rounded-full border-2 border-green-500`}
       />
 
-      <div className="w-full">
-        <SimpleProgress value={progresso} />
-        <div className="text-xs text-neutral-300 mt-1">{progresso}% concluído</div>
-      </div>
+      {!sidebarCollapsed && (
+        <div className="w-full">
+          <SimpleProgress value={progresso} />
+          <div className="text-xs text-neutral-300 mt-1">{progresso}% concluído</div>
+        </div>
+      )}
 
       <nav className="flex flex-col space-y-2 w-full">
         {MENU_ITEMS.map((item) => (
@@ -329,22 +352,24 @@ export default function Aluno() {
               setMobileTab(item.key);
               if (item.key === "modulos") setModuloSelecionado(null);
             }}
-            className={`flex items-center gap-3 px-3 py-3 w-full text-neutral-300 rounded ${
+            className={`flex items-center ${sidebarCollapsed ? "justify-center gap-0" : "gap-3"} px-3 py-3 w-full text-neutral-300 rounded ${
               mobileTab === item.key
                 ? "bg-green-600 text-white"
                 : "hover:bg-green-600 hover:text-white"
             }`}
+            title={sidebarCollapsed ? item.label : undefined}
           >
-            <item.icon size={20} className="text-green-500" />
-            <span>{item.label}</span>
+            <item.icon size={20} className="text-white" />
+            <span className={`${sidebarCollapsed ? "hidden" : "inline"}`}>{item.label}</span>
           </button>
         ))}
         <Link
           to="/perfil"
-          className="flex items-center gap-3 px-3 py-3 w-full text-neutral-300 hover:bg-green-600 hover:text-white rounded"
+          className={`flex items-center ${sidebarCollapsed ? "justify-center gap-0" : "gap-3"} px-3 py-3 w-full text-neutral-300 hover:bg-green-600 hover:text-white rounded`}
+          title={sidebarCollapsed ? "Perfil" : undefined}
         >
-          <User size={20} className="text-green-500" />
-          <span>Perfil</span>
+          <User size={20} className="text-white" />
+          <span className={`${sidebarCollapsed ? "hidden" : "inline"}`}>Perfil</span>
         </Link>
       </nav>
     </aside>
@@ -389,7 +414,7 @@ export default function Aluno() {
       </button>
       {MobileDrawer}
       {DesktopSidebar}
-      <div className="flex-1 flex flex-col pt-12 md:pt-0 md:ml-64">
+      <div className={`flex-1 flex flex-col pt-12 md:pt-0 ${contentMargin}`}>
         {bannerUrl && moduloSelecionado === null && (
           <div className="mx-4 my-4 flex justify-center">
             <div className="w-full max-w-[1600px] h-[400px] overflow-hidden rounded-lg">
