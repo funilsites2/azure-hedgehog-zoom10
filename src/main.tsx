@@ -6,6 +6,7 @@ import { ModulosProvider } from "@/context/ModulosContext";
 import { LogoProvider } from "@/context/LogoContext";
 import { PhotoProvider } from "@/context/PhotoContext";
 import { UserProvider } from "@/context/UserContext";
+import { StudentThemeProvider } from "@/context/StudentThemeContext";
 
 createRoot(document.getElementById("root")!).render(
   <UserProvider>
@@ -13,7 +14,9 @@ createRoot(document.getElementById("root")!).render(
       <BannerProvider>
         <ModulosProvider>
           <PhotoProvider>
-            <App />
+            <StudentThemeProvider>
+              <App />
+            </StudentThemeProvider>
           </PhotoProvider>
         </ModulosProvider>
       </BannerProvider>
