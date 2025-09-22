@@ -132,7 +132,7 @@ export function AulaPlayer({
                 <div className="absolute inset-0 bg-black bg-opacity-50 flex flex-col items-center justify-center text-center px-2">
                   <Lock size={24} className="text-white mb-2" />
                   {a.releaseDate && (
-                    <span className="bg-yellow-500 text-black text-xs px-2 py-1 rounded">
+                    <span className="text-xs text-white">
                       Liberado em {new Date(a.releaseDate).toLocaleString()}
                     </span>
                   )}
