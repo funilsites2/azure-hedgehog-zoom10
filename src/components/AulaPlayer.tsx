@@ -117,7 +117,6 @@ export function AulaPlayer({
           </TabsContent>
           <TabsContent value="texto">
             <div className="text-neutral-300 text-sm">
-              Olá, {name}!<br/>
               <b>Conteúdo em texto:</b> Aqui você pode colocar a transcrição ou texto da aula.
             </div>
           </TabsContent>
@@ -153,7 +152,9 @@ export function AulaPlayer({
             >
               <ChevronLeft size={16} /> Voltar
             </button>
-          ) : <div />}
+          ) : (
+            <div />
+          )}
           {hasNext ? (
             <button
               className="flex items-center gap-1 text-sm bg-neutral-800 px-3 py-1 rounded hover:bg-neutral-700"
@@ -161,7 +162,9 @@ export function AulaPlayer({
             >
               Próxima <ChevronRight size={16} />
             </button>
-          ) : <div />}
+          ) : (
+            <div />
+          )}
         </div>
       </div>
       <div className="w-full md:w-1/3 flex-shrink-0 flex flex-col">
@@ -199,5 +202,5 @@ export function AulaPlayer({
         </div>
       </div>
     </div>
-);
+  );
 }
