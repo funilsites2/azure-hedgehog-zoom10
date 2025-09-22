@@ -12,6 +12,7 @@ type Aula = {
   titulo: string;
   videoUrl: string;
   assistida?: boolean;
+  bloqueado?: boolean;
 };
 
 type Modulo = {
@@ -25,13 +26,13 @@ interface AulaPlayerProps {
   aulaSelecionadaId: number;
   onSelecionarAula: (aulaId: number) => void;
   onMarcarAssistida: (aulaId: number) => void;
-}
+};
 
 // Gera URL de thumbnail
 function getYoutubeThumbnail(url: string): string | null {
   try {
     const match = url.match(
-      /(?:youtube\.com\/(?:embed\/|watch\?v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/
+      /(?:youtube\\.com\\/(?:embed\\/|watch\\?v=)|youtu\\.be\\/)([a-zA-Z0-9_-]{11})/
     );
     if (match && match[1]) {
       return `https://img.youtube.com/vi/${match[1]}/hqdefault.jpg`;
@@ -83,6 +84,10 @@ export function AulaPlayer({
   const aula = aulas[aulaIndex] ?? aulas[0];
   const hasPrev = aulaIndex > 0;
   const hasNext = aulaIndex < aulas.length - 1;
+  const prevAula = aulas[aulaIndex - 1];
+  const nextAula = aulas[aulaIndex + 1];
+  const prevBlocked = prevAula?.bloqueado;
+  const nextBlocked = nextAula?.bloqueado;
 
   const totalAulasModulo = aulas.length;
   const assistidasModulo = aulas.filter((a) => a.assistida).length;
@@ -138,16 +143,18 @@ export function AulaPlayer({
             <div className="flex gap-2 ml-4">
               {hasPrev && (
                 <button
-                  className="flex items-center gap-1 text-sm bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700"
-                  onClick={() => onSelecionarAula(aulas[aulaIndex - 1].id)}
+                  className="flex items-center gap-1 text-sm bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                  onClick={() => !prevBlocked && onSelecionarAula(prevAula!.id)}
+                  disabled={!hasPrev || !!prevBlocked}
                 >
                   <ChevronLeft size={16} /> Voltar
                 </button>
               )}
               {hasNext && (
                 <button
-                  className="flex items-center gap-1 text-sm bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700"
-                  onClick={() => onSelecionarAula(aulas[aulaIndex + 1].id)}
+                  className="flex items-center gap-1 text-sm bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                  onClick={() => !nextBlocked && onSelecionarAula(nextAula!.id)}
+                  disabled={!hasNext || !!nextBlocked}
                 >
                   Próxima <ChevronRight size={16} />
                 </button>
@@ -197,16 +204,18 @@ export function AulaPlayer({
               const thumb =
                 getYoutubeThumbnail(a.videoUrl) ||
                 "https://placehold.co/80x45/222/fff?text=Video";
+              const isSelected = a.id === aulaSelecionadaId;
               return (
                 <li
                   key={a.id}
                   className={cn(
-                    "flex items-center gap-3 px-2 py-2 rounded cursor-pointer transition group",
-                    a.id === aulaSelecionadaId
+                    "flex items-center gap-3 px-2 py-2 rounded transition",
+                    isSelected
                       ? "bg-green-700/80 text-white"
-                      : "hover:bg-neutral-700 text-neutral-300"
+                      : "text-neutral-300 hover:bg-neutral-700",
+                    a.bloqueado && "cursor-not-allowed opacity-50 hover:bg-none"
                   )}
-                  onClick={() => onSelecionarAula(a.id)}
+                  onClick={() => !a.bloqueado && onSelecionarAula(a.id)}
                 >
                   <img
                     src={thumb}
