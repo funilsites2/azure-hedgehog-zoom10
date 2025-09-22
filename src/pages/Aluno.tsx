@@ -43,15 +43,12 @@ export default function Aluno() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   const linhas = Array.from(new Set(modulos.map((m) => m.linha)));
-  const totalAulas = modulos.reduce((acc, m) => acc + m.aulas.length, 0);
+  const totalAulas = modulos.reduce((sum, m) => sum + m.aulas.length, 0);
   const aulasAssistidas = modulos.reduce(
-    (acc, m) => acc + m.aulas.filter((a) => a.assistida).length,
+    (sum, m) => sum + m.aulas.filter((a) => a.assistida).length,
     0
   );
-  const progresso = totalAulas
-    ? Math.round((aulasAssistidas / totalAulas) * 100)
-    : 0;
-
+  const progresso = totalAulas ? Math.round((aulasAssistidas / totalAulas) * 100) : 0;
   const modulo = modulos.find((m) => m.id === moduloSelecionado);
 
   function renderMainContent() {
@@ -78,32 +75,31 @@ export default function Aluno() {
             })}
           </div>
         );
-      } else {
-        if (modulo.bloqueado) {
-          setModuloSelecionado(null);
-          return null;
-        }
-        return (
-          <>
-            <button
-              className="relative z-60 mb-6 mt-8 ml-8 flex items-center gap-2 text-neutral-400 hover:text-white transition"
-              onClick={() => setModuloSelecionado(null)}
-            >
-              <ArrowLeft size={20} /> Voltar
-            </button>
-            <div className="flex-1 flex overflow-hidden">
-              <AulaPlayer
-                modulo={modulo}
-                aulaSelecionadaId={aulaSelecionada ?? modulo.aulas[0]?.id}
-                onSelecionarAula={setAulaSelecionada}
-                onMarcarAssistida={(aulaId) =>
-                  marcarAulaAssistida(modulo.id, aulaId)
-                }
-              />
-            </div>
-          </>
-        );
       }
+      if (modulo.bloqueado) {
+        setModuloSelecionado(null);
+        return null;
+      }
+      return (
+        <>
+          <button
+            className="relative z-50 mb-6 mt-8 ml-8 flex items-center gap-2 text-neutral-400 hover:text-white transition"
+            onClick={() => setModuloSelecionado(null)}
+          >
+            <ArrowLeft size={20} /> Voltar
+          </button>
+          <div className="flex-1 flex overflow-hidden">
+            <AulaPlayer
+              modulo={modulo}
+              aulaSelecionadaId={aulaSelecionada ?? modulo.aulas[0]?.id}
+              onSelecionarAula={setAulaSelecionada}
+              onMarcarAssistida={(aulaId) =>
+                marcarAulaAssistida(modulo.id, aulaId)
+              }
+            />
+          </div>
+        </>
+      );
     }
 
     if (mobileTab === "progresso") {
@@ -162,19 +158,19 @@ export default function Aluno() {
 
   const MobileDrawer = (
     <div
-      className={`fixed inset-0 z-40 bg-black/60 transition-opacity duration-200 ${
+      className={`fixed inset-0 z-40 bg-black/60 transition-opacity ${
         mobileMenuOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
       }`}
       onClick={() => setMobileMenuOpen(false)}
     >
       <div
-        className={`absolute left-0 top-0 h-full w-64 bg-neutral-950 p-6 flex flex-col gap-6 border-r border-neutral-800 shadow-lg transition-transform duration-200 ${
+        className={`absolute left-0 top-0 h-full w-64 bg-neutral-950 p-6 flex flex-col gap-6 border-r border-neutral-800 shadow-lg transition-transform ${
           mobileMenuOpen ? "translate-x-0" : "-translate-x-full"
         }`}
         onClick={(e) => e.stopPropagation()}
       >
         <button
-          className="self-end mb-4 text-neutral-400 hover:text-white"
+          className="self-end text-neutral-400 hover:text-white"
           onClick={() => setMobileMenuOpen(false)}
           aria-label="Fechar menu"
         >
@@ -184,24 +180,21 @@ export default function Aluno() {
           <Layers size={28} /> Aluno
         </h2>
         <nav className="flex flex-col gap-4">
-          {MENU_ITEMS.map((item) => {
-            const Icon = item.icon;
-            return (
-              <button
-                key={item.key}
-                className={`flex items-center gap-2 px-2 py-2 rounded text-left ${
-                  mobileTab === item.key ? "bg-neutral-800 text-white" : "text-neutral-300"
-                }`}
-                onClick={() => {
-                  setMobileTab(item.key);
-                  setMobileMenuOpen(false);
-                  setModuloSelecionado(null);
-                }}
-              >
-                <Icon size={20} /> {item.label}
-              </button>
-            );
-          })}
+          {MENU_ITEMS.map((item) => (
+            <button
+              key={item.key}
+              className={`flex items-center gap-2 px-2 py-2 rounded text-left ${
+                mobileTab === item.key ? "bg-neutral-800 text-white" : "text-neutral-300"
+              }`}
+              onClick={() => {
+                setMobileTab(item.key);
+                setMobileMenuOpen(false);
+                setModuloSelecionado(null);
+              }}
+            >
+              <item.icon size={20} /> {item.label}
+            </button>
+          ))}
         </nav>
       </div>
     </div>
@@ -215,11 +208,7 @@ export default function Aluno() {
     >
       <div className="p-4 flex flex-col items-center space-y-4">
         {logoUrl && (
-          <img
-            src={logoUrl}
-            alt="Logo"
-            className="w-12 h-12 object-contain"
-          />
+          <img src={logoUrl} alt="Logo" className="w-12 h-12 object-contain" />
         )}
         <img
           src={photoUrl || "/placeholder.svg"}
@@ -242,50 +231,44 @@ export default function Aluno() {
         </button>
       </div>
       <nav className="flex flex-col flex-1 p-2">
-        {MENU_ITEMS.map((item) => {
-          const Icon = item.icon;
-          return (
-            <button
-              key={item.key}
-              className={`flex items-center gap-2 w-full px-3 py-2 my-1 rounded text-sm font-medium transition-colors ${
-                mobileTab === item.key
-                  ? "bg-neutral-900 text-white"
-                  : "text-neutral-300 hover:bg-neutral-800 hover:text-white"
-              }`}
-              onClick={() => {
-                setMobileTab(item.key);
-                setModuloSelecionado(null);
-              }}
-            >
-              <Icon size={20} />
-              {!sidebarCollapsed && item.label}
-            </button>
-          );
-        })}
-      </nav>
-    </aside>
-  );
-
-  const MobileFooter = (
-    <nav className="fixed bottom-0 left-0 right-0 z-30 flex md:hidden bg-neutral-950 border-t border-neutral-800 h-16">
-      {MENU_ITEMS.map((item) => {
-        const Icon = item.icon;
-        return (
+        {MENU_ITEMS.map((item) => (
           <button
             key={item.key}
-            className={`flex-1 flex flex-col items-center justify-center gap-1 text-xs ${
-              mobileTab === item.key ? "text-green-400" : "text-neutral-300"
+            className={`flex items-center gap-2 w-full px-3 py-2 my-1 rounded text-sm font-medium transition-colors ${
+              mobileTab === item.key
+                ? "bg-neutral-900 text-white"
+                : "text-neutral-300 hover:bg-neutral-800 hover:text-white"
             }`}
             onClick={() => {
               setMobileTab(item.key);
               setModuloSelecionado(null);
             }}
           >
-            <Icon size={22} />
-            {item.label}
+            <item.icon size={20} />
+            {!sidebarCollapsed && item.label}
           </button>
-        );
-      })}
+        ))}
+      </nav>
+    </aside>
+  );
+
+  const MobileFooter = (
+    <nav className="fixed bottom-0 left-0 right-0 z-30 flex md:hidden bg-neutral-950 border-t border-neutral-800 h-16">
+      {MENU_ITEMS.map((item) => (
+        <button
+          key={item.key}
+          className={`flex-1 flex flex-col items-center justify-center gap-1 text-xs ${
+            mobileTab === item.key ? "text-green-400" : "text-neutral-300"
+          }`}
+          onClick={() => {
+            setMobileTab(item.key);
+            setModuloSelecionado(null);
+          }}
+        >
+          <item.icon size={22} />
+          {item.label}
+        </button>
+      ))}
     </nav>
   );
 
