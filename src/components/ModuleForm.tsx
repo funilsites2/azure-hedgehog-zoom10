@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { useModulos } from "@/context/ModulosContext";
 import { Button } from "@/components/ui/button";
 import { Plus, Trash2 } from "lucide-react";
 
@@ -25,6 +26,11 @@ export const ModuleForm: React.FC<ModuleFormProps> = ({
   onCancel,
   submitLabel = "Salvar",
 }) => {
+  const { modulos } = useModulos();
+  const existingLinhas = Array.from(
+    new Set(modulos.map((m) => m.linha).filter((l) => l.trim() !== ""))
+  );
+
   const [nome, setNome] = useState(initialNome);
   const [capa, setCapa] = useState(initialCapa);
   const [linha, setLinha] = useState(initialLinha);
@@ -65,11 +71,17 @@ export const ModuleForm: React.FC<ModuleFormProps> = ({
         onChange={(e) => setCapa(e.target.value)}
       />
       <input
+        list="linhas"
         className="w-full p-2 rounded bg-neutral-800 text-white"
         placeholder="Nome da linha"
         value={linha}
         onChange={(e) => setLinha(e.target.value)}
       />
+      <datalist id="linhas">
+        {existingLinhas.map((l) => (
+          <option key={l} value={l} />
+        ))}
+      </datalist>
       <div className="space-y-2">
         <div className="flex gap-2">
           <input
