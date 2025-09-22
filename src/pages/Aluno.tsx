@@ -96,23 +96,29 @@ export default function Aluno() {
                   {partialAulas.map(({ modulo: m, aula }) => (
                     <div
                       key={aula.id}
-                      className="snap-start flex-shrink-0 w-1/2 md:w-1/5 p-4 rounded-lg cursor-pointer transition"
+                      className="group snap-start flex-shrink-0 w-1/2 md:w-1/5 rounded-lg cursor-pointer transition"
                       onClick={() => {
                         setModuloSelecionado(m.id);
                         setAulaSelecionada(aula.id);
                       }}
                     >
-                      <img
-                        src={getYoutubeThumbnail(aula.videoUrl)}
-                        alt={aula.titulo}
-                        className="w-full h-32 object-cover rounded mb-2"
-                      />
-                      <p className="text-white font-medium truncate">
-                        {aula.titulo}
-                      </p>
-                      <p className="text-neutral-400 text-sm truncate">
-                        {m.nome}
-                      </p>
+                      <div className="relative w-full h-32 rounded overflow-hidden">
+                        <img
+                          src={getYoutubeThumbnail(aula.videoUrl)}
+                          alt={aula.titulo}
+                          className="w-full h-full object-cover"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
+                          <div className="absolute bottom-0 left-0 right-0 p-2">
+                            <p className="text-white text-sm font-medium truncate">
+                              {aula.titulo}
+                            </p>
+                            <p className="text-neutral-200 text-xs truncate">
+                              {m.nome}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   ))}
                 </div>
