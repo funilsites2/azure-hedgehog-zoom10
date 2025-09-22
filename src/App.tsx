@@ -7,6 +7,7 @@ import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import Admin from "./pages/Admin";
 import Aluno from "./pages/Aluno";
+import Perfil from "./pages/Perfil";
 
 const queryClient = new QueryClient();
 
@@ -20,7 +21,7 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/admin" element={<Admin />} />
           <Route path="/aluno" element={<Aluno />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+          <Route path="/perfil" element={<Perfil />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
