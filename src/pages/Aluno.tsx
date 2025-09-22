@@ -22,6 +22,7 @@ import { usePhoto } from "@/context/PhotoContext";
 import { useUser } from "@/context/UserContext";
 import { Footer } from "@/components/Footer";
 import { showSuccess } from "@/utils/toast";
+import "@/styles/no-scrollbar.css";
 
 function getYoutubeThumbnail(url: string): string {
   const match = url.match(
@@ -93,7 +94,7 @@ export default function Aluno() {
                 <h2 className="text-2xl font-semibold mb-4 text-white">
                   Continuar Assistindo
                 </h2>
-                <div className="overflow-x-auto snap-x snap-mandatory flex gap-4 pb-4">
+                <div className="overflow-x-auto overflow-y-hidden no-scrollbar snap-x snap-mandatory flex gap-4 pb-4">
                   {partialAulas.map(({ modulo: m, aula }) => (
                     <div
                       key={aula.id}
