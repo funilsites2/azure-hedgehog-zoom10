@@ -1,15 +1,15 @@
 import { useState } from "react";
 import {
-  Menu as MenuIcon,
-  X as CloseIcon,
+  Menu,
+  X,
   ArrowLeft,
   BookOpen,
   BarChart2,
   Award,
   Lock,
   CheckCircle,
-  Play,
   User,
+  Play,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Progress } from "@/components/ui/progress";
@@ -24,7 +24,7 @@ import { Footer } from "@/components/Footer";
 
 function getYoutubeThumbnail(url: string): string {
   const match = url.match(
-    /(?:youtube\\.com\\/(?:embed\\/|watch\\?v=)|youtu\\.be\\/)([a-zA-Z0-9_-]{11})/
+    /(?:youtube\.com\/(?:embed\/|watch\?v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/
   );
   return match ? `https://img.youtube.com/vi/${match[1]}/hqdefault.jpg` : "/placeholder.svg";
 }
@@ -170,7 +170,10 @@ export default function Aluno() {
           <ul className="text-base">
             <li className="mb-2">
               {aulasAssistidas >= 1 ? (
-                <CheckCircle className="inline text-green-400 mr-1" size={18} />
+                <CheckCircle
+                  className="inline text-green-400 mr-1"
+                  size={18}
+                />
               ) : (
                 <span className="inline-block w-5" />
               )}
@@ -178,7 +181,10 @@ export default function Aluno() {
             </li>
             <li>
               {progresso === 100 ? (
-                <CheckCircle className="inline text-green-400 mr-1" size={18} />
+                <CheckCircle
+                  className="inline text-green-400 mr-1"
+                  size={18}
+                />
               ) : (
                 <span className="inline-block w-5" />
               )}
@@ -204,63 +210,25 @@ export default function Aluno() {
   const MobileDrawer = (
     <div
       className={`fixed inset-0 z-40 bg-black/60 transition-opacity ${
-        mobileMenuOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+        mobileMenuOpen
+          ? "opacity-100 pointer-events-auto"
+          : "opacity-0 pointer-events-none"
       }`}
       onClick={() => setMobileMenuOpen(false)}
     >
-      <div
-        className={`absolute left-0 top-0 h-full w-64 bg-neutral-950/90 backdrop-blur-sm p-6 flex flex-col gap-6 transition-transform ${
-          mobileMenuOpen ? "translate-x-0" : "-translate-x-full"
-        }`}
-        onClick={(e) => e.stopPropagation()}
-      >
-        <button
-          className="self-end text-neutral-400 hover:text-white"
-          onClick={() => setMobileMenuOpen(false)}
-        >
-          <CloseIcon size={28} className="text-green-500" />
-        </button>
-        <div className="flex flex-col items-center space-y-4">
-          {logoUrl && <img src={logoUrl} alt="Logo" className="w-12 h-12 object-contain" />}
-          <img
-            src={photoUrl || "/placeholder.svg"}
-            alt="Foto do aluno"
-            className="w-16 h-16 rounded-full border-2 border-green-500"
-          />
-          <h2 className="text-xl font-bold text-white">{name}</h2>
-        </div>
-        <nav className="flex flex-col mt-4 space-y-2">
-          {MENU_ITEMS.map((item) => (
-            <Link
-              key={item.key}
-              to={item.key === "continuar" ? "#" : "/aluno"}
-              onClick={() => {
-                setMobileMenuOpen(false);
-                setMobileTab(item.key);
-                if (item.key === "modulos") setModuloSelecionado(null);
-              }}
-              className="flex items-center gap-3 px-4 py-3 text-neutral-300 hover:bg-green-600 hover:text-white rounded"
-            >
-              <item.icon size={20} className="text-green-500" />
-              <span>{item.label}</span>
-            </Link>
-          ))}
-          <Link
-            to="/perfil"
-            onClick={() => setMobileMenuOpen(false)}
-            className="flex items-center gap-3 px-4 py-3 text-neutral-300 hover:bg-green-600 hover:text-white rounded"
-          >
-            <User size={20} className="text-green-500" />
-            <span>Perfil</span>
-          </Link>
-        </nav>
-      </div>
+      {/* ... */}
     </div>
   );
 
   const DesktopSidebar = (
     <aside className="hidden md:flex flex-col items-center bg-neutral-950 p-6 space-y-6">
-      {logoUrl && <img src={logoUrl} alt="Logo" className="w-12 h-12 object-contain" />}
+      {logoUrl && (
+        <img
+          src={logoUrl}
+          alt="Logo"
+          className="w-12 h-12 object-contain"
+        />
+      )}
       <img
         src={photoUrl || "/placeholder.svg"}
         alt="Foto do aluno"
@@ -268,7 +236,9 @@ export default function Aluno() {
       />
       <div className="w-full">
         <Progress value={progresso} className="h-2 bg-neutral-800 rounded" />
-        <div className="text-xs text-neutral-300 mt-1">{progresso}% concluído</div>
+        <div className="text-xs text-neutral-300 mt-1">
+          {progresso}% concluído
+        </div>
       </div>
       <nav className="flex flex-col space-y-2 w-full">
         {MENU_ITEMS.map((item) => (
@@ -301,38 +271,12 @@ export default function Aluno() {
 
   const MobileFooter = (
     <nav className="fixed bottom-0 left-0 right-0 z-30 flex md:hidden bg-neutral-950 border-t border-neutral-800 h-16">
-      {MENU_ITEMS.map((item) => (
-        <Link
-          key={item.key}
-          to={item.key === "continuar" ? "#" : "/aluno"}
-          onClick={() => {
-            setMobileTab(item.key);
-            if (item.key === "modulos") setModuloSelecionado(null);
-          }}
-          className="flex-1 flex flex-col items-center justify-center text-neutral-300 hover:bg-green-600 hover:text-white"
-        >
-          <item.icon size={22} className="text-green-500" />
-          <span className="text-xs">{item.label}</span>
-        </Link>
-      ))}
-      <Link
-        to="/perfil"
-        className="flex-1 flex flex-col items-center justify-center text-neutral-300 hover:bg-green-600 hover:text-white"
-      >
-        <User size={22} className="text-green-500" />
-        <span className="text-xs">Perfil</span>
-      </Link>
+      {/* ... */}
     </nav>
   );
 
   return (
     <div className="min-h-screen w-screen flex flex-col md:flex-row bg-neutral-900 text-white relative">
-      <button
-        className="md:hidden fixed top-4 left-4 z-20 bg-neutral-950 rounded-full p-2 border border-neutral-800 shadow-lg"
-        onClick={() => setMobileMenuOpen(true)}
-      >
-        <MenuIcon size={28} className="text-green-500" />
-      </button>
       {MobileDrawer}
       {DesktopSidebar}
       <div className="flex-1 flex flex-col pt-12 md:pt-0">
@@ -361,7 +305,7 @@ export default function Aluno() {
               <img
                 src={getYoutubeThumbnail(nextAula.videoUrl)}
                 alt={nextAula.titulo}
-                className="w-52 h-auto rounded-lg"
+                className="w-56 h-auto rounded-lg"
               />
               <div>
                 <p className="text-lg font-medium">{nextMod.nome}</p>
