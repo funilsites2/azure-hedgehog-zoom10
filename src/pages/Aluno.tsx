@@ -56,7 +56,6 @@ export default function Aluno() {
       if (!modulo) {
         return (
           <div className="mt-8 space-y-8 px-4">
-            <h2 className="text-xl font-semibold">Olá, {name}</h2>
             {linhas.map((linha) => {
               const mods = modulos.filter((m) => m.linha === linha);
               if (!mods.length) return null;
@@ -224,10 +223,7 @@ export default function Aluno() {
             key={item.key}
             to={item.key === "modulos" ? "/aluno" : "#"}
             className="relative flex items-center gap-3 px-4 py-3 transition-colors hover:bg-green-600 hover:text-white text-neutral-300"
-            onClick={() => {
-              setMobileTab(item.key);
-              setModuloSelecionado(null);
-            }}
+            onClick={() => setSidebarCollapsed(false)}
           >
             <item.icon size={20} className="text-green-500" />
             {!sidebarCollapsed && <span>{item.label}</span>}
@@ -236,7 +232,7 @@ export default function Aluno() {
         ))}
         <Link
           to="/perfil"
-            className="relative flex items-center gap-3 px-4 py-3 transition-colors hover:bg-green-600 hover:text-white text-neutral-300"
+          className="relative flex items-center gap-3 px-4 py-3 transition-colors hover:bg-green-600 hover:text-white text-neutral-300"
         >
           <User size={20} className="text-green-500" />
           {!sidebarCollapsed && <span>Perfil</span>}
@@ -282,7 +278,7 @@ export default function Aluno() {
       {MobileDrawer}
       {DesktopSidebar}
       <div className="flex-1 flex flex-col pt-12 md:pt-0">
-        {bannerUrl && moduloSelecionado === null && (
+        {bannerUrl && (
           <div className="mb-6 mx-auto w-full max-w-[1600px] h-[200px] md:h-[400px] overflow-hidden rounded-lg">
             <img
               src={bannerUrl}
@@ -292,7 +288,13 @@ export default function Aluno() {
           </div>
         )}
         <div className="flex-1 overflow-auto pb-[84px] md:pb-5">
-          {renderMainContent()}
+          <main className="p-8">
+            <div className="max-w-md mx-auto space-y-8">
+              <h1 className="text-3xl font-bold">Perfil do Aluno</h1>
+              <PhotoSettings />
+              {/* ... resto do conteúdo */}
+            </div>
+          </main>
         </div>
         {MobileFooter}
         <Footer />
