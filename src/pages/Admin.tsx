@@ -1,7 +1,5 @@
 import { useState } from "react";
 import {
-  Plus,
-  Video,
   Layers,
   Edit,
   Unlock,
@@ -218,13 +216,52 @@ export default function Admin() {
               {linhas.map((linha) => (
                 <div key={linha}>
                   <h2 className="text-2xl font-semibold mt-8 mb-4">{linha}</h2>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {/* mobile grid */}
+                  <div className="grid grid-cols-1 gap-4 md:hidden">
                     {modulos
                       .filter((m) => m.linha === linha)
                       .map((m) => (
                         <div
                           key={m.id}
                           className="bg-neutral-800 p-4 rounded-lg flex flex-col"
+                        >
+                          <img
+                            src={m.capa}
+                            alt={m.nome}
+                            className="w-full h-32 object-cover rounded mb-2"
+                          />
+                          <h3 className="font-semibold mb-2">{m.nome}</h3>
+                          <div className="mt-auto flex gap-2">
+                            <Button onClick={() => iniciarEdicao(m.id)}>
+                              <Edit size={16} />
+                            </Button>
+                            <Button
+                              variant="secondary"
+                              onClick={() => duplicarModulo(m.id)}
+                              title="Duplicar Módulo"
+                            >
+                              <Layers size={16} />
+                            </Button>
+                            <Button
+                              variant="secondary"
+                              onClick={() =>
+                                setAulaReleaseDays(m.id, 0, 0)
+                              }
+                            >
+                              <Unlock size={16} />
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                  </div>
+                  {/* desktop carousel */}
+                  <div className="hidden md:flex overflow-x-auto gap-4 snap-x snap-mandatory px-2">
+                    {modulos
+                      .filter((m) => m.linha === linha)
+                      .map((m) => (
+                        <div
+                          key={m.id}
+                          className="snap-start flex-shrink-0 w-[20%] bg-neutral-800 p-4 rounded-lg flex flex-col"
                         >
                           <img
                             src={m.capa}
