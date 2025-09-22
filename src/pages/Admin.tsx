@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { useModulos } from "@/context/ModulosContext";
 import { ModuloCarousel } from "@/components/ModuloCarousel";
 import { ModuleForm } from "@/components/ModuleForm";
+import { BannerSettings } from "@/components/BannerSettings";
 
 export default function Admin() {
   const {
@@ -124,6 +125,7 @@ export default function Admin() {
             <Video className="mr-2" size={16} /> Adicionar Aula
           </Button>
         </div>
+        <BannerSettings />
       </aside>
       <main className="flex-1 p-8 overflow-auto">
         <h1 className="text-3xl font-bold mb-6">Módulos</h1>
