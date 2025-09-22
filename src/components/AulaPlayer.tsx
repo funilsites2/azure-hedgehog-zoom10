@@ -73,7 +73,7 @@ export function AulaPlayer({
 
   return (
     <div className="flex flex-col md:flex-row gap-6 w-full h-full">
-      <div className="w-full md:w-2/3 flex flex-col">
+      <div className="w-full md:w-2/3 flex flex-col pl-4 md:pl-8">
         <div className="flex justify-end items-center mb-2">
           {!aula.assistida ? (
             <button
