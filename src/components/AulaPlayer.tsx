@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Video, CheckCircle } from "lucide-react";
+import { Video, CheckCircle, ChevronLeft, ChevronRight } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 
@@ -44,13 +44,52 @@ export function AulaPlayer({
   onSelecionarAula,
   onMarcarAssistida,
 }: AulaPlayerProps) {
-  const aula = modulo.aulas.find((a) => a.id === aulaSelecionadaId) ?? modulo.aulas[0];
+  const aulas = modulo.aulas;
+  const aulaIndex = aulas.findIndex((a) => a.id === aulaSelecionadaId);
+  const aula = aulas[aulaIndex] || aulas[0];
+  const hasPrev = aulaIndex > 0;
+  const hasNext = aulaIndex < aulas.length - 1;
+
   const [tab, setTab] = useState("video");
 
   return (
     <div className="flex flex-col md:flex-row gap-6 w-full h-full">
-      {/* Player + Tabs */}
+      {/* Player + Controls */}
       <div className="w-full md:w-2/3 flex flex-col">
+        {/* Top controls */}
+        <div className="flex justify-between items-center mb-2">
+          <div className="flex gap-2">
+            {hasPrev && (
+              <button
+                className="flex items-center gap-1 text-sm bg-neutral-800 px-3 py-1 rounded hover:bg-neutral-700"
+                onClick={() => onSelecionarAula(aulas[aulaIndex - 1].id)}
+              >
+                <ChevronLeft size={16} /> Anterior
+              </button>
+            )}
+            {hasNext && (
+              <button
+                className="flex items-center gap-1 text-sm bg-neutral-800 px-3 py-1 rounded hover:bg-neutral-700"
+                onClick={() => onSelecionarAula(aulas[aulaIndex + 1].id)}
+              >
+                Próxima <ChevronRight size={16} />
+              </button>
+            )}
+          </div>
+          {!aula.assistida ? (
+            <button
+              className="text-xs bg-green-600 px-3 py-1 rounded hover:bg-green-700"
+              onClick={() => onMarcarAssistida(aula.id)}
+            >
+              Concluir Aula
+            </button>
+          ) : (
+            <span className="flex items-center gap-1 text-green-400 text-xs">
+              <CheckCircle size={16} /> Concluída
+            </span>
+          )}
+        </div>
+        {/* Video */}
         <div className="aspect-video bg-black rounded-lg overflow-hidden mb-4 shadow-lg w-full">
           <iframe
             src={aula.videoUrl}
@@ -60,6 +99,7 @@ export function AulaPlayer({
             className="w-full h-full"
           />
         </div>
+        {/* Tabs */}
         <Tabs value={tab} onValueChange={setTab} className="w-full">
           <TabsList className="bg-neutral-800 mb-2">
             <TabsTrigger value="video">Vídeo</TabsTrigger>
@@ -98,26 +138,19 @@ export function AulaPlayer({
             </div>
           </TabsContent>
         </Tabs>
+        {/* Title */}
         <div className="mt-4">
-          <span className="font-semibold text-lg">{modulo.nome} - {aula.titulo}</span>
-          {!aula.assistida ? (
-            <button
-              className="ml-4 text-xs bg-green-600 px-3 py-1 rounded hover:bg-green-700"
-              onClick={() => onMarcarAssistida(aula.id)}
-            >
-              Marcar como assistida
-            </button>
-          ) : (
-            <span className="ml-4 flex items-center gap-1 text-green-400 text-xs">
-              <CheckCircle size={16} /> Aula assistida
-            </span>
-          )}
+          <span className="font-semibold text-lg">
+            {modulo.nome} - {aula.titulo}
+          </span>
         </div>
       </div>
       {/* Lista lateral de aulas */}
       <div className="w-full md:w-1/3 flex-shrink-0 flex flex-col">
         <div className="bg-neutral-800 rounded-lg p-3 shadow-lg h-full flex flex-col">
-          <div className="font-semibold mb-2 text-neutral-200 text-center">Aulas do módulo</div>
+          <div className="font-semibold mb-2 text-neutral-200 text-center">
+            Aulas do módulo
+          </div>
           <ul className="flex flex-col gap-2 overflow-y-auto">
             {modulo.aulas.map((a) => {
               const thumb =
