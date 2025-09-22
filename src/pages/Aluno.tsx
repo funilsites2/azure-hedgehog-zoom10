@@ -11,7 +11,7 @@ import {
   User,
 } from "lucide-react";
 import { Link } from "react-router-dom";
-import { Progress } from "@/components/ui/progress";
+import SimpleProgress from "@/components/SimpleProgress";
 import { useModulos } from "@/context/ModulosContext";
 import { AulaPlayer } from "@/components/AulaPlayer";
 import { ModuloCarousel } from "@/components/ModuloCarousel";
@@ -129,7 +129,7 @@ export default function Aluno() {
           <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
             <BarChart2 size={24} /> Progresso Geral
           </h2>
-          <Progress value={progresso} className="h-4 bg-neutral-800" />
+          <SimpleProgress value={progresso} />
           <div className="mt-2 text-lg">{progresso}% concluído</div>
         </div>
       );
@@ -240,7 +240,7 @@ export default function Aluno() {
         className="w-16 h-16 rounded-full border-2 border-green-500"
       />
       <div className="w-full">
-        <Progress value={progresso} className="h-2 bg-neutral-800 rounded" />
+        <SimpleProgress value={progresso} />
         <div className="text-xs text-neutral-300 mt-1">{progresso}% concluído</div>
       </div>
       <nav className="flex flex-col space-y-2 w-full">
