@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Video, CheckCircle, ChevronLeft, ChevronRight } from "lucide-react";
+import { CheckCircle, ChevronLeft, ChevronRight } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 
@@ -45,8 +45,18 @@ export function AulaPlayer({
   onMarcarAssistida,
 }: AulaPlayerProps) {
   const aulas = modulo.aulas;
+
+  // Guard for modules without aulas
+  if (!aulas || aulas.length === 0) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <span className="text-neutral-300">Nenhuma aula disponível neste módulo.</span>
+      </div>
+    );
+  }
+
   const aulaIndex = aulas.findIndex((a) => a.id === aulaSelecionadaId);
-  const aula = aulas[aulaIndex] || aulas[0];
+  const aula = aulas[aulaIndex] ?? aulas[0];
   const hasPrev = aulaIndex > 0;
   const hasNext = aulaIndex < aulas.length - 1;
 
@@ -56,26 +66,8 @@ export function AulaPlayer({
     <div className="flex flex-col md:flex-row gap-6 w-full h-full">
       {/* Player + Controls */}
       <div className="w-full md:w-2/3 flex flex-col">
-        {/* Top controls */}
-        <div className="flex justify-between items-center mb-2">
-          <div className="flex gap-2">
-            {hasPrev && (
-              <button
-                className="flex items-center gap-1 text-sm bg-neutral-800 px-3 py-1 rounded hover:bg-neutral-700"
-                onClick={() => onSelecionarAula(aulas[aulaIndex - 1].id)}
-              >
-                <ChevronLeft size={16} /> Anterior
-              </button>
-            )}
-            {hasNext && (
-              <button
-                className="flex items-center gap-1 text-sm bg-neutral-800 px-3 py-1 rounded hover:bg-neutral-700"
-                onClick={() => onSelecionarAula(aulas[aulaIndex + 1].id)}
-              >
-                Próxima <ChevronRight size={16} />
-              </button>
-            )}
-          </div>
+        {/* Top: Concluir Aula */}
+        <div className="flex justify-end items-center mb-2">
           {!aula.assistida ? (
             <button
               className="text-xs bg-green-600 px-3 py-1 rounded hover:bg-green-700"
@@ -144,6 +136,25 @@ export function AulaPlayer({
             {modulo.nome} - {aula.titulo}
           </span>
         </div>
+        {/* Bottom: Navegação de Aulas */}
+        <div className="flex justify-between mt-4">
+          {hasPrev ? (
+            <button
+              className="flex items-center gap-1 text-sm bg-neutral-800 px-3 py-1 rounded hover:bg-neutral-700"
+              onClick={() => onSelecionarAula(aulas[aulaIndex - 1].id)}
+            >
+              <ChevronLeft size={16} /> Voltar
+            </button>
+          ) : <div />}
+          {hasNext ? (
+            <button
+              className="flex items-center gap-1 text-sm bg-neutral-800 px-3 py-1 rounded hover:bg-neutral-700"
+              onClick={() => onSelecionarAula(aulas[aulaIndex + 1].id)}
+            >
+              Próxima <ChevronRight size={16} />
+            </button>
+          ) : <div />}
+        </div>
       </div>
       {/* Lista lateral de aulas */}
       <div className="w-full md:w-1/3 flex-shrink-0 flex flex-col">
@@ -181,5 +192,5 @@ export function AulaPlayer({
         </div>
       </div>
     </div>
-  );
+);
 }
