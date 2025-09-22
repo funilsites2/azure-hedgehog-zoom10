@@ -86,7 +86,7 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
                     style={alunoLayout ? { flex: "0 0 60%", marginRight: "2vw" } : undefined}
                   >
                     <div
-                      className={`bg-neutral-800 rounded-lg p-4 shadow-lg flex flex-col h-full cursor-pointer relative transition-transform transform hover:scale-105 ${
+                      className={`bg-neutral-800 rounded-xl overflow-hidden p-4 shadow-lg flex flex-col h-full cursor-pointer relative transition-transform transform hover:scale-105 ${
                         modulo.bloqueado ? "grayscale opacity-70" : ""
                       }`}
                       onClick={
@@ -96,7 +96,7 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
                       }
                     >
                       {modulo.releaseDate && now < modulo.releaseDate && (
-                        <div className="absolute top-0 inset-x-0 bg-yellow-500 text-black text-xs text-center py-1 rounded-t-lg">
+                        <div className="absolute top-0 inset-x-0 bg-yellow-500 text-black text-xs text-center py-1 rounded-t-xl">
                           Liberado em {new Date(modulo.releaseDate).toLocaleDateString()}
                         </div>
                       )}
@@ -110,7 +110,7 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
                         <img
                           src={modulo.capa}
                           alt={modulo.nome}
-                          className="w-full aspect-[3/4] object-cover rounded-lg mb-2"
+                          className="w-full aspect-[3/4] object-cover rounded-xl mb-2"
                           onError={(e) =>
                             (e.currentTarget.src =
                               "https://placehold.co/300x400?text=Sem+Capa")
@@ -159,7 +159,7 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
           return (
             <div
               key={modulo.id}
-              className={`snap-start flex-shrink-0 w-[20%] rounded-lg shadow-lg overflow-hidden cursor-pointer relative transition-transform transform hover:scale-105 ${
+              className={`snap-start flex-shrink-0 w-[20%] rounded-xl shadow-lg overflow-hidden cursor-pointer relative transition-transform transform hover:scale-105 ${
                 modulo.bloqueado ? "grayscale opacity-70" : ""
               }`}
               onClick={
@@ -169,7 +169,7 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
               }
             >
               {modulo.releaseDate && now < modulo.releaseDate && (
-                <div className="absolute top-0 inset-x-0 bg-yellow-500 text-black text-xs text-center py-1 rounded-t-lg">
+                <div className="absolute top-0 inset-x-0 bg-yellow-500 text-black text-xs text-center py-1 rounded-t-xl">
                   Liberado em {new Date(modulo.releaseDate).toLocaleDateString()}
                 </div>
               )}
@@ -182,7 +182,7 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
               <img
                 src={modulo.capa}
                 alt={modulo.nome}
-                className="w-full aspect-[3/4] object-cover rounded-lg"
+                className="w-full aspect-[3/4] object-cover rounded-xl"
                 onError={(e) =>
                   (e.currentTarget.src =
                     "https://placehold.co/300x400?text=Sem+Capa")
