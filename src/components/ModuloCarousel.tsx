@@ -18,7 +18,7 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
   alunoLayout = false,
   showLocked,
 }) => {
-  // Determine which modules to show
+  // Filter modules
   const filteredModulos =
     showLocked === true
       ? modulos.filter((m) => m.bloqueado)
@@ -26,7 +26,7 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
       ? modulos.filter((m) => !m.bloqueado)
       : modulos;
 
-  // Embla carousel setup for mobile
+  // Embla carousel setup
   const [emblaRef, emblaApi] = useEmblaCarousel({
     slidesToScroll: 1,
     containScroll: "trimSnaps",
@@ -36,7 +36,6 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
       "(min-width: 768px)": { active: false },
     },
   });
-
   const [canScrollPrev, setCanScrollPrev] = React.useState(false);
   const [canScrollNext, setCanScrollNext] = React.useState(false);
 
@@ -48,24 +47,21 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
     };
     emblaApi.on("select", onSelect);
     onSelect();
-    return () => {
-      emblaApi.off("select", onSelect);
-    };
+    return () => emblaApi.off("select", onSelect);
   }, [emblaApi]);
 
-  // Mobile card sizing
+  // Layout helpers
   const mobileCardWidth = alunoLayout
     ? "w-[70vw] max-w-[320px] min-w-[220px]"
     : "min-w-1/2 max-w-[90vw]";
   const mobilePeek = alunoLayout
     ? { flex: "0 0 66%", marginRight: "2vw" }
     : { flex: "0 0 50%" };
-
-  // Desktop grid columns
   const desktopGridCols = alunoLayout
     ? "md:grid-cols-3 lg:grid-cols-5"
     : "md:grid-cols-2 lg:grid-cols-3";
 
+  // Render
   return (
     <div>
       {/* Mobile carousel */}
@@ -81,9 +77,7 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
                 >
                   <div
                     className={`bg-neutral-800 rounded-lg p-4 shadow-lg flex flex-col h-full cursor-pointer relative transition-transform transform hover:scale-105 ${
-                      modulo.bloqueado
-                        ? "grayscale opacity-70 pointer-events-none"
-                        : ""
+                      modulo.bloqueado ? "grayscale opacity-70" : ""
                     }`}
                     onClick={
                       !modulo.bloqueado && onModuloClick
@@ -153,17 +147,14 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
           </button>
         </div>
       </div>
+
       {/* Desktop grid */}
-      <div
-        className={`hidden md:grid grid-cols-1 ${desktopGridCols} gap-4`}
-      >
+      <div className={`hidden md:grid grid-cols-1 ${desktopGridCols} gap-4`}>
         {filteredModulos.map((modulo) => (
           <div
             key={modulo.id}
             className={`bg-neutral-800 rounded-lg p-3 shadow-lg flex flex-col h-full cursor-pointer relative transition-transform transform hover:scale-105 ${
-              modulo.bloqueado
-                ? "grayscale opacity-70 pointer-events-none"
-                : ""
+              modulo.bloqueado ? "grayscale opacity-70" : ""
             }`}
             onClick={
               !modulo.bloqueado && onModuloClick
@@ -199,10 +190,7 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
                 >
                   <Video size={16} /> {aula.titulo}
                   {aula.bloqueado && (
-                    <Lock
-                      size={12}
-                      className="ml-1 text-red-500"
-                    />
+                    <Lock size={12} className="ml-1 text-red-500" />
                   )}
                 </li>
               ))}
