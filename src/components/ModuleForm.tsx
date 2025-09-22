@@ -56,7 +56,7 @@ export const ModuleForm: React.FC<ModuleFormProps> = ({
   const [delayDays, setDelayDays] = useState<number>(initialDelayDays);
 
   const handleAddAula = () => {
-    if (!novaAula.titulo || !novaAula.videoUrl) return;
+    if (!novaAula.titulo.trim() || !novaAula.videoUrl.trim()) return;
     if (editingIndex !== null) {
       setAulas((prev) =>
         prev.map((a, i) => (i === editingIndex ? novaAula : a))
@@ -150,16 +150,38 @@ export const ModuleForm: React.FC<ModuleFormProps> = ({
         value={delayDays}
         onChange={(e) => setDelayDays(Number(e.target.value))}
       />
+
+      {/* Inputs para adicionar/editar aulas */}
       <div className="space-y-2">
+        <h3 className="font-semibold text-lg">Aulas</h3>
+        <input
+          className="w-full p-2 rounded bg-neutral-800 text-white"
+          placeholder="Título da aula"
+          value={novaAula.titulo}
+          onChange={(e) =>
+            setNovaAula((v) => ({ ...v, titulo: e.target.value }))
+          }
+        />
+        <input
+          className="w-full p-2 rounded bg-neutral-800 text-white"
+          placeholder="URL do vídeo"
+          value={novaAula.videoUrl}
+          onChange={(e) =>
+            setNovaAula((v) => ({ ...v, videoUrl: e.target.value }))
+          }
+        />
         <div className="flex gap-2">
           <Button type="button" onClick={handleAddAula}>
             <Plus size={16} />
-            {editingIndex !== null ? "Atualizar Aula" : ""}
+            {editingIndex !== null ? "Atualizar Aula" : "Adicionar Aula"}
           </Button>
         </div>
         <ul className="space-y-1">
           {aulas.map((a, idx) => (
-            <li key={idx} className="flex items-center justify-between bg-neutral-800 p-2 rounded">
+            <li
+              key={idx}
+              className="flex items-center justify-between bg-neutral-800 p-2 rounded"
+            >
               <span className="truncate">{a.titulo}</span>
               <div className="flex items-center gap-2">
                 <button onClick={() => editAula(idx)}>
@@ -173,6 +195,7 @@ export const ModuleForm: React.FC<ModuleFormProps> = ({
           ))}
         </ul>
       </div>
+
       <div className="flex gap-2">
         <Button onClick={handleSubmit}>{submitLabel}</Button>
         {onCancel && (
