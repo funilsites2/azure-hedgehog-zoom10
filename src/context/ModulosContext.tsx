@@ -6,6 +6,7 @@ type Aula = {
   videoUrl: string;
   assistida?: boolean;
   bloqueado?: boolean;
+  releaseDate?: number;
 };
 
 type Modulo = {
@@ -15,7 +16,7 @@ type Modulo = {
   linha: string;
   aulas: Aula[];
   bloqueado?: boolean;
-  releaseDate?: number; // timestamp de liberação
+  releaseDate?: number; // timestamp de liberação do módulo
 };
 
 type ModulosContextType = {
@@ -23,17 +24,22 @@ type ModulosContextType = {
   adicionarModulo: (
     nome: string,
     capa: string,
-    aulas?: Omit<Aula, "id" | "assistida" | "bloqueado">[],
+    aulas?: Omit<Aula, "id" | "assistida" | "bloqueado" | "releaseDate">[],
     linha?: string,
     delayDays?: number
   ) => void;
-  adicionarAula: (moduloId: number, titulo: string, videoUrl: string) => void;
+  adicionarAula: (
+    moduloId: number,
+    titulo: string,
+    videoUrl: string,
+    delayDays?: number
+  ) => void;
   marcarAulaAssistida: (moduloId: number, aulaId: number) => void;
   editarModulo: (
     moduloId: number,
     novoNome: string,
     novaCapa: string,
-    novasAulas: Omit<Aula, "id" | "assistida" | "bloqueado">[],
+    novasAulas: Omit<Aula, "id" | "assistida" | "bloqueado" | "releaseDate">[],
     linha?: string,
     delayDays?: number
   ) => void;
@@ -54,7 +60,6 @@ const getInitialModulos = (): Modulo[] => {
       return JSON.parse(data);
     } catch {}
   }
-  // módulos iniciais disponíveis imediatamente
   const now = Date.now();
   return [
     {
@@ -69,6 +74,7 @@ const getInitialModulos = (): Modulo[] => {
           videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
           assistida: true,
           bloqueado: false,
+          releaseDate: now,
         },
         {
           id: 2,
@@ -76,6 +82,7 @@ const getInitialModulos = (): Modulo[] => {
           videoUrl: "https://www.youtube.com/embed/ysz5S6PUM-U",
           assistida: false,
           bloqueado: false,
+          releaseDate: now,
         },
       ],
       releaseDate: now,
@@ -92,6 +99,7 @@ const getInitialModulos = (): Modulo[] => {
           videoUrl: "https://www.youtube.com/embed/ScMzIvxBSi4",
           assistida: false,
           bloqueado: false,
+          releaseDate: now,
         },
       ],
       releaseDate: now,
@@ -102,13 +110,17 @@ const getInitialModulos = (): Modulo[] => {
 const initializeBlocks = (mods: Modulo[]): Modulo[] => {
   const now = Date.now();
   return mods.map((m) => {
-    // respeita bloqueio manual se definido, senão usa releaseDate
     const moduleBlocked = m.bloqueado ?? (m.releaseDate ? now < m.releaseDate : false);
     const aulas = m.aulas.map((a, i, arr) => {
-      // respeita bloqueio manual de aula se definido
-      if (a.bloqueado !== undefined) {
+      // bloqueio manual tem prioridade
+      if (a.bloqueado && a.releaseDate === undefined) {
         return a;
       }
+      // bloqueio por releaseDate
+      if (a.releaseDate && now < a.releaseDate) {
+        return { ...a, bloqueado: true };
+      }
+      // bloqueio sequencial
       if (i === 0) {
         return { ...a, bloqueado: false };
       }
@@ -119,9 +131,7 @@ const initializeBlocks = (mods: Modulo[]): Modulo[] => {
   });
 };
 
-const ModulosContext = createContext<ModulosContextType | undefined>(
-  undefined
-);
+const ModulosContext = createContext<ModulosContextType | undefined>(undefined);
 
 export const ModulosProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
@@ -137,7 +147,7 @@ export const ModulosProvider: React.FC<{ children: React.ReactNode }> = ({
   const adicionarModulo = (
     nome: string,
     capa: string,
-    aulas: Omit<Aula, "id" | "assistida" | "bloqueado">[] = [],
+    aulas: Omit<Aula, "id" | "assistida" | "bloqueado" | "releaseDate">[] = [],
     linha: string = "",
     delayDays: number = 0
   ) => {
@@ -158,6 +168,7 @@ export const ModulosProvider: React.FC<{ children: React.ReactNode }> = ({
             videoUrl: a.videoUrl,
             assistida: false,
             bloqueado: i !== 0,
+            releaseDate: releaseDate,
           })),
           releaseDate,
         },
@@ -168,8 +179,11 @@ export const ModulosProvider: React.FC<{ children: React.ReactNode }> = ({
   const adicionarAula = (
     moduloId: number,
     titulo: string,
-    videoUrl: string
+    videoUrl: string,
+    delayDays: number = 0
   ) => {
+    const now = Date.now();
+    const releaseDate = now + delayDays * 24 * 60 * 60 * 1000;
     setModulos((prev) =>
       prev.map((m) =>
         m.id === moduloId
@@ -183,6 +197,7 @@ export const ModulosProvider: React.FC<{ children: React.ReactNode }> = ({
                   videoUrl,
                   assistida: false,
                   bloqueado: true,
+                  releaseDate,
                 },
               ],
             }
@@ -213,7 +228,7 @@ export const ModulosProvider: React.FC<{ children: React.ReactNode }> = ({
     moduloId: number,
     novoNome: string,
     novaCapa: string,
-    novasAulas: Omit<Aula, "id" | "assistida" | "bloqueado">[] = [],
+    novasAulas: Omit<Aula, "id" | "assistida" | "bloqueado" | "releaseDate">[] = [],
     linha: string = "",
     delayDays: number = 0
   ) => {
@@ -235,6 +250,7 @@ export const ModulosProvider: React.FC<{ children: React.ReactNode }> = ({
                   videoUrl: a.videoUrl,
                   assistida: m.aulas[idx]?.assistida ?? false,
                   bloqueado: false,
+                  releaseDate,
                 })),
               }
             : m
@@ -246,9 +262,7 @@ export const ModulosProvider: React.FC<{ children: React.ReactNode }> = ({
   const setModuloBloqueado = (moduloId: number, bloqueado: boolean) => {
     setModulos((prev) =>
       initializeBlocks(
-        prev.map((m) =>
-          m.id === moduloId ? { ...m, bloqueado } : m
-        )
+        prev.map((m) => (m.id === moduloId ? { ...m, bloqueado } : m))
       )
     );
   };
