@@ -242,7 +242,7 @@ export default function Admin() {
                       }
                       className={`flex-1 ${
                         !m.bloqueado
-                          ? "bg-white text-black hover:bg-neutral-100"
+                          ? "bg-white !text-black hover:bg-neutral-100"
                           : ""
                       }`}
                     >
