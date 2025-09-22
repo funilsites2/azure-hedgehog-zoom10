@@ -9,7 +9,6 @@ import {
   Lock,
   CheckCircle,
   User,
-  Play,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Progress } from "@/components/ui/progress";
@@ -221,9 +220,8 @@ export default function Aluno() {
         </div>
         <nav className="flex flex-col mt-4 space-y-2">
           {MENU_ITEMS.map((item) => (
-            <Link
+            <button
               key={item.key}
-              to={item.key === "modulos" ? "/aluno" : `/${item.key}`}
               onClick={() => {
                 setMobileMenuOpen(false);
                 setMobileTab(item.key);
@@ -233,7 +231,7 @@ export default function Aluno() {
             >
               <item.icon size={20} className="text-green-500" />
               <span>{item.label}</span>
-            </Link>
+            </button>
           ))}
           <Link
             to="/perfil"
@@ -344,7 +342,7 @@ export default function Aluno() {
         )}
         {moduloSelecionado === null && partialAulas.length > 0 && (
           <div className="container mx-auto mb-8">
-            {/* ... permanece inalterado */}
+            {/* mantém conteúdo original de partialAulas */}
           </div>
         )}
         <div className="flex-1 overflow-auto pb-[84px] md:pb-5">
