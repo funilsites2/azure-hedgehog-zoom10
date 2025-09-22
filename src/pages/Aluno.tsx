@@ -81,10 +81,7 @@ export default function Aluno() {
               const mods = modulos.filter((m) => m.linha === linha);
               if (!mods.length) return null;
               return (
-                <div
-                  key={linha}
-                  className="bg-neutral-800 bg-opacity-20 p-4 rounded-lg"
-                >
+                <div key={linha} className="bg-neutral-800 bg-opacity-20 p-4 rounded-lg">
                   <h3 className="text-2xl font-semibold mb-4">{linha}</h3>
                   <ModuloCarousel
                     modulos={mods}
@@ -328,7 +325,7 @@ export default function Aluno() {
         )}
         {moduloSelecionado === null && partialAulas.length > 0 && (
           <div className="container mx-auto mb-8">
-            {/* Conteúdo original de próximas aulas permanece */}
+            {/* próximas aulas */}
           </div>
         )}
         <div className="flex-1 overflow-auto pb-[84px] md:pb-5">
