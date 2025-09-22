@@ -26,12 +26,7 @@ const MENU_ITEMS = [
 ] as const;
 
 export default function Aluno() {
-  const {
-    modulos,
-    marcarAulaAssistida,
-    columnNames,
-    setColumnName,
-  } = useModulos();
+  const { modulos, marcarAulaAssistida } = useModulos();
   const [moduloSelecionado, setModuloSelecionado] = useState<number | null>(null);
   const [aulaSelecionada, setAulaSelecionada] = useState<number | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -60,14 +55,7 @@ export default function Aluno() {
                 if (mods.length === 0) return null;
                 return (
                   <div key={col}>
-                    <div className="flex items-center mb-4 ml-2">
-                      <input
-                        type="text"
-                        value={columnNames[col] || ""}
-                        onChange={(e) => setColumnName(col, e.target.value)}
-                        className="text-2xl font-semibold bg-neutral-800 text-white p-1 rounded w-full max-w-xs"
-                      />
-                    </div>
+                    <h2 className="text-2xl font-semibold mb-4">Linha {col}</h2>
                     <ModuloCarousel
                       modulos={mods}
                       alunoLayout
@@ -82,11 +70,221 @@ export default function Aluno() {
             </div>
           </>
         );
+      } else {
+        if (modulo.bloqueado) {
+          setModuloSelecionado(null);
+          return null;
+        }
+        return (
+          <>
+            <button
+              className="mb-6 mt-8 ml-8 flex items-center gap-2 text-neutral-400 hover:text-white transition"
+              onClick={() => setModuloSelecionado(null)}
+            >
+              <ArrowLeft size={20} /> Voltar para módulos
+            </button>
+            <div className="flex-1 flex overflow-hidden">
+              <AulaPlayer
+                modulo={modulo}
+                aulaSelecionadaId={aulaSelecionada ?? modulo.aulas[0]?.id}
+                onSelecionarAula={setAulaSelecionada}
+                onMarcarAssistida={(aulaId) =>
+                  marcarAulaAssistida(modulo.id, aulaId)
+                }
+              />
+            </div>
+          </>
+        );
       }
-      // ... restante igual ...
     }
-    // ... restante igual ...
+
+    if (mobileTab === "progresso") {
+      return (
+        <div className="p-8">
+          <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
+            <BarChart2 size={24} /> Progresso Geral
+          </h2>
+          <Progress value={progresso} className="h-4 bg-neutral-800" />
+          <div className="mt-2 text-lg">{progresso}% concluído</div>
+        </div>
+      );
+    }
+
+    if (mobileTab === "conquistas") {
+      return (
+        <div className="p-8">
+          <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
+            <Award size={24} className="text-yellow-400" /> Conquistas
+          </h2>
+          <ul className="text-base">
+            <li className="mb-2">
+              {aulasAssistidas >= 1 ? (
+                <CheckCircle className="inline text-green-400 mr-1" size={18} />
+              ) : (
+                <span className="inline-block w-5" />
+              )}
+              Primeira aula assistida
+            </li>
+            <li>
+              {progresso === 100 ? (
+                <CheckCircle className="inline text-green-400 mr-1" size={18} />
+              ) : (
+                <span className="inline-block w-5" />
+              )}
+              Curso completo!
+            </li>
+          </ul>
+        </div>
+      );
+    }
+
+    if (mobileTab === "bloqueados") {
+      return (
+        <div className="p-8">
+          <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
+            <Lock size={24} className="text-red-400" /> Bloqueados
+          </h2>
+          <ModuloCarousel modulos={modulos} alunoLayout showLocked />
+        </div>
+      );
+    }
+
+    return null;
   }
 
-  // ... restante do componente inalterado ...
+  // Mobile drawer
+  const MobileDrawer = (
+    <div
+      className={`fixed inset-0 z-40 bg-black/60 transition-opacity duration-200 ${
+        mobileMenuOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+      }`}
+      onClick={() => setMobileMenuOpen(false)}
+    >
+      <div
+        className={`absolute left-0 top-0 h-full w-64 bg-neutral-950 p-6 flex flex-col gap-6 border-r border-neutral-800 shadow-lg transition-transform duration-200 ${
+          mobileMenuOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <button
+          className="self-end mb-4 text-neutral-400 hover:text-white"
+          onClick={() => setMobileMenuOpen(false)}
+          aria-label="Fechar menu"
+        >
+          <X size={28} />
+        </button>
+        <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
+          <Layers size={28} /> Aluno
+        </h2>
+        <nav className="flex flex-col gap-4">
+          {MENU_ITEMS.map((item) => {
+            const Icon = item.icon;
+            return (
+              <button
+                key={item.key}
+                className={`flex items-center gap-2 px-2 py-2 rounded text-left ${
+                  mobileTab === item.key ? "bg-neutral-800 text-white" : "text-neutral-300"
+                }`}
+                onClick={() => {
+                  setMobileTab(item.key);
+                  setMobileMenuOpen(false);
+                  setModuloSelecionado(null);
+                }}
+              >
+                <Icon size={20} /> {item.label}
+              </button>
+            );
+          })}
+        </nav>
+      </div>
+    </div>
+  );
+
+  // Desktop sidebar
+  const DesktopSidebar = (
+    <aside
+      className={`hidden md:flex flex-col bg-neutral-950 border-r border-neutral-800 transition-all ${
+        sidebarCollapsed ? "w-20" : "w-64"
+      }`}
+    >
+      <div className="flex items-center justify-between p-4">
+        {!sidebarCollapsed && (
+          <h2 className="text-xl font-bold flex items-center gap-2">
+            <Layers size={24} /> Aluno
+          </h2>
+        )}
+        <button
+          className="p-2 text-neutral-400 hover:text-white"
+          onClick={() => setSidebarCollapsed((prev) => !prev)}
+          aria-label="Toggle sidebar"
+        >
+          {sidebarCollapsed ? <ChevronRight size={24} /> : <ChevronLeft size={24} />}
+        </button>
+      </div>
+      <nav className="flex flex-col flex-1 p-2">
+        {MENU_ITEMS.map((item) => {
+          const Icon = item.icon;
+          return (
+            <button
+              key={item.key}
+              className={`flex items-center gap-2 w-full px-3 py-2 my-1 rounded text-sm font-medium transition-colors ${
+                mobileTab === item.key
+                  ? "bg-neutral-900 text-white"
+                  : "text-neutral-300 hover:bg-neutral-800 hover:text-white"
+              }`}
+              onClick={() => {
+                setMobileTab(item.key);
+                setModuloSelecionado(null);
+              }}
+            >
+              <Icon size={20} />
+              {!sidebarCollapsed && item.label}
+            </button>
+          );
+        })}
+      </nav>
+    </aside>
+  );
+
+  // Mobile footer
+  const MobileFooter = (
+    <nav className="fixed bottom-0 left-0 right-0 z-30 flex md:hidden bg-neutral-950 border-t border-neutral-800 h-16">
+      {MENU_ITEMS.map((item) => {
+        const Icon = item.icon;
+        return (
+          <button
+            key={item.key}
+            className={`flex-1 flex flex-col items-center justify-center gap-1 text-xs ${
+              mobileTab === item.key ? "text-green-400" : "text-neutral-300"
+            }`}
+            onClick={() => {
+              setMobileTab(item.key);
+              setModuloSelecionado(null);
+            }}
+          >
+            <Icon size={22} />
+            {item.label}
+          </button>
+        );
+      })}
+    </nav>
+  );
+
+  return (
+    <div className="min-h-screen h-screen w-screen flex flex-col md:flex-row bg-neutral-900 text-white overflow-hidden relative">
+      <button
+        className="md:hidden fixed top-4 left-4 z-50 bg-neutral-950 rounded-full p-2 border border-neutral-800 shadow-lg"
+        onClick={() => setMobileMenuOpen(true)}
+        aria-label="Abrir menu"
+      >
+        <Menu size={28} />
+      </button>
+      {MobileDrawer}
+      {DesktopSidebar}
+      <div className="flex-1 flex flex-col">
+        <main className="flex-1 overflow-auto">{renderMainContent()}</main>
+        {MobileFooter}
+      </div>
+    </div>
+  );
 }
