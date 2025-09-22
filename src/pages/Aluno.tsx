@@ -81,7 +81,7 @@ export default function Aluno() {
         return (
           <>
             <button
-              className="mb-6 mt-8 ml-8 flex items-center gap-2 text-neutral-400 hover:text-white transition"
+              className="relative z-60 mb-6 mt-8 ml-8 flex items-center gap-2 text-neutral-400 hover:text-white transition"
               onClick={() => setModuloSelecionado(null)}
             >
               <ArrowLeft size={20} /> Voltar para módulos
