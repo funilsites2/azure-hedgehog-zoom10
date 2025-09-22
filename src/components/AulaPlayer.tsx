@@ -108,7 +108,8 @@ export function AulaPlayer({
       <div className="w-full md:w-1/3 overflow-auto space-y-4 pr-4">
         {aulas.map((a) => {
           const blockedByDate = a.releaseDate ? now < a.releaseDate : false;
-          const blocked = a.bloqueado === true || blockedByDate;
+          const blockedSequential = a.bloqueado === true && !blockedByDate;
+          const blocked = blockedByDate || blockedSequential;
           return (
             <div
               key={a.id}
@@ -121,6 +122,11 @@ export function AulaPlayer({
               {blockedByDate && (
                 <div className="absolute top-0 inset-x-0 bg-yellow-500 text-black text-xs text-center py-1 z-10 rounded-t-lg">
                   Liberado em {new Date(a.releaseDate!).toLocaleString()}
+                </div>
+              )}
+              {blockedSequential && (
+                <div className="absolute top-0 inset-x-0 bg-red-500 text-white text-xs text-center py-1 z-10 rounded-t-lg">
+                  Assista a aula anterior para desbloquear
                 </div>
               )}
               <img
