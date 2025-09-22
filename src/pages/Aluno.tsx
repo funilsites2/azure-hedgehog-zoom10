@@ -51,21 +51,6 @@ export default function Aluno() {
     "modulos"
   );
 
-  // cálculo de próxima aula
-  const { nextMod, nextAula } = (() => {
-    let nm = null;
-    let na = null;
-    for (const m of modulos) {
-      const a = m.aulas.find((a) => !a.assistida);
-      if (a) {
-        nm = m;
-        na = a;
-        break;
-      }
-    }
-    return { nextMod: nm as typeof m, nextAula: na as typeof a };
-  })();
-
   // lista de todas as aulas não concluídas
   const partialAulas = modulos
     .flatMap((m) => m.aulas.map((a) => ({ modulo: m, aula: a })))
@@ -83,17 +68,151 @@ export default function Aluno() {
   const modulo = modulos.find((m) => m.id === moduloSelecionado);
 
   function renderMainContent() {
-    // ... (mesma implementação)
+    if (moduloSelecionado && modulo) {
+      return (
+        <AulaPlayer
+          modulo={modulo}
+          aulaSelecionadaId={aulaSelecionada ?? modulo.aulas[0].id}
+          onSelecionarAula={(id) => setAulaSelecionada(id)}
+          onMarcarAssistida={(id) => marcarAulaAssistida(moduloSelecionado, id)}
+        />
+      );
+    }
+    if (mobileTab === "modulos") {
+      return (
+        <div>
+          {linhas.map((linha) => {
+            const mods = modulos.filter((m) => m.linha === linha);
+            if (mods.length === 0) return null;
+            return (
+              <div key={linha} className="mb-8">
+                <h3 className="text-2xl font-semibold mb-4">{linha}</h3>
+                <ModuloCarousel
+                  modulos={mods}
+                  onModuloClick={(m) => {
+                    setModuloSelecionado(m.id);
+                    setAulaSelecionada(m.aulas[0]?.id ?? null);
+                  }}
+                  alunoLayout
+                />
+              </div>
+            );
+          })}
+        </div>
+      );
+    }
+    // demais abas (progresso, conquistas, bloqueados) podem ser implementadas aqui
+    return (
+      <div className="flex items-center justify-center h-full text-neutral-400">
+        <p>Em breve nesta seção ({mobileTab}).</p>
+      </div>
+    );
   }
 
-  // ... (MobileDrawer, DesktopSidebar, MobileFooter, etc.)
+  const MobileDrawer = (
+    <div
+      className={`fixed inset-0 z-40 bg-black/60 transition-opacity ${
+        mobileMenuOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+      }`}
+      onClick={() => setMobileMenuOpen(false)}
+    >
+      <div
+        className={`absolute left-0 top-0 h-full w-64 bg-neutral-950/90 backdrop-blur-sm p-6 flex flex-col gap-6 transition-transform ${
+          mobileMenuOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <button
+          className="self-end text-neutral-400 hover:text-white"
+          onClick={() => setMobileMenuOpen(false)}
+        >
+          <X size={28} />
+        </button>
+        <div className="flex flex-col items-center space-y-4">
+          {logoUrl && <img src={logoUrl} alt="Logo" className="w-12 h-12 object-contain" />}
+          <img
+            src={photoUrl || "/placeholder.svg"}
+            alt="Foto do aluno"
+            className="w-16 h-16 rounded-full border-2 border-green-500"
+          />
+          <h2 className="text-xl font-bold text-white">{name}</h2>
+        </div>
+        <nav className="flex flex-col mt-4 space-y-2">
+          {MENU_ITEMS.map((item) => (
+            <button
+              key={item.key}
+              onClick={() => {
+                setMobileTab(item.key);
+                setMobileMenuOpen(false);
+              }}
+              className={`flex items-center gap-3 px-4 py-3 w-full text-neutral-300 hover:bg-green-600 hover:text-white rounded ${
+                mobileTab === item.key ? "bg-green-700 text-white" : ""
+              }`}
+            >
+              <item.icon size={20} className="text-green-500" />
+              <span>{item.label}</span>
+            </button>
+          ))}
+        </nav>
+      </div>
+    </div>
+  );
+
+  const DesktopSidebar = (
+    <aside className="hidden md:flex flex-col items-center bg-neutral-950 p-6 space-y-6">
+      {logoUrl && <img src={logoUrl} alt="Logo" className="w-12 h-12 object-contain" />}
+      <img
+        src={photoUrl || "/placeholder.svg"}
+        alt="Foto do aluno"
+        className="w-16 h-16 rounded-full border-2 border-green-500"
+      />
+      <h2 className="text-xl font-bold text-white">{name}</h2>
+      <nav className="flex flex-col space-y-2 w-full">
+        {MENU_ITEMS.map((item) => (
+          <button
+            key={item.key}
+            onClick={() => setMobileTab(item.key)}
+            className={`flex items-center gap-3 px-4 py-3 w-full text-neutral-300 hover:bg-green-600 hover:text-white rounded ${
+              mobileTab === item.key ? "bg-green-700 text-white" : ""
+            }`}
+          >
+            <item.icon size={20} className="text-green-500" />
+            <span>{item.label}</span>
+          </button>
+        ))}
+      </nav>
+    </aside>
+  );
+
+  const MobileFooter = (
+    <nav className="fixed bottom-0 left-0 right-0 z-30 flex md:hidden bg-neutral-950 border-t border-neutral-800 h-16">
+      {MENU_ITEMS.map((item) => (
+        <button
+          key={item.key}
+          onClick={() => setMobileTab(item.key)}
+          className={`flex-1 flex flex-col items-center justify-center text-neutral-300 hover:bg-green-600 hover:text-white ${
+            mobileTab === item.key ? "bg-green-700 text-white" : ""
+          }`}
+        >
+          <item.icon size={22} className="text-green-500" />
+          <span className="text-xs">{item.label}</span>
+        </button>
+      ))}
+    </nav>
+  );
 
   return (
     <div className="min-h-screen w-screen flex flex-col md:flex-row bg-neutral-900 text-white relative">
-      {/* ... ícone de menu, Drawer e Sidebar ... */}
-
+      <button
+        className="md:hidden fixed top-4 left-4 z-20 bg-neutral-950 rounded-full p-2 border border-neutral-800 shadow-lg"
+        onClick={() => setMobileMenuOpen(true)}
+      >
+        <Menu size={28} className="text-green-500" />
+      </button>
+      {MobileDrawer}
+      {DesktopSidebar}
       <div className="flex-1 flex flex-col pt-12 md:pt-0">
-        {bannerUrl && moduloSelecionado === null && (
+        {bannerUrl && moduloSelecionado === null && mobileTab === "modulos" && (
           <div className="mx-4 my-4 flex justify-center">
             <div className="w-full max-w-[1600px] h-[400px] overflow-hidden rounded-lg">
               <img
@@ -105,8 +224,8 @@ export default function Aluno() {
           </div>
         )}
 
-        {/* seção Continuar Assistindo com todos os vídeos não concluídos */}
-        {moduloSelecionado === null && partialAulas.length > 0 && (
+        {/* seção Continuar Assistindo com todas as aulas não concluídas */}
+        {moduloSelecionado === null && mobileTab === "continuar" && partialAulas.length > 0 && (
           <div className="container mx-auto mb-8">
             <h3 className="text-2xl font-semibold mb-4">Continuar Assistindo</h3>
             <div className="flex overflow-x-auto gap-6 pb-2">
@@ -136,8 +255,8 @@ export default function Aluno() {
           {renderMainContent()}
         </div>
 
-        {/* rodapé móvel e Footer */}
-        { /* ... MobileFooter e <Footer /> ... */ }
+        {MobileFooter}
+        <Footer />
       </div>
     </div>
   );
