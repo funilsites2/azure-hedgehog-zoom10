@@ -208,6 +208,7 @@ export default function Aluno() {
               key={item.key}
               onClick={() => {
                 setMobileTab(item.key);
+                if (item.key === "modulos") setModuloSelecionado(null);
                 setMobileMenuOpen(false);
               }}
               className="flex items-center gap-3 px-4 py-3 text-neutral-300 hover:bg-green-600 hover:text-white rounded"
@@ -254,7 +255,10 @@ export default function Aluno() {
         {MENU_ITEMS.map((item) => (
           <button
             key={item.key}
-            onClick={() => setMobileTab(item.key)}
+            onClick={() => {
+              setMobileTab(item.key);
+              if (item.key === "modulos") setModuloSelecionado(null);
+            }}
             className={`flex items-center gap-3 px-4 py-3 w-full text-neutral-300 rounded ${
               mobileTab === item.key
                 ? "bg-green-600 text-white"
@@ -281,7 +285,10 @@ export default function Aluno() {
       {MENU_ITEMS.map((item) => (
         <button
           key={item.key}
-          onClick={() => setMobileTab(item.key)}
+          onClick={() => {
+            setMobileTab(item.key);
+            if (item.key === "modulos") setModuloSelecionado(null);
+          }}
           className={`flex-1 flex flex-col items-center justify-center text-neutral-300 ${
             mobileTab === item.key
               ? "bg-green-600 text-white"
@@ -318,7 +325,7 @@ export default function Aluno() {
             <img
               src={bannerUrl}
               alt="Banner Aluno"
-              class
+              className="w-full h-full object-cover"
             />
           </div>
         )}
@@ -329,5 +336,5 @@ export default function Aluno() {
         <Footer />
       </div>
     </div>
-);
+  );
 }
