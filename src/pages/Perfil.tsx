@@ -5,9 +5,9 @@ import {
   BarChart2,
   Award,
   Lock,
-  Menu,
-  X,
-  User,
+  Menu as MenuIcon,
+  X as CloseIcon,
+  User as UserIcon,
 } from "lucide-react";
 import { useBanner } from "@/context/BannerContext";
 import { useLogo } from "@/context/LogoContext";
@@ -30,12 +30,12 @@ const Perfil: React.FC = () => {
   const { logoUrl } = useLogo();
   const { photoUrl } = usePhoto();
   const { name, setName } = useUser();
+
   const [nomeAluno, setNomeAluno] = useState(name);
   const [currentPwd, setCurrentPwd] = useState("");
   const [newPwd, setNewPwd] = useState("");
   const [confirmPwd, setConfirmPwd] = useState("");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   const handleNameChange = () => {
     if (!nomeAluno.trim()) {
@@ -69,7 +69,7 @@ const Perfil: React.FC = () => {
       onClick={() => setMobileMenuOpen(false)}
     >
       <div
-        className={`absolute left-0 top-0 h-full w-64 bg-neutral-950/90 backdrop-blur-sm p-6 flex flex-col gap-4 border-r border-neutral-800 shadow-lg transition-transform ${
+        className={`absolute left-0 top-0 h-full w-64 bg-neutral-950/90 backdrop-blur-sm p-6 flex flex-col gap-6 transition-transform ${
           mobileMenuOpen ? "translate-x-0" : "-translate-x-full"
         }`}
         onClick={(e) => e.stopPropagation()}
@@ -78,30 +78,36 @@ const Perfil: React.FC = () => {
           className="self-end text-neutral-400 hover:text-white"
           onClick={() => setMobileMenuOpen(false)}
         >
-          <X size={28} className="text-green-500" />
+          <CloseIcon size={28} className="text-green-500" />
         </button>
-        <h2 className="text-2xl font-bold">{name}</h2>
-        <nav className="flex flex-col">
+        <div className="flex flex-col items-center space-y-4">
+          {logoUrl && <img src={logoUrl} alt="Logo" className="w-12 h-12 object-contain" />}
+          <img
+            src={photoUrl || "/placeholder.svg"}
+            alt="Foto do aluno"
+            className="w-16 h-16 rounded-full border-2 border-green-500"
+          />
+          <h2 className="text-xl font-bold text-white">{name}</h2>
+        </div>
+        <nav className="flex flex-col mt-4 space-y-2">
           {MENU_ITEMS.map((item) => (
             <Link
               key={item.key}
               to={item.to}
-              className="relative flex items-center gap-3 px-4 py-3 transition-colors hover:bg-green-600 hover:text-white text-neutral-300"
               onClick={() => setMobileMenuOpen(false)}
+              className="flex items-center gap-3 px-4 py-3 text-neutral-300 hover:bg-green-600 hover:text-white rounded"
             >
               <item.icon size={20} className="text-green-500" />
-              <span className="flex-1">{item.label}</span>
-              <div className="h-0.5 bg-green-500 w-full absolute left-0 bottom-0"></div>
+              <span>{item.label}</span>
             </Link>
           ))}
           <Link
             to="/perfil"
-            className="relative flex items-center gap-3 px-4 py-3 transition-colors hover:bg-green-600 hover:text-white text-neutral-300"
             onClick={() => setMobileMenuOpen(false)}
+            className="flex items-center gap-3 px-4 py-3 text-neutral-300 hover:bg-green-600 hover:text-white rounded"
           >
-            <User size={20} className="text-green-500" />
-            <span className="flex-1">Perfil</span>
-            <div className="h-0.5 bg-green-500 w-full absolute left-0 bottom-0"></div>
+            <UserIcon size={20} className="text-green-500" />
+            <span>Perfil</span>
           </Link>
         </nav>
       </div>
@@ -109,42 +115,31 @@ const Perfil: React.FC = () => {
   );
 
   const DesktopSidebar = (
-    <aside
-      className={`hidden md:flex flex-col bg-neutral-950/80 backdrop-blur-sm border-r border-neutral-800 transition-all ${
-        sidebarCollapsed ? "w-20" : "w-64"
-      }`}
-    >
-      <div className="p-4 flex flex-col items-center space-y-4">
-        {logoUrl && <img src={logoUrl} alt="Logo" className="w-12 h-12 object-contain" />}
-        <img
-          src={photoUrl || "/placeholder.svg"}
-          alt="Foto do aluno"
-          className="w-16 h-16 rounded-full border-2 border-green-500"
-        />
-        {!sidebarCollapsed && (
-          <div className="text-green-500 font-semibold">{name}</div>
-        )}
-      </div>
-      <nav className="flex flex-col flex-1">
+    <aside className="hidden md:flex flex-col items-center bg-neutral-950 p-6 space-y-6">
+      {logoUrl && <img src={logoUrl} alt="Logo" className="w-12 h-12 object-contain" />}
+      <img
+        src={photoUrl || "/placeholder.svg"}
+        alt="Foto do aluno"
+        className="w-16 h-16 rounded-full border-2 border-green-500"
+      />
+      <h2 className="text-xl font-bold text-white">{name}</h2>
+      <nav className="flex flex-col space-y-2 w-full">
         {MENU_ITEMS.map((item) => (
           <Link
             key={item.key}
             to={item.to}
-            className="relative flex items-center gap-3 px-4 py-3 transition-colors hover:bg-green-600 hover:text-white text-neutral-300"
-            onClick={() => setSidebarCollapsed(false)}
+            className="flex items-center gap-3 px-4 py-3 w-full text-neutral-300 hover:bg-green-600 hover:text-white rounded"
           >
             <item.icon size={20} className="text-green-500" />
-            {!sidebarCollapsed && <span>{item.label}</span>}
-            <div className="h-0.5 bg-green-500 w-full absolute left-0 bottom-0"></div>
+            <span>{item.label}</span>
           </Link>
         ))}
         <Link
           to="/perfil"
-          className="relative flex items-center gap-3 px-4 py-3 transition-colors hover:bg-green-600 hover:text-white text-neutral-300"
+          className="flex items-center gap-3 px-4 py-3 w-full text-neutral-300 hover:bg-green-600 hover:text-white rounded"
         >
-          <User size={20} className="text-green-500" />
-          {!sidebarCollapsed && <span>Perfil</span>}
-          <div className="h-0.5 bg-green-500 w-full absolute left-0 bottom-0"></div>
+          <UserIcon size={20} className="text-green-500" />
+          <span>Perfil</span>
         </Link>
       </nav>
     </aside>
@@ -156,20 +151,18 @@ const Perfil: React.FC = () => {
         <Link
           key={item.key}
           to={item.to}
-          className="relative flex-1 flex flex-col items-center justify-center transition-colors hover:bg-green-600 hover:text-white text-neutral-300"
+          className="flex-1 flex flex-col items-center justify-center text-neutral-300 hover:bg-green-600 hover:text-white"
         >
           <item.icon size={22} className="text-green-500" />
           <span className="text-xs">{item.label}</span>
-          <div className="h-0.5 bg-green-500 w-full absolute left-0 bottom-0"></div>
         </Link>
       ))}
       <Link
         to="/perfil"
-        className="relative flex-1 flex flex-col items-center justify-center transition-colors hover:bg-green-600 hover:text-white text-neutral-300"
+        className="flex-1 flex flex-col items-center justify-center text-neutral-300 hover:bg-green-600 hover:text-white"
       >
-        <User size={22} className="text-green-500" />
+        <UserIcon size={22} className="text-green-500" />
         <span className="text-xs">Perfil</span>
-        <div className="h-0.5 bg-green-500 w-full absolute left-0 bottom-0"></div>
       </Link>
     </nav>
   );
@@ -180,7 +173,7 @@ const Perfil: React.FC = () => {
         className="md:hidden fixed top-4 left-4 z-20 bg-neutral-950 rounded-full p-2 border border-neutral-800 shadow-lg"
         onClick={() => setMobileMenuOpen(true)}
       >
-        <Menu size={28} className="text-green-500" />
+        <MenuIcon size={28} className="text-green-500" />
       </button>
       {MobileDrawer}
       {DesktopSidebar}
@@ -243,7 +236,7 @@ const Perfil: React.FC = () => {
         <Footer />
       </div>
     </div>
-);
+  );
 };
 
 export default Perfil;
