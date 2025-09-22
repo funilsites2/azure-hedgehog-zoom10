@@ -15,6 +15,7 @@ type Modulo = {
   linha: string;
   aulas: Aula[];
   bloqueado?: boolean;
+  releaseDate?: number; // timestamp de liberação
 };
 
 type ModulosContextType = {
@@ -23,7 +24,8 @@ type ModulosContextType = {
     nome: string,
     capa: string,
     aulas?: Omit<Aula, "id" | "assistida" | "bloqueado">[],
-    linha?: string
+    linha?: string,
+    delayDays?: number
   ) => void;
   adicionarAula: (moduloId: number, titulo: string, videoUrl: string) => void;
   marcarAulaAssistida: (moduloId: number, aulaId: number) => void;
@@ -32,7 +34,8 @@ type ModulosContextType = {
     novoNome: string,
     novaCapa: string,
     novasAulas: Omit<Aula, "id" | "assistida" | "bloqueado">[],
-    linha?: string
+    linha?: string,
+    delayDays?: number
   ) => void;
   setModuloBloqueado: (moduloId: number, bloqueado: boolean) => void;
   setAulaBloqueada: (
@@ -51,13 +54,14 @@ const getInitialModulos = (): Modulo[] => {
       return JSON.parse(data);
     } catch {}
   }
+  // módulos iniciais disponíveis imediatamente
+  const now = Date.now();
   return [
     {
       id: 1,
       nome: "Módulo 1",
       capa: "https://placehold.co/400x200/222/fff?text=Módulo+1",
       linha: "Linha A",
-      bloqueado: false,
       aulas: [
         {
           id: 1,
@@ -74,13 +78,13 @@ const getInitialModulos = (): Modulo[] => {
           bloqueado: false,
         },
       ],
+      releaseDate: now,
     },
     {
       id: 2,
       nome: "Módulo 2",
       capa: "https://placehold.co/400x200/333/fff?text=Módulo+2",
       linha: "Linha B",
-      bloqueado: false,
       aulas: [
         {
           id: 3,
@@ -90,19 +94,23 @@ const getInitialModulos = (): Modulo[] => {
           bloqueado: false,
         },
       ],
+      releaseDate: now,
     },
   ];
 };
 
-const initializeBlocks = (mods: Modulo[]): Modulo[] =>
-  mods.map((m) => ({
-    ...m,
-    aulas: m.aulas.map((a, i, arr) => {
+const initializeBlocks = (mods: Modulo[]): Modulo[] => {
+  const now = Date.now();
+  return mods.map((m) => {
+    const moduleBlocked = m.releaseDate ? now < m.releaseDate : false;
+    const aulas = m.aulas.map((a, i, arr) => {
       if (i === 0) return { ...a, bloqueado: false };
       const prev = arr[i - 1];
       return { ...a, bloqueado: !prev.assistida };
-    }),
-  }));
+    });
+    return { ...m, bloqueado: moduleBlocked, aulas };
+  });
+};
 
 const ModulosContext = createContext<ModulosContextType | undefined>(
   undefined
@@ -123,9 +131,12 @@ export const ModulosProvider: React.FC<{ children: React.ReactNode }> = ({
     nome: string,
     capa: string,
     aulas: Omit<Aula, "id" | "assistida" | "bloqueado">[] = [],
-    linha: string = ""
+    linha: string = "",
+    delayDays: number = 0
   ) => {
-    const novoId = Date.now();
+    const now = Date.now();
+    const releaseDate = now + delayDays * 24 * 60 * 60 * 1000;
+    const novoId = now;
     setModulos((prev) =>
       initializeBlocks([
         ...prev,
@@ -134,7 +145,6 @@ export const ModulosProvider: React.FC<{ children: React.ReactNode }> = ({
           nome,
           capa,
           linha,
-          bloqueado: false,
           aulas: aulas.map((a, i) => ({
             id: novoId + i + 1,
             titulo: a.titulo,
@@ -142,6 +152,7 @@ export const ModulosProvider: React.FC<{ children: React.ReactNode }> = ({
             assistida: false,
             bloqueado: i !== 0,
           })),
+          releaseDate,
         },
       ])
     );
@@ -196,8 +207,11 @@ export const ModulosProvider: React.FC<{ children: React.ReactNode }> = ({
     novoNome: string,
     novaCapa: string,
     novasAulas: Omit<Aula, "id" | "assistida" | "bloqueado">[] = [],
-    linha: string = ""
+    linha: string = "",
+    delayDays: number = 0
   ) => {
+    const now = Date.now();
+    const releaseDate = now + delayDays * 24 * 60 * 60 * 1000;
     setModulos((prev) =>
       initializeBlocks(
         prev.map((m) =>
@@ -207,8 +221,9 @@ export const ModulosProvider: React.FC<{ children: React.ReactNode }> = ({
                 nome: novoNome,
                 capa: novaCapa,
                 linha,
+                releaseDate,
                 aulas: novasAulas.map((a, idx) => ({
-                  id: m.aulas[idx]?.id ?? Date.now() + idx + 1,
+                  id: m.aulas[idx]?.id ?? now + idx + 1,
                   titulo: a.titulo,
                   videoUrl: a.videoUrl,
                   assistida: m.aulas[idx]?.assistida ?? false,

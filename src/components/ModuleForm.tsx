@@ -19,7 +19,14 @@ interface ModuleFormProps {
   initialCapa?: string;
   initialLinha?: string;
   initialAulas?: AulaInput[];
-  onSubmit: (nome: string, capa: string, aulas: AulaInput[], linha: string) => void;
+  initialDelayDays?: number;
+  onSubmit: (
+    nome: string,
+    capa: string,
+    aulas: AulaInput[],
+    linha: string,
+    delayDays: number
+  ) => void;
   onCancel?: () => void;
   submitLabel?: string;
 }
@@ -29,6 +36,7 @@ export const ModuleForm: React.FC<ModuleFormProps> = ({
   initialCapa = "",
   initialLinha = "",
   initialAulas = [],
+  initialDelayDays = 0,
   onSubmit,
   onCancel,
   submitLabel = "Salvar",
@@ -44,6 +52,7 @@ export const ModuleForm: React.FC<ModuleFormProps> = ({
   const [aulas, setAulas] = useState<AulaInput[]>(initialAulas);
   const [novaAula, setNovaAula] = useState<AulaInput>({ titulo: "", videoUrl: "" });
   const [isCreatingNewLinha, setIsCreatingNewLinha] = useState(false);
+  const [delayDays, setDelayDays] = useState<number>(initialDelayDays);
 
   const addAula = () => {
     if (!novaAula.titulo || !novaAula.videoUrl) return;
@@ -57,11 +66,12 @@ export const ModuleForm: React.FC<ModuleFormProps> = ({
 
   const handleSubmit = () => {
     if (!nome.trim() || !capa.trim() || !linha.trim()) return;
-    onSubmit(nome, capa, aulas, linha);
+    onSubmit(nome, capa, aulas, linha, delayDays);
     setNome("");
     setCapa("");
     setLinha("");
     setAulas([]);
+    setDelayDays(0);
     setIsCreatingNewLinha(false);
   };
 
@@ -113,6 +123,14 @@ export const ModuleForm: React.FC<ModuleFormProps> = ({
           onChange={(e) => setLinha(e.target.value)}
         />
       )}
+      <input
+        type="number"
+        min={0}
+        className="w-full p-2 rounded bg-neutral-800 text-white"
+        placeholder="Dias para liberar o módulo"
+        value={delayDays}
+        onChange={(e) => setDelayDays(Number(e.target.value))}
+      />
       <div className="space-y-2">
         <div className="flex gap-2">
           <input
