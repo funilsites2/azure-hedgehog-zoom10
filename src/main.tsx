@@ -5,16 +5,13 @@ import { BannerProvider } from "@/context/BannerContext";
 import { ModulosProvider } from "@/context/ModulosContext";
 import { LogoProvider } from "@/context/LogoContext";
 import { PhotoProvider } from "@/context/PhotoContext";
-import { StudentProvider } from "@/context/StudentContext";
 
 createRoot(document.getElementById("root")!).render(
   <LogoProvider>
     <BannerProvider>
       <ModulosProvider>
         <PhotoProvider>
-          <StudentProvider>
-            <App />
-          </StudentProvider>
+          <App />
         </PhotoProvider>
       </ModulosProvider>
     </BannerProvider>

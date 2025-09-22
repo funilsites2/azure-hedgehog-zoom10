@@ -22,7 +22,6 @@ import { ModuloCarousel } from "@/components/ModuloCarousel";
 import { useBanner } from "@/context/BannerContext";
 import { useLogo } from "@/context/LogoContext";
 import { usePhoto } from "@/context/PhotoContext";
-import { useStudent } from "@/context/StudentContext";
 import { Footer } from "@/components/Footer";
 
 const MENU_ITEMS = [
@@ -37,11 +36,12 @@ export default function Aluno() {
   const { bannerUrl } = useBanner();
   const { logoUrl } = useLogo();
   const { photoUrl } = usePhoto();
-  const { name } = useStudent();
   const [moduloSelecionado, setModuloSelecionado] = useState<number | null>(null);
   const [aulaSelecionada, setAulaSelecionada] = useState<number | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [mobileTab, setMobileTab] = useState<typeof MENU_ITEMS[number]["key"]>("modulos");
+  const [mobileTab, setMobileTab] = useState<typeof MENU_ITEMS[number]["key"]>(
+    "modulos"
+  );
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   const linhas = Array.from(new Set(modulos.map((m) => m.linha)));
@@ -178,7 +178,7 @@ export default function Aluno() {
           <X size={28} className="text-green-500" />
         </button>
         <h2 className="text-2xl font-bold flex items-center gap-2">
-          <Layers size={28} className="text-green-500" /> {name || "Aluno"}
+          <Layers size={28} className="text-green-500" /> Aluno
         </h2>
         <nav className="flex flex-col">
           {MENU_ITEMS.map((item) => (
@@ -227,7 +227,7 @@ export default function Aluno() {
       <div className="flex items-center justify-between p-4">
         {!sidebarCollapsed && (
           <h2 className="text-xl font-bold flex items-center gap-2">
-            <Layers size={24} className="text-green-500" /> {name || "Aluno"}
+            <Layers size={24} className="text-green-500" /> Aluno
           </h2>
         )}
         <button
@@ -246,7 +246,11 @@ export default function Aluno() {
           <Link
             key={item.key}
             to={item.key === "modulos" ? "/aluno" : "#"}
-            className="relative flex items-center gap-3 px-4 py-3 transition-colors hover:bg-green-600 hover=text-white text-neutral-300"
+            className="relative flex items-center gap-3 px-4 py-3 transition-colors hover:bg-green-600 hover:text-white text-neutral-300"
+            onClick={() => {
+              setMobileTab(item.key);
+              setModuloSelecionado(null);
+            }}
           >
             <item.icon size={20} className="text-green-500" />
             {!sidebarCollapsed && <span>{item.label}</span>}
@@ -255,7 +259,7 @@ export default function Aluno() {
         ))}
         <Link
           to="/perfil"
-          className="relative flex items-center gap-3 px-4 py-3 transition-colors hover:bg-green-600 hover=text-white text-neutral-300"
+          className="relative flex items-center gap-3 px-4 py-3 transition-colors hover:bg-green-600 hover:text-white text-neutral-300"
         >
           <User size={20} className="text-green-500" />
           {!sidebarCollapsed && <span>Perfil</span>}
@@ -271,7 +275,7 @@ export default function Aluno() {
         <Link
           key={item.key}
           to={item.key === "modulos" ? "/aluno" : "#"}
-          className="relative flex-1 flex flex-col items-center justify-center transition-colors hover:bg-green-600 hover=text-white text-neutral-300"
+          className="relative flex-1 flex flex-col items-center justify-center transition-colors hover:bg-green-600 hover:text-white text-neutral-300"
           onClick={() => setMobileTab(item.key)}
         >
           <item.icon size={22} className="text-green-500" />
@@ -281,7 +285,7 @@ export default function Aluno() {
       ))}
       <Link
         to="/perfil"
-        className="relative flex-1 flex flex-col items-center justify-center transition-colors hover:bg-green-600 hover=text-white text-neutral-300"
+        className="relative flex-1 flex flex-col items-center justify-center transition-colors hover:bg-green-600 hover:text-white text-neutral-300"
       >
         <User size={22} className="text-green-500" />
         <span className="text-xs">Perfil</span>
@@ -317,5 +321,5 @@ export default function Aluno() {
         <Footer />
       </div>
     </div>
-);
+  );
 }
