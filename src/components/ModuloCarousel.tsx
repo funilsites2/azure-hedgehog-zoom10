@@ -19,6 +19,7 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
   alunoLayout = false,
   showLocked,
 }) => {
+  // Determine which modules to show
   const filteredModulos =
     showLocked === true
       ? modulos.filter((m) => m.bloqueado)
@@ -26,6 +27,7 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
       ? modulos.filter((m) => !m.bloqueado)
       : modulos;
 
+  // Embla carousel setup for mobile
   const [emblaRef, emblaApi] = useEmblaCarousel({
     slidesToScroll: 1,
     containScroll: "trimSnaps",
@@ -52,6 +54,7 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
     };
   }, [emblaApi]);
 
+  // Mobile card sizing
   const mobileCardWidth = alunoLayout
     ? "w-[70vw] max-w-[320px] min-w-[220px]"
     : "min-w-1/2 max-w-[90vw]";
@@ -59,6 +62,7 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
     ? { flex: "0 0 66%", marginRight: "2vw" }
     : { flex: "0 0 50%" };
 
+  // Desktop grid columns
   const desktopGridCols = alunoLayout
     ? "md:grid-cols-3 lg:grid-cols-5"
     : "md:grid-cols-2 lg:grid-cols-3";
@@ -71,22 +75,36 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
           <div className="overflow-hidden" ref={emblaRef}>
             <div className="flex">
               {filteredModulos.map((modulo) => (
-                <div key={modulo.id} className={`${mobileCardWidth} flex-shrink-0 px-2`} style={mobilePeek}>
-                  {/* Make this a group and overflow-visible so the preview can pop out */}
+                <div
+                  key={modulo.id}
+                  className={`${mobileCardWidth} flex-shrink-0 px-2`}
+                  style={mobilePeek}
+                >
                   <div
-                    className={`group bg-neutral-800 rounded-lg p-4 shadow-lg flex flex-col h-full relative transition-transform transform hover:scale-105 overflow-visible ${
+                    className={`bg-neutral-800 rounded-lg p-4 shadow-lg flex flex-col h-full cursor-pointer relative transition-transform transform hover:scale-105 ${
                       modulo.bloqueado ? "grayscale opacity-70 cursor-not-allowed" : ""
                     }`}
-                    onClick={!modulo.bloqueado && onModuloClick ? () => onModuloClick(modulo) : undefined}
+                    onClick={
+                      !modulo.bloqueado && onModuloClick
+                        ? () => onModuloClick(modulo)
+                        : undefined
+                    }
                     aria-disabled={modulo.bloqueado ? true : undefined}
                   >
                     {modulo.bloqueado && (
-                      <Lock size={28} className="absolute top-2 right-2 text-red-500 bg-neutral-900 rounded-full p-1" />
+                      <Lock
+                        size={28}
+                        className="absolute top-2 right-2 text-red-500 bg-neutral-900 rounded-full p-1"
+                      />
                     )}
                     <div className="mb-2 flex flex-col items-center w-full">
-                      {/* Allow HoverPreview to overflow the card (pop-out) */}
-                      <div className="w-full aspect-[3/4] rounded mb-2 overflow-visible">
-                        <HoverPreview videoUrl={modulo.aulas[0]?.videoUrl} imageSrc={modulo.capa} alt={modulo.nome} className="w-full h-full" />
+                      <div className="w-full aspect-[3/4] rounded overflow-hidden mb-2">
+                        <HoverPreview
+                          videoUrl={modulo.aulas[0]?.videoUrl}
+                          imageSrc={modulo.capa}
+                          alt={modulo.nome}
+                          className="w-full h-full"
+                        />
                       </div>
                       <h2 className="text-base font-semibold text-center">{modulo.nome}</h2>
                     </div>
@@ -94,7 +112,9 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
                       {modulo.aulas.map((aula) => (
                         <li key={aula.id} className="flex items-center gap-2 mb-1 text-xs">
                           <Video size={16} /> {aula.titulo}
-                          {aula.bloqueado && <Lock size={12} className="ml-1 text-red-500" />}
+                          {aula.bloqueado && (
+                            <Lock size={12} className="ml-1 text-red-500" />
+                          )}
                         </li>
                       ))}
                     </ul>
@@ -103,7 +123,7 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
               ))}
             </div>
           </div>
-
+          {/* Nav buttons */}
           <button
             className="absolute left-0 top-1/2 -translate-y-1/2 bg-neutral-900/80 rounded-full p-2 z-10"
             onClick={() => emblaApi && emblaApi.scrollPrev()}
@@ -124,24 +144,35 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
           </button>
         </div>
       </div>
-
       {/* Desktop grid */}
       <div className={`hidden md:grid grid-cols-1 ${desktopGridCols} gap-4`}>
         {filteredModulos.map((modulo) => (
           <div
             key={modulo.id}
-            className={`group bg-neutral-800 rounded-lg p-3 shadow-lg flex flex-col h-full relative transition-transform transform hover:scale-105 overflow-visible ${
+            className={`bg-neutral-800 rounded-lg p-3 shadow-lg flex flex-col h-full cursor-pointer relative transition-transform transform hover:scale-105 ${
               modulo.bloqueado ? "grayscale opacity-70 cursor-not-allowed" : ""
             }`}
-            onClick={!modulo.bloqueado && onModuloClick ? () => onModuloClick(modulo) : undefined}
+            onClick={
+              !modulo.bloqueado && onModuloClick
+                ? () => onModuloClick(modulo)
+                : undefined
+            }
             aria-disabled={modulo.bloqueado ? true : undefined}
           >
             {modulo.bloqueado && (
-              <Lock size={28} className="absolute top-2 right-2 text-red-500 bg-neutral-900 rounded-full p-1" />
+              <Lock
+                size={28}
+                className="absolute top-2 right-2 text-red-500 bg-neutral-900 rounded-full p-1"
+              />
             )}
             <div className="mb-2 flex flex-col items-center w-full">
-              <div className="w-full aspect-[3/4] rounded mb-2 overflow-visible">
-                <HoverPreview videoUrl={modulo.aulas[0]?.videoUrl} imageSrc={modulo.capa} alt={modulo.nome} className="w-full h-full" />
+              <div className="w-full aspect-[3/4] rounded overflow-hidden mb-2">
+                <HoverPreview
+                  videoUrl={modulo.aulas[0]?.videoUrl}
+                  imageSrc={modulo.capa}
+                  alt={modulo.nome}
+                  className="w-full h-full"
+                />
               </div>
               <h2 className="text-base font-semibold text-center">{modulo.nome}</h2>
             </div>
@@ -149,7 +180,9 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
               {modulo.aulas.map((aula) => (
                 <li key={aula.id} className="flex items-center gap-2 mb-1 text-xs">
                   <Video size={16} /> {aula.titulo}
-                  {aula.bloqueado && <Lock size={12} className="ml-1 text-red-500" />}
+                  {aula.bloqueado && (
+                    <Lock size={12} className="ml-1 text-red-500" />
+                  )}
                 </li>
               ))}
             </ul>
