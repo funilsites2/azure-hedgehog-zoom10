@@ -195,6 +195,12 @@ export default function Aluno() {
             className="w-16 h-16 rounded-full border-2 border-green-500"
           />
           <h2 className="text-xl font-bold text-white">{name}</h2>
+          <div className="w-full">
+            <Progress value={progresso} className="h-2 bg-neutral-800 rounded" />
+            <div className="text-xs text-neutral-300 mt-1">
+              {progresso}% concluído
+            </div>
+          </div>
         </div>
         <nav className="flex flex-col mt-4 space-y-2">
           {MENU_ITEMS.map((item) => (
@@ -238,6 +244,12 @@ export default function Aluno() {
         className="w-16 h-16 rounded-full border-2 border-green-500"
       />
       <h2 className="text-xl font-bold text-white">{name}</h2>
+      <div className="w-full">
+        <Progress value={progresso} className="h-2 bg-neutral-800 rounded" />
+        <div className="text-xs text-neutral-300 mt-1">
+          {progresso}% concluído
+        </div>
+      </div>
       <nav className="flex flex-col space-y-2 w-full">
         {MENU_ITEMS.map((item) => (
           <button
@@ -306,7 +318,7 @@ export default function Aluno() {
             <img
               src={bannerUrl}
               alt="Banner Aluno"
-              className="w-full h-full object-cover"
+              class
             />
           </div>
         )}
