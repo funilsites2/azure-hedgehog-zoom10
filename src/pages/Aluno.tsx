@@ -313,7 +313,7 @@ export default function Aluno() {
       <div className="flex-1 flex flex-col pt-12 md:pt-0">
         <main className="flex-1 overflow-auto">
           {bannerUrl && (
-            <div className="mb-6 mx-auto w-full max-w-[1600px] h-[600px] overflow-hidden rounded-lg">
+            <div className="mb-6 mx-auto w-full max-w-[1600px] h-[400px] overflow-hidden rounded-lg">
               <img
                 src={bannerUrl}
                 alt="Banner Aluno"
