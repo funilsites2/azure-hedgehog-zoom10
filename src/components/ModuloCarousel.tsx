@@ -79,7 +79,7 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
                   style={mobilePeek}
                 >
                   <div
-                    className={`bg-neutral-800 rounded-lg p-4 shadow-lg flex flex-col h-full cursor-pointer relative ${
+                    className={`bg-neutral-800 rounded-lg p-4 shadow-lg flex flex-col h-full cursor-pointer relative transition-transform transform hover:scale-105 ${
                       modulo.bloqueado ? "grayscale opacity-70 pointer-events-none" : ""
                     }`}
                     onClick={
@@ -147,7 +147,7 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
         {filteredModulos.map((modulo) => (
           <div
             key={modulo.id}
-            className={`bg-neutral-800 rounded-lg p-3 shadow-lg flex flex-col h-full cursor-pointer relative ${
+            className={`bg-neutral-800 rounded-lg p-3 shadow-lg flex flex-col h-full cursor-pointer relative transition-transform transform hover:scale-105 ${
               modulo.bloqueado ? "grayscale opacity-70 pointer-events-none" : ""
             }`}
             onClick={
@@ -188,5 +188,4 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
         ))}
       </div>
     </div>
-  );
-};
+);
