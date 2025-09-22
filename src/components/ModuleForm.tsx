@@ -10,7 +10,7 @@ import {
   SelectContent,
   SelectItem,
 } from "@/components/ui/select";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2, Edit } from "lucide-react";
 
 type AulaInput = { titulo: string; videoUrl: string };
 
@@ -51,17 +51,34 @@ export const ModuleForm: React.FC<ModuleFormProps> = ({
   const [linha, setLinha] = useState(initialLinha);
   const [aulas, setAulas] = useState<AulaInput[]>(initialAulas);
   const [novaAula, setNovaAula] = useState<AulaInput>({ titulo: "", videoUrl: "" });
+  const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [isCreatingNewLinha, setIsCreatingNewLinha] = useState(false);
   const [delayDays, setDelayDays] = useState<number>(initialDelayDays);
 
-  const addAula = () => {
+  const handleAddAula = () => {
     if (!novaAula.titulo || !novaAula.videoUrl) return;
-    setAulas((prev) => [...prev, novaAula]);
+    if (editingIndex !== null) {
+      setAulas((prev) =>
+        prev.map((a, i) => (i === editingIndex ? novaAula : a))
+      );
+      setEditingIndex(null);
+    } else {
+      setAulas((prev) => [...prev, novaAula]);
+    }
     setNovaAula({ titulo: "", videoUrl: "" });
   };
 
   const removeAula = (idx: number) => {
     setAulas((prev) => prev.filter((_, i) => i !== idx));
+    if (editingIndex === idx) {
+      setEditingIndex(null);
+      setNovaAula({ titulo: "", videoUrl: "" });
+    }
+  };
+
+  const editAula = (idx: number) => {
+    setNovaAula(aulas[idx]);
+    setEditingIndex(idx);
   };
 
   const handleSubmit = () => {
@@ -73,6 +90,8 @@ export const ModuleForm: React.FC<ModuleFormProps> = ({
     setAulas([]);
     setDelayDays(0);
     setIsCreatingNewLinha(false);
+    setEditingIndex(null);
+    setNovaAula({ titulo: "", videoUrl: "" });
   };
 
   return (
@@ -133,17 +152,23 @@ export const ModuleForm: React.FC<ModuleFormProps> = ({
       />
       <div className="space-y-2">
         <div className="flex gap-2">
-          <Button type="button" onClick={addAula}>
+          <Button type="button" onClick={handleAddAula}>
             <Plus size={16} />
+            {editingIndex !== null ? "Atualizar Aula" : ""}
           </Button>
         </div>
         <ul className="space-y-1">
           {aulas.map((a, idx) => (
             <li key={idx} className="flex items-center justify-between bg-neutral-800 p-2 rounded">
               <span className="truncate">{a.titulo}</span>
-              <button onClick={() => removeAula(idx)}>
-                <Trash2 className="text-red-400" size={16} />
-              </button>
+              <div className="flex items-center gap-2">
+                <button onClick={() => editAula(idx)}>
+                  <Edit className="text-blue-400" size={16} />
+                </button>
+                <button onClick={() => removeAula(idx)}>
+                  <Trash2 className="text-red-400" size={16} />
+                </button>
+              </div>
             </li>
           ))}
         </ul>
