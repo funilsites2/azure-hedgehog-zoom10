@@ -163,27 +163,48 @@ export default function Admin() {
                 const m = modulos.find((mod) => mod.id === editandoId);
                 if (!m) return null;
                 return (
-                  <ModuleForm
-                    initialNome={m.nome}
-                    initialCapa={m.capa}
-                    initialLinha={m.linha}
-                    initialAulas={m.aulas.map((a) => ({
-                      titulo: a.titulo,
-                      videoUrl: a.videoUrl,
-                    }))}
-                    initialDelayDays={m.releaseDate
-                      ? Math.max(
-                          0,
-                          Math.round(
-                            (m.releaseDate - Date.now()) /
-                              (1000 * 60 * 60 * 24)
+                  <>
+                    <ModuleForm
+                      initialNome={m.nome}
+                      initialCapa={m.capa}
+                      initialLinha={m.linha}
+                      initialAulas={m.aulas.map((a) => ({
+                        titulo: a.titulo,
+                        videoUrl: a.videoUrl,
+                      }))}
+                      initialDelayDays={m.releaseDate
+                        ? Math.max(
+                            0,
+                            Math.round(
+                              (m.releaseDate - Date.now()) /
+                                (1000 * 60 * 60 * 24)
+                            )
                           )
-                        )
-                      : 0}
-                    onSubmit={handleEditSubmit}
-                    onCancel={cancelarEdicao}
-                    submitLabel="Atualizar Módulo"
-                  />
+                        : 0}
+                      onSubmit={handleEditSubmit}
+                      onCancel={cancelarEdicao}
+                      submitLabel="Atualizar Módulo"
+                    />
+                    <div className="mt-6">
+                      <h3 className="font-semibold mb-2">Bloqueio de Aulas</h3>
+                      {m.aulas.map((a) => (
+                        <div
+                          key={a.id}
+                          className="flex items-center justify-between mb-2"
+                        >
+                          <span>{a.titulo}</span>
+                          <Button
+                            variant={a.bloqueado ? "destructive" : "outline"}
+                            onClick={() =>
+                              setAulaBloqueada(m.id, a.id, !a.bloqueado)
+                            }
+                          >
+                            {a.bloqueado ? "Desbloquear" : "Bloquear"}
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  </>
                 );
               })()}
             </div>
