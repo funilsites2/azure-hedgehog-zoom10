@@ -17,6 +17,12 @@ type Modulo = {
   bloqueado?: boolean;
 };
 
+type Banner = {
+  id: string;
+  imageUrl: string;
+  linkUrl?: string;
+};
+
 type ModulosContextType = {
   modulos: Modulo[];
   adicionarModulo: (
@@ -40,9 +46,13 @@ type ModulosContextType = {
     aulaId: number,
     bloqueado: boolean
   ) => void;
+  banners: Banner[];
+  adicionarBanner: (imageUrl: string, linkUrl?: string) => void;
+  removerBanner: (id: string) => void;
 };
 
 const STORAGE_KEY = "modulos_area_membros";
+const BANNERS_KEY = "banners_area_aluno";
 
 const getInitialModulos = (): Modulo[] => {
   const data = localStorage.getItem(STORAGE_KEY);
@@ -51,7 +61,6 @@ const getInitialModulos = (): Modulo[] => {
       return JSON.parse(data);
     } catch {}
   }
-  // Módulos de exemplo iniciais
   return [
     {
       id: 1,
@@ -95,6 +104,16 @@ const getInitialModulos = (): Modulo[] => {
   ];
 };
 
+const getInitialBanners = (): Banner[] => {
+  const data = localStorage.getItem(BANNERS_KEY);
+  if (data) {
+    try {
+      return JSON.parse(data);
+    } catch {}
+  }
+  return [];
+};
+
 const ModulosContext = createContext<ModulosContextType | undefined>(
   undefined
 );
@@ -103,10 +122,15 @@ export const ModulosProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const [modulos, setModulos] = useState<Modulo[]>(getInitialModulos);
+  const [banners, setBanners] = useState<Banner[]>(getInitialBanners);
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(modulos));
   }, [modulos]);
+
+  useEffect(() => {
+    localStorage.setItem(BANNERS_KEY, JSON.stringify(banners));
+  }, [banners]);
 
   const adicionarModulo = (
     nome: string,
@@ -228,6 +252,15 @@ export const ModulosProvider: React.FC<{ children: React.ReactNode }> = ({
     );
   };
 
+  const adicionarBanner = (imageUrl: string, linkUrl?: string) => {
+    const id = Date.now().toString();
+    setBanners((prev) => [...prev, { id, imageUrl, linkUrl }]);
+  };
+
+  const removerBanner = (id: string) => {
+    setBanners((prev) => prev.filter((b) => b.id !== id));
+  };
+
   return (
     <ModulosContext.Provider
       value={{
@@ -238,6 +271,9 @@ export const ModulosProvider: React.FC<{ children: React.ReactNode }> = ({
         editarModulo,
         setModuloBloqueado,
         setAulaBloqueada,
+        banners,
+        adicionarBanner,
+        removerBanner,
       }}
     >
       {children}
