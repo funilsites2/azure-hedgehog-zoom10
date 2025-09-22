@@ -102,9 +102,16 @@ const getInitialModulos = (): Modulo[] => {
 const initializeBlocks = (mods: Modulo[]): Modulo[] => {
   const now = Date.now();
   return mods.map((m) => {
-    const moduleBlocked = m.releaseDate ? now < m.releaseDate : false;
+    // respeita bloqueio manual se definido, senão usa releaseDate
+    const moduleBlocked = m.bloqueado ?? (m.releaseDate ? now < m.releaseDate : false);
     const aulas = m.aulas.map((a, i, arr) => {
-      if (i === 0) return { ...a, bloqueado: false };
+      // respeita bloqueio manual de aula se definido
+      if (a.bloqueado !== undefined) {
+        return a;
+      }
+      if (i === 0) {
+        return { ...a, bloqueado: false };
+      }
       const prev = arr[i - 1];
       return { ...a, bloqueado: !prev.assistida };
     });
@@ -238,7 +245,11 @@ export const ModulosProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const setModuloBloqueado = (moduloId: number, bloqueado: boolean) => {
     setModulos((prev) =>
-      prev.map((m) => (m.id === moduloId ? { ...m, bloqueado } : m))
+      initializeBlocks(
+        prev.map((m) =>
+          m.id === moduloId ? { ...m, bloqueado } : m
+        )
+      )
     );
   };
 
@@ -248,15 +259,17 @@ export const ModulosProvider: React.FC<{ children: React.ReactNode }> = ({
     bloqueado: boolean
   ) => {
     setModulos((prev) =>
-      prev.map((m) =>
-        m.id === moduloId
-          ? {
-              ...m,
-              aulas: m.aulas.map((a) =>
-                a.id === aulaId ? { ...a, bloqueado } : a
-              ),
-            }
-          : m
+      initializeBlocks(
+        prev.map((m) =>
+          m.id === moduloId
+            ? {
+                ...m,
+                aulas: m.aulas.map((a) =>
+                  a.id === aulaId ? { ...a, bloqueado } : a
+                ),
+              }
+            : m
+        )
       )
     );
   };
