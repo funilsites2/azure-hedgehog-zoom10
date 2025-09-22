@@ -24,6 +24,7 @@ interface ModuloCarouselProps {
   onModuloClick?: (modulo: Modulo) => void;
   alunoLayout?: boolean;
   showLocked?: boolean;
+  desktopCardClass?: string; // nova prop opcional para controlar a largura no desktop
 }
 
 export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
@@ -31,6 +32,7 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
   onModuloClick,
   alunoLayout = false,
   showLocked,
+  desktopCardClass,
 }) => {
   const now = Date.now();
 
@@ -67,6 +69,8 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
   const mobileCardWidth = alunoLayout
     ? "w-[60vw] max-w-[280px] min-w-[180px]"
     : "min-w-1/2 max-w-[90vw]";
+
+  const desktopWidthClass = desktopCardClass || "w-[20%]";
 
   return (
     <div>
@@ -159,7 +163,7 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
           return (
             <div
               key={modulo.id}
-              className={`snap-start flex-shrink-0 w-[20%] rounded-lg shadow-lg overflow-hidden cursor-pointer relative transition-transform transform hover:scale-105 ${
+              className={`snap-start flex-shrink-0 ${desktopWidthClass} rounded-lg shadow-lg overflow-hidden cursor-pointer relative transition-transform transform hover:scale-105 ${
                 modulo.bloqueado ? "grayscale opacity-70" : ""
               }`}
               onClick={

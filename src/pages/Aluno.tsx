@@ -154,6 +154,7 @@ export default function Aluno() {
                     <ModuloCarousel
                       modulos={mods}
                       alunoLayout
+                      desktopCardClass={sidebarCollapsed ? "w-1/4" : "w-[20%]"}
                       onModuloClick={(m) => {
                         setModuloSelecionado(m.id);
                         setAulaSelecionada(m.aulas[0]?.id ?? null);
@@ -242,7 +243,12 @@ export default function Aluno() {
           <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
             <Lock size={24} className="text-red-400" /> Bloqueados
           </h2>
-          <ModuloCarousel modulos={modulos} alunoLayout showLocked />
+          <ModuloCarousel
+            modulos={modulos}
+            alunoLayout
+            showLocked
+            desktopCardClass={sidebarCollapsed ? "w-1/4" : "w-[20%]"}
+          />
         </div>
       );
     }
@@ -359,7 +365,7 @@ export default function Aluno() {
             }`}
             title={sidebarCollapsed ? item.label : undefined}
           >
-            <item.icon size={20} className="text-green-500" />
+            <item.icon size={20} className="text-white" />
             <span className={`${sidebarCollapsed ? "hidden" : "inline"}`}>{item.label}</span>
           </button>
         ))}
@@ -368,7 +374,7 @@ export default function Aluno() {
           className={`flex items-center ${sidebarCollapsed ? "justify-center gap-0" : "gap-3"} px-3 py-3 w-full text-neutral-300 hover:bg-green-600 hover:text-white rounded`}
           title={sidebarCollapsed ? "Perfil" : undefined}
         >
-          <User size={20} className="text-green-500" />
+          <User size={20} className="text-white" />
           <span className={`${sidebarCollapsed ? "hidden" : "inline"}`}>Perfil</span>
         </Link>
       </nav>
