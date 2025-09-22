@@ -89,12 +89,14 @@ export default function Aluno() {
             {/* Bloco de Continuar Assistindo */}
             {partialAulas.length > 0 && (
               <div className="mx-4 mt-8 mb-8">
-                <h2 className="text-2xl font-semibold mb-4 text-white">Continuar Assistindo</h2>
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                <h2 className="text-2xl font-semibold mb-4 text-white">
+                  Continuar Assistindo
+                </h2>
+                <div className="overflow-x-auto snap-x snap-mandatory flex gap-4 pb-4">
                   {partialAulas.map(({ modulo: m, aula }) => (
                     <div
                       key={aula.id}
-                      className="bg-neutral-800 p-4 rounded-lg cursor-pointer hover:bg-neutral-700 transition"
+                      className="snap-start flex-shrink-0 w-1/2 md:w-1/5 bg-neutral-800 p-4 rounded-lg cursor-pointer hover:bg-neutral-700 transition"
                       onClick={() => {
                         setModuloSelecionado(m.id);
                         setAulaSelecionada(aula.id);
@@ -105,8 +107,12 @@ export default function Aluno() {
                         alt={aula.titulo}
                         className="w-full h-32 object-cover rounded mb-2"
                       />
-                      <p className="text-white font-medium truncate">{aula.titulo}</p>
-                      <p className="text-neutral-400 text-sm truncate">{m.nome}</p>
+                      <p className="text-white font-medium truncate">
+                        {aula.titulo}
+                      </p>
+                      <p className="text-neutral-400 text-sm truncate">
+                        {m.nome}
+                      </p>
                     </div>
                   ))}
                 </div>
@@ -122,7 +128,9 @@ export default function Aluno() {
                     key={linha}
                     className="bg-neutral-800 bg-opacity-20 p-4 rounded-lg"
                   >
-                    <h3 className="text-2xl font-semibold mb-4 text-white">{linha}</h3>
+                    <h3 className="text-2xl font-semibold mb-4 text-white">
+                      {linha}
+                    </h3>
                     <ModuloCarousel
                       modulos={mods}
                       alunoLayout
@@ -184,7 +192,10 @@ export default function Aluno() {
           <ul className="text-base">
             <li className="mb-2">
               {aulasAssistidas >= 1 ? (
-                <CheckCircle className="inline text-green-400 mr-1" size={18} />
+                <CheckCircle
+                  className="inline text-green-400 mr-1"
+                  size={18}
+                />
               ) : (
                 <span className="inline-block w-5" />
               )}
@@ -192,7 +203,10 @@ export default function Aluno() {
             </li>
             <li>
               {progresso === 100 ? (
-                <CheckCircle className="inline text-green-400 mr-1" size={18} />
+                <CheckCircle
+                  className="inline text-green-400 mr-1"
+                  size={18}
+                />
               ) : (
                 <span className="inline-block w-5" />
               )}
@@ -218,7 +232,9 @@ export default function Aluno() {
   const MobileDrawer = (
     <div
       className={`fixed inset-0 z-40 bg-black/60 transition-opacity ${
-        mobileMenuOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+        mobileMenuOpen
+          ? "opacity-100 pointer-events-auto"
+          : "opacity-0 pointer-events-none"
       }`}
       onClick={() => setMobileMenuOpen(false)}
     >
@@ -235,7 +251,9 @@ export default function Aluno() {
           <X size={28} className="text-green-500" />
         </button>
         <div className="flex flex-col items-center space-y-4">
-          {logoUrl && <img src={logoUrl} alt="Logo" className="w-12 h-12 object-contain" />}
+          {logoUrl && (
+            <img src={logoUrl} alt="Logo" className="w-12 h-12 object-contain" />
+          )}
           <img
             src={photoUrl || "/placeholder.svg"}
             alt="Foto do aluno"
@@ -274,7 +292,9 @@ export default function Aluno() {
 
   const DesktopSidebar = (
     <aside className="hidden md:flex flex-col items-center bg-neutral-950 p-6 space-y-6">
-      {logoUrl && <img src={logoUrl} alt="Logo" className="w-12 h-12 object-contain" />}
+      {logoUrl && (
+        <img src={logoUrl} alt="Logo" className="w-12 h-12 object-contain" />
+      )}
       <img
         src={photoUrl || "/placeholder.svg"}
         alt="Foto do aluno"
@@ -282,7 +302,9 @@ export default function Aluno() {
       />
       <div className="w-full">
         <SimpleProgress value={progresso} />
-        <div className="text-xs text-neutral-300 mt-1">{progresso}% concluído</div>
+        <div className="text-xs text-neutral-300 mt-1">
+          {progresso}% concluído
+        </div>
       </div>
       <nav className="flex flex-col space-y-2 w-full">
         {MENU_ITEMS.map((item) => (
@@ -292,7 +314,7 @@ export default function Aluno() {
               setMobileTab(item.key);
               if (item.key === "modulos") setModuloSelecionado(null);
             }}
-            className={`flex items	center gap-3 px-4 py-3 w-full text-neutral-300 rounded ${
+            className={`flex items-center gap-3 px-4 py-3 w-full text-neutral-300 rounded ${
               mobileTab === item.key
                 ? "bg-green-600 text-white"
                 : "hover:bg-green-600 hover:text-white"
@@ -334,7 +356,7 @@ export default function Aluno() {
       ))}
       <Link
         to="/perfil"
-        className="flex-1 flex flex-col	items-center justify-center text-neutral-300 hover:bg-green-600 hover:text-white"
+        className="flex-1 flex flex-col items-center justify-center text-neutral-300 hover:bg-green-600 hover:text-white"
       >
         <User size={22} className="text-green-500" />
         <span className="text-xs">Perfil</span>
