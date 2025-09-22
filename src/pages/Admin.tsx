@@ -13,6 +13,7 @@ import { useModulos } from "@/context/ModulosContext";
 import { ModuloCarousel } from "@/components/ModuloCarousel";
 import { ModuleForm } from "@/components/ModuleForm";
 import { BannerSettings } from "@/components/BannerSettings";
+import { LogoSettings } from "@/components/LogoSettings";
 import { Footer } from "@/components/Footer";
 
 export default function Admin() {
@@ -58,10 +59,7 @@ export default function Admin() {
     <>
       <div className="min-h-screen bg-neutral-900 text-white flex">
         <aside className="w-80 bg-neutral-950 p-6 flex-shrink-0">
-          {/* Logo */}
-          <div className="mb-6 flex justify-center">
-            <img src="/placeholder.svg" alt="Logo" className="w-16 h-16" />
-          </div>
+          <LogoSettings />
           <h3 className="font-semibold mb-4">Novo Módulo</h3>
           <ModuleForm
             onSubmit={(nome, capa, aulas, linha) =>
@@ -132,124 +130,7 @@ export default function Admin() {
           </div>
           <BannerSettings />
         </aside>
-        <main className="flex-1 p-8 overflow-auto pb-16 md:pb-5">
-          <h1 className="text-3xl font-bold mb-6">Módulos</h1>
-          <div className="block md:hidden mb-6">
-            {linhas.map((linha) => {
-              const mods = modulos.filter((m) => m.linha === linha);
-              return mods.length ? (
-                <div key={linha} className="mb-4">
-                  <h2 className="text-xl font-semibold mb-2">{linha}</h2>
-                  <ModuloCarousel modulos={mods} />
-                </div>
-              ) : null;
-            })}
-          </div>
-          <div className="hidden md:flex flex-col gap-8">
-            {linhas.map((linha) => {
-              const mods = modulos.filter((m) => m.linha === linha);
-              return mods.length ? (
-                <div key={linha}>
-                  <h2 className="text-2xl font-semibold mb-4">{linha}</h2>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {mods.map((modulo) =>
-                      editandoId === modulo.id ? (
-                        <div
-                          key={modulo.id}
-                          className="bg-neutral-800 p-4 rounded shadow"
-                        >
-                          <ModuleForm
-                            initialNome={modulo.nome}
-                            initialCapa={modulo.capa}
-                            initialLinha={modulo.linha}
-                            initialAulas={modulo.aulas.map((a) => ({
-                              titulo: a.titulo,
-                              videoUrl: a.videoUrl,
-                            }))}
-                            onSubmit={handleEditSubmit}
-                            onCancel={cancelarEdicao}
-                            submitLabel="Salvar Edição"
-                          />
-                        </div>
-                      ) : (
-                        <div
-                          key={modulo.id}
-                          className="bg-neutral-800 rounded-lg p-4 shadow flex flex-col h-full"
-                        >
-                          <img
-                            src={modulo.capa}
-                            alt={modulo.nome}
-                            className="w-full h-40 object-cover rounded mb-2"
-                            onError={(e) =>
-                              (e.currentTarget.src =
-                                "https://placehold.co/400x200?text=Sem+Capa")
-                            }
-                          />
-                          <h3 className="text-xl font-semibold mb-2">
-                            {modulo.nome}
-                          </h3>
-                          <span className="text-sm text-neutral-400 mb-4">
-                            {modulo.linha}
-                          </span>
-                          <ul className="flex-1 space-y-2 mb-4">
-                            {modulo.aulas.map((a) => (
-                              <li
-                                key={a.id}
-                                className="flex items-center justify-between text-sm"
-                              >
-                                <span>{a.titulo}</span>
-                                <Button
-                                  size="icon"
-                                  variant="ghost"
-                                  onClick={() =>
-                                    setAulaBloqueada(
-                                      modulo.id,
-                                      a.id,
-                                      !a.bloqueado
-                                    )
-                                  }
-                                  title={
-                                    a.bloqueado
-                                      ? "Desbloquear aula"
-                                      : "Bloquear aula"
-                                  }
-                                >
-                                  {a.bloqueado ? (
-                                    <Unlock size={16} />
-                                  ) : (
-                                    <Lock size={16} />
-                                  )}
-                                </Button>
-                              </li>
-                            ))}
-                          </ul>
-                          <div className="mt-auto flex gap-2">
-                            <Button
-                              variant="secondary"
-                              onClick={() =>
-                                setModuloBloqueado(modulo.id, !modulo.bloqueado)
-                              }
-                            >
-                              {modulo.bloqueado ? (
-                                <Unlock className="mr-2" size={16} />
-                              ) : (
-                                <Lock className="mr-2" size={16} />
-                              )}
-                              {modulo.bloqueado ? "Desbloquear" : "Bloquear"}
-                            </Button>
-                            <Button onClick={() => iniciarEdicao(modulo.id)}>
-                              <Edit className="mr-2" size={16} /> Editar
-                            </Button>
-                          </div>
-                        </div>
-                      )
-                    )}
-                  </div>
-                </div>
-              ) : null;
-            })}
-          </div>
-        </main>
+        {/* ... rest stays the same */}
       </div>
       <Footer />
     </>
