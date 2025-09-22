@@ -311,13 +311,13 @@ export default function Aluno() {
       {MobileDrawer}
       {DesktopSidebar}
       <div className="flex-1 flex flex-col pt-12 md:pt-0">
-        <main className="flex-1 overflow-auto p-4">
+        <main className="flex-1 overflow-auto">
           {bannerUrl && (
-            <div className="mb-6 flex justify-center">
+            <div className="mb-6 mx-auto w-full max-w-[1600px] h-[600px] overflow-hidden rounded-lg">
               <img
                 src={bannerUrl}
                 alt="Banner Aluno"
-                className="w-full max-w-3xl rounded-lg object-cover"
+                className="w-full h-full object-cover"
               />
             </div>
           )}
@@ -326,5 +326,5 @@ export default function Aluno() {
         {MobileFooter}
       </div>
     </div>
-  );
+);
 }
