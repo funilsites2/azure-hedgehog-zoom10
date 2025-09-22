@@ -30,7 +30,8 @@ export default function Admin() {
     moduloId: number | "";
     titulo: string;
     videoUrl: string;
-  }>({ moduloId: "", titulo: "", videoUrl: "" });
+    delayDays: number;
+  }>({ moduloId: "", titulo: "", videoUrl: "", delayDays: 0 });
 
   const [editandoId, setEditandoId] = useState<number | null>(null);
   const iniciarEdicao = (moduloId: number) => setEditandoId(moduloId);
@@ -113,6 +114,19 @@ export default function Admin() {
                   }))
                 }
               />
+              <input
+                type="number"
+                min={0}
+                className="w-full p-2 rounded bg-neutral-800 text-white"
+                placeholder="Dias para liberar aula"
+                value={novaAulaExistente.delayDays}
+                onChange={(e) =>
+                  setNovaAulaExistente((v) => ({
+                    ...v,
+                    delayDays: Number(e.target.value),
+                  }))
+                }
+              />
               <Button
                 onClick={() => {
                   const { moduloId, titulo, videoUrl } =
@@ -123,7 +137,7 @@ export default function Admin() {
                     videoUrl.trim() !== ""
                   ) {
                     adicionarAula(moduloId, titulo.trim(), videoUrl.trim());
-                    setNovaAulaExistente({ moduloId: "", titulo: "", videoUrl: "" });
+                    setNovaAulaExistente({ moduloId: "", titulo: "", videoUrl: "", delayDays: 0 });
                   }
                 }}
               >
@@ -204,18 +218,12 @@ export default function Admin() {
                               >
                                 {modulo.bloqueado ? (
                                   <>
-                                    <Unlock
-                                      size={16}
-                                      className="mr-2"
-                                    />
+                                    <Unlock size={16} className="mr-2" />
                                     Desbloquear
                                   </>
                                 ) : (
                                   <>
-                                    <Lock
-                                      size={16}
-                                      className="mr-2"
-                                    />
+                                    <Lock size={16} className="mr-2" />
                                     Bloquear
                                   </>
                                 )}
