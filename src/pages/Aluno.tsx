@@ -216,19 +216,58 @@ export default function Aluno() {
       }`}
       onClick={() => setMobileMenuOpen(false)}
     >
-      {/* ... */}
+      <div
+        className={`absolute left-0 top-0 h-full w-64 bg-neutral-950/90 backdrop-blur-sm p-6 flex flex-col gap-6 transition-transform ${
+          mobileMenuOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <button
+          className="self-end text-neutral-400 hover:text-white"
+          onClick={() => setMobileMenuOpen(false)}
+        >
+          <X size={28} className="text-green-500" />
+        </button>
+        <div className="flex flex-col items-center space-y-4">
+          {logoUrl && <img src={logoUrl} alt="Logo" className="w-12 h-12 object-contain" />}
+          <img
+            src={photoUrl || "/placeholder.svg"}
+            alt="Foto do aluno"
+            className="w-16 h-16 rounded-full border-2 border-green-500"
+          />
+          <h2 className="text-xl font-bold text-white">{name}</h2>
+        </div>
+        <nav className="flex flex-col mt-4 space-y-2">
+          {MENU_ITEMS.map((item) => (
+            <button
+              key={item.key}
+              onClick={() => {
+                setMobileTab(item.key);
+                setMobileMenuOpen(false);
+                if (item.key === "modulos") setModuloSelecionado(null);
+              }}
+              className="flex items-center gap-3 px-4 py-3 text-neutral-300 hover:bg-green-600 hover:text-white rounded"
+            >
+              <item.icon size={20} className="text-green-500" />
+              <span>{item.label}</span>
+            </button>
+          ))}
+          <Link
+            to="/perfil"
+            onClick={() => setMobileMenuOpen(false)}
+            className="flex items-center gap-3 px-4 py-3 text-neutral-300 hover:bg-green-600 hover:text-white rounded"
+          >
+            <User size={20} className="text-green-500" />
+            <span>Perfil</span>
+          </Link>
+        </nav>
+      </div>
     </div>
   );
 
   const DesktopSidebar = (
     <aside className="hidden md:flex flex-col items-center bg-neutral-950 p-6 space-y-6">
-      {logoUrl && (
-        <img
-          src={logoUrl}
-          alt="Logo"
-          className="w-12 h-12 object-contain"
-        />
-      )}
+      {logoUrl && <img src={logoUrl} alt="Logo" className="w-12 h-12 object-contain" />}
       <img
         src={photoUrl || "/placeholder.svg"}
         alt="Foto do aluno"
@@ -236,9 +275,7 @@ export default function Aluno() {
       />
       <div className="w-full">
         <Progress value={progresso} className="h-2 bg-neutral-800 rounded" />
-        <div className="text-xs text-neutral-300 mt-1">
-          {progresso}% concluído
-        </div>
+        <div className="text-xs text-neutral-300 mt-1">{progresso}% concluído</div>
       </div>
       <nav className="flex flex-col space-y-2 w-full">
         {MENU_ITEMS.map((item) => (
@@ -277,6 +314,12 @@ export default function Aluno() {
 
   return (
     <div className="min-h-screen w-screen flex flex-col md:flex-row bg-neutral-900 text-white relative">
+      <button
+        className="md:hidden fixed top-4 left-4 z-20 bg-neutral-950 rounded-full p-2 border border-neutral-800 shadow-lg"
+        onClick={() => setMobileMenuOpen(true)}
+      >
+        <Menu size={28} className="text-green-500" />
+      </button>
       {MobileDrawer}
       {DesktopSidebar}
       <div className="flex-1 flex flex-col pt-12 md:pt-0">
