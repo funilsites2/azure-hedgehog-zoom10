@@ -219,7 +219,11 @@ export default function Admin() {
                       onClick={() =>
                         setModuloBloqueado(m.id, !m.bloqueado)
                       }
-                      className="flex-1"
+                      className={`flex-1 ${
+                        !m.bloqueado
+                          ? "bg-white text-black hover:bg-neutral-100"
+                          : ""
+                      }`}
                     >
                       {m.bloqueado ? (
                         <>
