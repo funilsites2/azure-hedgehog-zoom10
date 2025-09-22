@@ -44,7 +44,6 @@ export default function Admin() {
   ) => {
     if (editandoId !== null) {
       editarModulo(editandoId, nome, capa, aulas, linha, delayDays);
-      cancelarEdicao();
     }
   };
 
@@ -164,7 +163,6 @@ export default function Admin() {
                           )
                         : 0}
                       onSubmit={handleEditSubmit}
-                      onCancel={cancelarEdicao}
                       submitLabel="Atualizar Módulo"
                     />
                     <div className="mt-6">
@@ -202,6 +200,11 @@ export default function Admin() {
                           </div>
                         );
                       })}
+                    </div>
+                    <div className="mt-4">
+                      <Button className="w-full" onClick={cancelarEdicao}>
+                        Salvar Tudo
+                      </Button>
                     </div>
                   </>
                 );
