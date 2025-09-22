@@ -61,7 +61,7 @@ export function AulaPlayer({
   const progresso = total ? Math.round((done / total) * 100) : 0;
 
   const isLockedCurrent =
-    aula.bloqueado === true || (aula.releaseDate && now < aula.releaseDate);
+    aula.bloqueado === true || (aula.releaseDate ? now < aula.releaseDate : false);
 
   return (
     <div className="flex flex-col md:flex-row gap-6 w-full h-full">
@@ -109,7 +109,8 @@ export function AulaPlayer({
       {/* Miniaturas */}
       <div className="w-full md:w-1/3 overflow-auto space-y-4 pr-4">
         {aulas.map((a) => {
-          const blocked = a.bloqueado === true || (a.releaseDate && now < a.releaseDate);
+          const blockedByDate = a.releaseDate ? now < a.releaseDate : false;
+          const blocked = a.bloqueado === true || blockedByDate;
           return (
             <div
               key={a.id}
@@ -119,6 +120,11 @@ export function AulaPlayer({
               )}
               onClick={() => !blocked && onSelecionarAula(a.id)}
             >
+              {blockedByDate && (
+                <div className="absolute top-0 inset-x-0 bg-yellow-500 text-black text-xs text-center py-1 z-10 rounded-t-lg">
+                  Liberado em {new Date(a.releaseDate!).toLocaleDateString()}
+                </div>
+              )}
               <img
                 src={getYoutubeThumbnail(a.videoUrl)}
                 alt={a.titulo}
@@ -135,5 +141,5 @@ export function AulaPlayer({
         })}
       </div>
     </div>
-  );
+);
 }
