@@ -132,7 +132,7 @@ export function AulaPlayer({
               <img
                 src={getYoutubeThumbnail(a.videoUrl)}
                 alt={a.titulo}
-                className="w-full h-20 object-cover"
+                className="w-full h-20 object-cover rounded-lg"
               />
               {blocked && (
                 <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">

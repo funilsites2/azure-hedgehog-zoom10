@@ -108,7 +108,7 @@ export default function Aluno() {
                         <img
                           src={getYoutubeThumbnail(aula.videoUrl)}
                           alt={aula.titulo}
-                          className="w-full h-full object-cover"
+                          className="w-full h-full object-cover rounded-lg"
                         />
                         {/* Ícone de Play no hover */}
                         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">

@@ -110,7 +110,7 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
                         <img
                           src={modulo.capa}
                           alt={modulo.nome}
-                          className="w-full aspect-[3/4] object-cover rounded mb-2"
+                          className="w-full aspect-[3/4] object-cover rounded-lg mb-2"
                           onError={(e) =>
                             (e.currentTarget.src =
                               "https://placehold.co/300x400?text=Sem+Capa")
@@ -182,7 +182,7 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
               <img
                 src={modulo.capa}
                 alt={modulo.nome}
-                className="w-full aspect-[3/4] object-cover"
+                className="w-full aspect-[3/4] object-cover rounded-lg"
                 onError={(e) =>
                   (e.currentTarget.src =
                     "https://placehold.co/300x400?text=Sem+Capa")
