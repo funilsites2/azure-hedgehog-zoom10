@@ -56,14 +56,12 @@ const Perfil: React.FC = () => {
   const MobileDrawer = (
     <div
       className={`fixed inset-0 z-40 bg-black/60 transition-opacity ${
-        mobileMenuOpen
-          ? "opacity-100 pointer-events-auto"
-          : "opacity-0 pointer-events-none"
+        mobileMenuOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
       }`}
       onClick={() => setMobileMenuOpen(false)}
     >
       <div
-        className={`absolute left-0 top-0 h-full w-64 bg-neutral-950 p-6 flex flex-col gap-6 border-r border-neutral-800 shadow-lg transition-transform ${
+        className={`absolute left-0 top-0 h-full w-64 bg-neutral-950/90 backdrop-blur-sm p-6 flex flex-col gap-4 border-r border-neutral-800 shadow-lg transition-transform ${
           mobileMenuOpen ? "translate-x-0" : "-translate-x-full"
         }`}
         onClick={(e) => e.stopPropagation()}
@@ -77,23 +75,27 @@ const Perfil: React.FC = () => {
         <h2 className="text-2xl font-bold flex items-center gap-2">
           <Layers size={28} className="text-green-500" /> Área do Aluno
         </h2>
-        <nav className="flex flex-col gap-4">
+        <nav className="flex flex-col">
           {MENU_ITEMS.map((item) => (
             <Link
               key={item.key}
               to={item.key === "modulos" ? "/aluno" : "#"}
-              className="flex items-center gap-2 px-2 py-2 rounded border border-green-500 text-neutral-300 hover:bg-neutral-800 hover:text-white"
+              className="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-neutral-800 text-neutral-300"
               onClick={() => setMobileMenuOpen(false)}
             >
-              <item.icon size={20} className="text-green-500" /> {item.label}
+              <item.icon size={20} className="text-green-500" />
+              <span className="flex-1">{item.label}</span>
+              <div className="h-0.5 bg-green-500 w-full absolute left-0 bottom-0"></div>
             </Link>
           ))}
           <Link
             to="/perfil"
-            className="flex items-center gap-2 px-2 py-2 rounded border border-green-500 text-neutral-300 hover:bg-neutral-800 hover:text-white"
+            className="relative flex items-center gap-3 px-4 py-3 transition-colors hover:bg-neutral-800 text-neutral-300"
             onClick={() => setMobileMenuOpen(false)}
           >
-            <User size={20} className="text-green-500" /> Perfil
+            <User size={20} className="text-green-500" />
+            <span className="flex-1">Perfil</span>
+            <div className="h-0.5 bg-green-500 w-full absolute left-0 bottom-0"></div>
           </Link>
         </nav>
       </div>
@@ -102,14 +104,12 @@ const Perfil: React.FC = () => {
 
   const DesktopSidebar = (
     <aside
-      className={`hidden md:flex flex-col bg-neutral-950 border-r border-neutral-800 transition-all ${
+      className={`hidden md:flex flex-col bg-neutral-950/80 backdrop-blur-sm border-r border-neutral-800 transition-all ${
         sidebarCollapsed ? "w-20" : "w-64"
       }`}
     >
       <div className="p-4 flex flex-col items-center space-y-4">
-        {logoUrl && (
-          <img src={logoUrl} alt="Logo" className="w-12 h-12 object-contain" />
-        )}
+        {logoUrl && <img src={logoUrl} alt="Logo" className="w-12 h-12 object-contain" />}
         <img
           src={photoUrl || "/placeholder.svg"}
           alt="Foto do aluno"
@@ -133,23 +133,25 @@ const Perfil: React.FC = () => {
           )}
         </button>
       </div>
-      <nav className="flex flex-col flex-1 p-2">
+      <nav className="flex flex-col flex-1">
         {MENU_ITEMS.map((item) => (
           <Link
             key={item.key}
             to={item.key === "modulos" ? "/aluno" : "#"}
-            className="flex items-center gap-2 w-full px-3 py-2 my-1 rounded border border-green-500 text-neutral-300 hover:bg-neutral-800 hover:text-white"
+            className="relative flex items-center gap-3 px-4 py-3 transition-colors hover:bg-neutral-800 text-neutral-300"
           >
             <item.icon size={20} className="text-green-500" />
-            {!sidebarCollapsed && item.label}
+            {!sidebarCollapsed && <span>{item.label}</span>}
+            <div className="h-0.5 bg-green-500 w-full absolute left-0 bottom-0"></div>
           </Link>
         ))}
         <Link
           to="/perfil"
-          className="flex items-center gap-2 w-full px-3 py-2 my-1 rounded border border-green-500 text-neutral-300 hover:bg-neutral-800 hover:text-white"
+          className="relative flex items-center gap-3 px-4 py-3 transition-colors hover:bg-neutral-800 text-neutral-300"
         >
           <User size={20} className="text-green-500" />
-          {!sidebarCollapsed && "Perfil"}
+          {!sidebarCollapsed && <span>Perfil</span>}
+          <div className="h-0.5 bg-green-500 w-full absolute left-0 bottom-0"></div>
         </Link>
       </nav>
     </aside>
@@ -161,18 +163,20 @@ const Perfil: React.FC = () => {
         <Link
           key={item.key}
           to={item.key === "modulos" ? "/aluno" : "#"}
-          className="flex-1 flex flex-col items-center justify-center gap-1 p-2 border border-green-500 rounded text-xs text-neutral-300 hover:text-white"
+          className="relative flex-1 flex flex-col items-center justify-center transition-colors hover:bg-neutral-900 text-neutral-300"
         >
           <item.icon size={22} className="text-green-500" />
-          {item.label}
+          <span className="text-xs">{item.label}</span>
+          <div className="h-0.5 bg-green-500 w-full absolute left-0 bottom-0"></div>
         </Link>
       ))}
       <Link
         to="/perfil"
-        className="flex-1 flex flex-col items-center justify-center gap-1 p-2 border border-green-500 rounded text-xs text-neutral-300 hover:text-white"
+        className="relative flex-1 flex flex-col items-center justify-center transition-colors hover:bg-neutral-900 text-neutral-300"
       >
         <User size={22} className="text-green-500" />
-        Perfil
+        <span className="text-xs">Perfil</span>
+        <div className="h-0.5 bg-green-500 w-full absolute left-0 bottom-0"></div>
       </Link>
     </nav>
   );
