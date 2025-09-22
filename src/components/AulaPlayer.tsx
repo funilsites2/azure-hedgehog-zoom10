@@ -112,7 +112,7 @@ export function AulaPlayer({
               <TabsTrigger value="resumo">Resumo</TabsTrigger>
               <TabsTrigger value="apresentacao">Apresentação</TabsTrigger>
               <TabsTrigger value="mapa">Mapa Mental</TabsTrigger>
-            </div>
+            </TabsList>
             <div className="flex gap-2 ml-4">
               {hasPrev && (
                 <button
