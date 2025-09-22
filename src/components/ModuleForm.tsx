@@ -3,6 +3,13 @@
 import React, { useState } from "react";
 import { useModulos } from "@/context/ModulosContext";
 import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@/components/ui/select";
 import { Plus, Trash2 } from "lucide-react";
 
 type AulaInput = { titulo: string; videoUrl: string };
@@ -70,18 +77,26 @@ export const ModuleForm: React.FC<ModuleFormProps> = ({
         value={capa}
         onChange={(e) => setCapa(e.target.value)}
       />
-      <input
-        list="linhas"
-        className="w-full p-2 rounded bg-neutral-800 text-white"
-        placeholder="Nome da linha"
-        value={linha}
-        onChange={(e) => setLinha(e.target.value)}
-      />
-      <datalist id="linhas">
-        {existingLinhas.map((l) => (
-          <option key={l} value={l} />
-        ))}
-      </datalist>
+      <Select onValueChange={setLinha} value={linha}>
+        <SelectTrigger className="w-full">
+          <SelectValue placeholder="Selecione ou digite a linha" />
+        </SelectTrigger>
+        <SelectContent>
+          {existingLinhas.map((l) => (
+            <SelectItem key={l} value={l}>
+              {l}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+      {!existingLinhas.includes(linha) && (
+        <input
+          className="w-full p-2 rounded bg-neutral-800 text-white"
+          placeholder="Nova linha"
+          value={linha}
+          onChange={(e) => setLinha(e.target.value)}
+        />
+      )}
       <div className="space-y-2">
         <div className="flex gap-2">
           <input
