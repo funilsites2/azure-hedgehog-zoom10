@@ -151,6 +151,7 @@ export default function Aluno() {
     return null;
   }
 
+  // drawer, sidebar e footer seguem sem alterações...
   const MobileDrawer = (
     <div
       className={`fixed inset-0 z-40 bg-black/60 transition-opacity ${
@@ -328,5 +329,5 @@ export default function Aluno() {
         <Footer />
       </div>
     </div>
-);
+  );
 }
