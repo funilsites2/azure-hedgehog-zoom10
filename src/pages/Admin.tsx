@@ -68,7 +68,69 @@ export default function Admin() {
           <div>
             <h3 className="font-semibold mb-2">Nova Aula</h3>
             <div className="space-y-2">
-              {/* ... nova aula existente permanece igual ... */}
+              <select
+                className="w-full p-2 rounded bg-neutral-800 text-white"
+                value={novaAulaExistente.moduloId}
+                onChange={(e) =>
+                  setNovaAulaExistente((v) => ({
+                    ...v,
+                    moduloId: Number(e.target.value),
+                  }))
+                }
+              >
+                <option value="">Selecione o módulo</option>
+                {modulos.map((m) => (
+                  <option key={m.id} value={m.id}>
+                    {m.nome}
+                  </option>
+                ))}
+              </select>
+              <input
+                className="w-full p-2 rounded bg-neutral-800 text-white"
+                placeholder="Título da aula"
+                value={novaAulaExistente.titulo}
+                onChange={(e) =>
+                  setNovaAulaExistente((v) => ({ ...v, titulo: e.target.value }))
+                }
+              />
+              <input
+                className="w-full p-2 rounded bg-neutral-800 text-white"
+                placeholder="URL do vídeo"
+                value={novaAulaExistente.videoUrl}
+                onChange={(e) =>
+                  setNovaAulaExistente((v) => ({
+                    ...v,
+                    videoUrl: e.target.value,
+                  }))
+                }
+              />
+              <input
+                type="number"
+                min={0}
+                className="w-full p-2 rounded bg-neutral-800 text-white"
+                placeholder="Dias para liberar"
+                value={novaAulaExistente.delayDays}
+                onChange={(e) =>
+                  setNovaAulaExistente((v) => ({
+                    ...v,
+                    delayDays: Number(e.target.value),
+                  }))
+                }
+              />
+              <Button
+                disabled={!novaAulaExistente.moduloId}
+                onClick={() => {
+                  adicionarAula(
+                    Number(novaAulaExistente.moduloId),
+                    novaAulaExistente.titulo,
+                    novaAulaExistente.videoUrl,
+                    novaAulaExistente.delayDays
+                  );
+                  setNovaAulaExistente({ moduloId: "", titulo: "", videoUrl: "", delayDays: 0 });
+                }}
+              >
+                Adicionar Aula Existente
+              </Button>
             </div>
           </div>
         </aside>
@@ -147,7 +209,32 @@ export default function Admin() {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
-              {/* ... listagem de módulos permanece igual ... */}
+              {modulos.map((m) => (
+                <div
+                  key={m.id}
+                  className="bg-neutral-800 p-4 rounded-lg flex flex-col"
+                >
+                  <img
+                    src={m.capa}
+                    alt={m.nome}
+                    className="w-full h-32 object-cover rounded mb-2"
+                  />
+                  <h2 className="font-semibold mb-2">{m.nome}</h2>
+                  <div className="mt-auto flex gap-2">
+                    <Button onClick={() => iniciarEdicao(m.id)}>
+                      <Edit size={16} />
+                    </Button>
+                    <Button
+                      variant="secondary"
+                      onClick={() =>
+                        setAulaReleaseDays(m.id, 0, 0)
+                      }
+                    >
+                      <Unlock size={16} />
+                    </Button>
+                  </div>
+                </div>
+              ))}
             </div>
           )}
         </main>
