@@ -195,6 +195,11 @@ export default function Admin() {
                           <span>{a.titulo}</span>
                           <Button
                             variant={a.bloqueado ? "destructive" : "outline"}
+                            className={
+                              !a.bloqueado
+                                ? "bg-white !text-black hover:bg-neutral-100"
+                                : ""
+                            }
                             onClick={() =>
                               setAulaBloqueada(m.id, a.id, !a.bloqueado)
                             }
