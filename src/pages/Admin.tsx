@@ -58,6 +58,10 @@ export default function Admin() {
     <>
       <div className="min-h-screen bg-neutral-900 text-white flex">
         <aside className="w-80 bg-neutral-950 p-6 flex-shrink-0">
+          {/* Logo */}
+          <div className="mb-6 flex justify-center">
+            <img src="/placeholder.svg" alt="Logo" className="w-16 h-16" />
+          </div>
           <h3 className="font-semibold mb-4">Novo Módulo</h3>
           <ModuleForm
             onSubmit={(nome, capa, aulas, linha) =>

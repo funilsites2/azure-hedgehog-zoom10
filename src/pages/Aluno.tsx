@@ -164,7 +164,7 @@ export default function Aluno() {
       onClick={() => setMobileMenuOpen(false)}
     >
       <div
-        className={`absolute left-0 top-0 h-full w-64 bg-neutral-950 p-6 flex flex-col gap-6 border-r border-neutral-800 shadow-lg transition-transform duration-200 ${
+        className={`absolute left-0 top-0 h-full w-64 bg-neutral-950 p-6 flex flex-col gap-6 border-r	border-neutral-800 shadow-lg transition-transform duration-200 ${
           mobileMenuOpen ? "translate-x-0" : "-translate-x-full"
         }`}
         onClick={(e) => e.stopPropagation()}
@@ -209,13 +209,8 @@ export default function Aluno() {
         sidebarCollapsed ? "w-20" : "w-64"
       }`}
     >
-      {/* Logo and student image */}
-      <div className="p-4 flex flex-col items-center space-y-4">
-        <img
-          src="/placeholder.svg"
-          alt="Logo"
-          className="w-12 h-12"
-        />
+      {/* Student image */}
+      <div className="p-4 flex flex-col items-center">
         <img
           src="/placeholder.svg"
           alt="Foto do aluno"
@@ -287,7 +282,7 @@ export default function Aluno() {
   return (
     <div className="min-h-screen w-screen flex flex-col md:flex-row bg-neutral-900 text-white relative">
       <button
-        className="md:hidden fixed top-4 left-4 z-20 bg-neutral-950 rounded-full p-2 border border-neutral-800 shadow-lg"
+        className="md:hidden fixed top-4 left-4 z-20 bg-neutral-950 rounded-full p-2 border	border-neutral-800 shadow-lg"
         onClick={() => setMobileMenuOpen(true)}
         aria-label="Abrir menu"
       >
