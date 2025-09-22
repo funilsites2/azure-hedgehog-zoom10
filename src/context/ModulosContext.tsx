@@ -51,7 +51,6 @@ const getInitialModulos = (): Modulo[] => {
       return JSON.parse(data);
     } catch {}
   }
-  // Módulos de exemplo iniciais
   return [
     {
       id: 1,
@@ -95,6 +94,16 @@ const getInitialModulos = (): Modulo[] => {
   ];
 };
 
+const initializeBlocks = (mods: Modulo[]): Modulo[] =>
+  mods.map((m) => ({
+    ...m,
+    aulas: m.aulas.map((a, i, arr) => {
+      if (i === 0) return { ...a, bloqueado: false };
+      const prev = arr[i - 1];
+      return { ...a, bloqueado: !prev.assistida };
+    }),
+  }));
+
 const ModulosContext = createContext<ModulosContextType | undefined>(
   undefined
 );
@@ -102,7 +111,9 @@ const ModulosContext = createContext<ModulosContextType | undefined>(
 export const ModulosProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const [modulos, setModulos] = useState<Modulo[]>(getInitialModulos);
+  const [modulos, setModulos] = useState<Modulo[]>(() =>
+    initializeBlocks(getInitialModulos())
+  );
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(modulos));
@@ -115,23 +126,25 @@ export const ModulosProvider: React.FC<{ children: React.ReactNode }> = ({
     linha: string = ""
   ) => {
     const novoId = Date.now();
-    setModulos((prev) => [
-      ...prev,
-      {
-        id: novoId,
-        nome,
-        capa,
-        linha,
-        bloqueado: false,
-        aulas: aulas.map((a, i) => ({
-          id: novoId + i + 1,
-          titulo: a.titulo,
-          videoUrl: a.videoUrl,
-          assistida: false,
+    setModulos((prev) =>
+      initializeBlocks([
+        ...prev,
+        {
+          id: novoId,
+          nome,
+          capa,
+          linha,
           bloqueado: false,
-        })),
-      },
-    ]);
+          aulas: aulas.map((a, i) => ({
+            id: novoId + i + 1,
+            titulo: a.titulo,
+            videoUrl: a.videoUrl,
+            assistida: false,
+            bloqueado: i !== 0,
+          })),
+        },
+      ])
+    );
   };
 
   const adicionarAula = (
@@ -151,7 +164,7 @@ export const ModulosProvider: React.FC<{ children: React.ReactNode }> = ({
                   titulo,
                   videoUrl,
                   assistida: false,
-                  bloqueado: false,
+                  bloqueado: true,
                 },
               ],
             }
@@ -162,16 +175,19 @@ export const ModulosProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const marcarAulaAssistida = (moduloId: number, aulaId: number) => {
     setModulos((prev) =>
-      prev.map((m) =>
-        m.id === moduloId
-          ? {
-              ...m,
-              aulas: m.aulas.map((a) =>
-                a.id === aulaId ? { ...a, assistida: true } : a
-              ),
-            }
-          : m
-      )
+      prev.map((m) => {
+        if (m.id !== moduloId) return m;
+        const novasAulas = m.aulas.map((a, i, arr) => {
+          if (a.id === aulaId) {
+            return { ...a, assistida: true, bloqueado: false };
+          }
+          if (i > 0 && arr[i - 1].id === aulaId) {
+            return { ...a, bloqueado: false };
+          }
+          return a;
+        });
+        return { ...m, aulas: novasAulas };
+      })
     );
   };
 
@@ -183,22 +199,24 @@ export const ModulosProvider: React.FC<{ children: React.ReactNode }> = ({
     linha: string = ""
   ) => {
     setModulos((prev) =>
-      prev.map((m) =>
-        m.id === moduloId
-          ? {
-              ...m,
-              nome: novoNome,
-              capa: novaCapa,
-              linha,
-              aulas: novasAulas.map((a, idx) => ({
-                id: m.aulas[idx]?.id ?? Date.now() + idx + 1,
-                titulo: a.titulo,
-                videoUrl: a.videoUrl,
-                assistida: m.aulas[idx]?.assistida ?? false,
-                bloqueado: m.aulas[idx]?.bloqueado ?? false,
-              })),
-            }
-          : m
+      initializeBlocks(
+        prev.map((m) =>
+          m.id === moduloId
+            ? {
+                ...m,
+                nome: novoNome,
+                capa: novaCapa,
+                linha,
+                aulas: novasAulas.map((a, idx) => ({
+                  id: m.aulas[idx]?.id ?? Date.now() + idx + 1,
+                  titulo: a.titulo,
+                  videoUrl: a.videoUrl,
+                  assistida: m.aulas[idx]?.assistida ?? false,
+                  bloqueado: false,
+                })),
+              }
+            : m
+        )
       )
     );
   };
