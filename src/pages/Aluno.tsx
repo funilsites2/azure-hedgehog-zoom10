@@ -291,26 +291,27 @@ export default function Aluno() {
             </div>
           </div>
         )}
-        {/* miniatura Continuar Assistindo */}
+        {/* miniatura Continuar Assistindo alinhada à esquerda */}
         {moduloSelecionado === null && nextMod && nextAula && (
-          <div className="mx-auto mb-8 max-w-md text-center">
+          <div className="container mx-auto mb-8">
             <h3 className="text-2xl font-semibold mb-2">Continuar Assistindo</h3>
-            <img
-              src={getYoutubeThumbnail(nextAula.videoUrl)}
-              alt={nextAula.titulo}
-              className="w-full h-auto rounded-lg mb-2"
-            />
-            <p className="text-lg font-medium">{nextMod.nome}</p>
-            <p className="text-neutral-300 mb-4">{nextAula.titulo}</p>
-            <button
-              className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+            <div
+              className="flex items-center gap-4 cursor-pointer"
               onClick={() => {
                 setModuloSelecionado(nextMod.id);
                 setAulaSelecionada(nextAula.id);
               }}
             >
-              Continuar
-            </button>
+              <img
+                src={getYoutubeThumbnail(nextAula.videoUrl)}
+                alt={nextAula.titulo}
+                className="w-56 h-auto rounded-lg"
+              />
+              <div>
+                <p className="text-lg font-medium">{nextMod.nome}</p>
+                <p className="text-neutral-300">{nextAula.titulo}</p>
+              </div>
+            </div>
           </div>
         )}
         <div className="flex-1 overflow-auto pb-[84px] md:pb-5">
