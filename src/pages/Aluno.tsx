@@ -33,6 +33,9 @@ export default function Aluno() {
   const [mobileTab, setMobileTab] = useState<typeof MENU_ITEMS[number]["key"]>("modulos");
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
+  // Agrupa linhas únicas
+  const linhas = Array.from(new Set(modulos.map((m) => m.linha)));
+
   // Progresso geral
   const totalAulas = modulos.reduce((acc, m) => acc + m.aulas.length, 0);
   const aulasAssistidas = modulos.reduce(
@@ -50,12 +53,12 @@ export default function Aluno() {
           <>
             <h1 className="text-3xl font-bold mb-6 mt-8 ml-8">Módulos</h1>
             <div className="space-y-8 px-4">
-              {[1, 2, 3].map((col) => {
-                const mods = modulos.filter((m) => m.coluna === col);
+              {linhas.map((linha) => {
+                const mods = modulos.filter((m) => m.linha === linha);
                 if (mods.length === 0) return null;
                 return (
-                  <div key={col}>
-                    <h2 className="text-2xl font-semibold mb-4">Linha {col}</h2>
+                  <div key={linha}>
+                    <h2 className="text-2xl font-semibold mb-4">{linha}</h2>
                     <ModuloCarousel
                       modulos={mods}
                       alunoLayout
