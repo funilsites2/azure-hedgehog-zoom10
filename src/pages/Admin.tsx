@@ -22,6 +22,7 @@ export default function Admin() {
     adicionarAula,
     editarModulo,
     setAulaReleaseDays,
+    duplicarModulo,
   } = useModulos();
 
   const [novaAulaExistente, setNovaAulaExistente] = useState<{
@@ -226,6 +227,9 @@ export default function Admin() {
                   <div className="mt-auto flex gap-2">
                     <Button onClick={() => iniciarEdicao(m.id)}>
                       <Edit size={16} />
+                    </Button>
+                    <Button variant="secondary" onClick={() => duplicarModulo(m.id)} title="Duplicar Módulo">
+                      <Layers size={16} />
                     </Button>
                     <Button
                       variant="secondary"
