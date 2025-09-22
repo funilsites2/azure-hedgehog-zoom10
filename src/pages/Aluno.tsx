@@ -275,7 +275,7 @@ export default function Aluno() {
   );
 
   return (
-    <div className="min-h-screen h-screen w-screen flex flex-col md:flex-row bg-neutral-900 text-white overflow-hidden relative">
+    <div className="min-h-screen w-screen flex flex-col md:flex-row bg-neutral-900 text-white relative">
       <button
         className="md:hidden fixed top-4 left-4 z-20 bg-neutral-950 rounded-full p-2 border border-neutral-800 shadow-lg"
         onClick={() => setMobileMenuOpen(true)}
@@ -301,5 +301,5 @@ export default function Aluno() {
         {MobileFooter}
       </div>
     </div>
-  );
+);
 }
