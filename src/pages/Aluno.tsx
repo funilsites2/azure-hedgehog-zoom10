@@ -9,7 +9,6 @@ import {
   Lock,
   CheckCircle,
   User,
-  Play,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Progress } from "@/components/ui/progress";
@@ -22,15 +21,6 @@ import { usePhoto } from "@/context/PhotoContext";
 import { useUser } from "@/context/UserContext";
 import { Footer } from "@/components/Footer";
 import { showSuccess } from "@/utils/toast";
-
-function getYoutubeThumbnail(url: string): string {
-  const match = url.match(
-    /(?:youtube\.com\/(?:embed\/|watch\?v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/
-  );
-  return match
-    ? `https://img.youtube.com/vi/${match[1]}/hqdefault.jpg`
-    : "/placeholder.svg";
-}
 
 const MENU_ITEMS = [
   { key: "modulos", label: "Módulos", icon: BookOpen },
@@ -190,9 +180,7 @@ export default function Aluno() {
   const MobileDrawer = (
     <div
       className={`fixed inset-0 z-40 bg-black/60 transition-opacity ${
-        mobileMenuOpen
-          ? "opacity-100 pointer-events-auto"
-          : "opacity-0 pointer-events-none"
+        mobileMenuOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
       }`}
       onClick={() => setMobileMenuOpen(false)}
     >
@@ -209,9 +197,7 @@ export default function Aluno() {
           <X size={28} className="text-green-500" />
         </button>
         <div className="flex flex-col items-center space-y-4">
-          {logoUrl && (
-            <img src={logoUrl} alt="Logo" className="w-12 h-12 object-contain" />
-          )}
+          {logoUrl && <img src={logoUrl} alt="Logo" className="w-12 h-12 object-contain" />}
           <img
             src={photoUrl || "/placeholder.svg"}
             alt="Foto do aluno"
@@ -250,9 +236,7 @@ export default function Aluno() {
 
   const DesktopSidebar = (
     <aside className="hidden md:flex flex-col items-center bg-neutral-950 p-6 space-y-6">
-      {logoUrl && (
-        <img src={logoUrl} alt="Logo" className="w-12 h-12 object-contain" />
-      )}
+      {logoUrl && <img src={logoUrl} alt="Logo" className="w-12 h-12 object-contain" />}
       <img
         src={photoUrl || "/placeholder.svg"}
         alt="Foto do aluno"
@@ -344,7 +328,7 @@ export default function Aluno() {
         )}
         {moduloSelecionado === null && partialAulas.length > 0 && (
           <div className="container mx-auto mb-8">
-            {/* ... permanece inalterado */}
+            {/* Conteúdo original de próximas aulas permanece */}
           </div>
         )}
         <div className="flex-1 overflow-auto pb-[84px] md:pb-5">
