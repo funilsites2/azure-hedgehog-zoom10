@@ -96,7 +96,7 @@ export default function Aluno() {
                   {partialAulas.map(({ modulo: m, aula }) => (
                     <div
                       key={aula.id}
-                      className="snap-start flex-shrink-0 w-1/2 md:w-1/5 bg-neutral-800 p-4 rounded-lg cursor-pointer hover:bg-neutral-700 transition"
+                      className="snap-start flex-shrink-0 w-1/2 md:w-1/5 p-4 rounded-lg cursor-pointer transition"
                       onClick={() => {
                         setModuloSelecionado(m.id);
                         setAulaSelecionada(aula.id);
@@ -124,10 +124,7 @@ export default function Aluno() {
                 const mods = modulos.filter((m) => m.linha === linha);
                 if (!mods.length) return null;
                 return (
-                  <div
-                    key={linha}
-                    className="bg-neutral-800 bg-opacity-20 p-4 rounded-lg"
-                  >
+                  <div key={linha}>
                     <h3 className="text-2xl font-semibold mb-4 text-white">
                       {linha}
                     </h3>
