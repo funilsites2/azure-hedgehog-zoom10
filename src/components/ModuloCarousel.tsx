@@ -28,7 +28,7 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
       ? modulos.filter((m) => !m.bloqueado)
       : modulos;
 
-  // Embla carousel setup
+  // Embla carousel setup for mobile
   const [emblaRef, emblaApi] = useEmblaCarousel({
     slidesToScroll: 1,
     containScroll: "trimSnaps",
@@ -56,12 +56,6 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
   const mobileCardWidth = alunoLayout
     ? "w-[60vw] max-w-[280px] min-w-[180px]"
     : "min-w-1/2 max-w-[90vw]";
-  const mobilePeek = alunoLayout
-    ? { flex: "0 0 60%", marginRight: "2vw" }
-    : { flex: "0 0 50%" };
-  const desktopGridCols = alunoLayout
-    ? "md:grid-cols-3 lg:grid-cols-5"
-    : "md:grid-cols-2 lg:grid-cols-3";
 
   return (
     <div>
@@ -74,7 +68,7 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
                 <div
                   key={modulo.id}
                   className={`${mobileCardWidth} flex-shrink-0 px-2`}
-                  style={mobilePeek}
+                  style={alunoLayout ? { flex: "0 0 60%", marginRight: "2vw" } : undefined}
                 >
                   <div
                     className={`bg-neutral-800 rounded-lg p-4 shadow-lg flex flex-col h-full cursor-pointer relative transition-transform transform hover:scale-105 ${
@@ -154,12 +148,12 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
         </div>
       </div>
 
-      {/* Desktop grid */}
-      <div className={`hidden md:grid grid-cols-1 ${desktopGridCols} gap-4`}>
+      {/* Desktop carousel */}
+      <div className="hidden md:flex overflow-x-auto gap-4 snap-x snap-mandatory px-2">
         {filteredModulos.map((modulo) => (
           <div
             key={modulo.id}
-            className={`bg-neutral-800 rounded-lg p-3 shadow-lg flex flex-col h-full cursor-pointer relative transition-transform transform hover:scale-105 ${
+            className={`snap-start flex-shrink-0 w-[20%] bg-neutral-800 rounded-lg p-3 shadow-lg flex flex-col cursor-pointer relative transition-transform transform hover:scale-105 ${
               modulo.bloqueado ? "grayscale opacity-70" : ""
             }`}
             onClick={
@@ -208,5 +202,5 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
         ))}
       </div>
     </div>
-);
-}
+  );
+};
