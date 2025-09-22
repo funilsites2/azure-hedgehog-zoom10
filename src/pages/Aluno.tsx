@@ -46,22 +46,12 @@ export default function Aluno() {
 
   const [moduloSelecionado, setModuloSelecionado] = useState<number | null>(null);
   const [aulaSelecionada, setAulaSelecionada] = useState<number | null>(null);
-  const [startedAulas, setStartedAulas] = useState<number[]>([]);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mobileTab, setMobileTab] = useState<typeof MENU_ITEMS[number]["key"]>(
     "modulos"
   );
 
-  // registra aula iniciada
-  const handleSelectAula = (modId: number, aulaId: number) => {
-    setModuloSelecionado(modId);
-    setAulaSelecionada(aulaId);
-    setStartedAulas((prev) =>
-      prev.includes(aulaId) ? prev : [...prev, aulaId]
-    );
-  };
-
-  // calcula próxima aula não assistida (fallback)
+  // calcula próxima aula não assistida
   const { nextMod, nextAula } = (() => {
     let nm = null;
     let na = null;
@@ -76,20 +66,6 @@ export default function Aluno() {
     return { nextMod: nm as typeof m, nextAula: na as typeof a };
   })();
 
-  // aulas em progresso (iniciadas e não concluídas)
-  const inProgress = startedAulas
-    .map((id) => {
-      for (const m of modulos) {
-        const a = m.aulas.find((x) => x.id === id);
-        if (a) return { modulo: m, aula: a };
-      }
-      return null;
-    })
-    .filter(
-      (item): item is { modulo: typeof nextMod; aula: typeof nextAula } =>
-        item !== null && !item.aula.assistida
-    );
-
   const linhas = Array.from(new Set(modulos.map((m) => m.linha)));
   const totalAulas = modulos.reduce((sum, m) => sum + m.aulas.length, 0);
   const aulasAssistidas = modulos.reduce(
@@ -103,28 +79,6 @@ export default function Aluno() {
 
   function renderMainContent() {
     if (mobileTab === "continuar") {
-      if (inProgress.length > 0) {
-        return (
-          <div className="p-4 overflow-x-auto flex gap-4">
-            {inProgress.map(({ modulo, aula }) => (
-              <div
-                key={aula.id}
-                className="min-w-[200px] bg-neutral-800 rounded-lg p-2 cursor-pointer"
-                onClick={() => handleSelectAula(modulo.id, aula.id)}
-              >
-                <img
-                  src={getYoutubeThumbnail(aula.videoUrl)}
-                  alt={aula.titulo}
-                  className="w-full h-24 object-cover rounded mb-2"
-                />
-                <h3 className="text-sm font-semibold">{modulo.nome}</h3>
-                <p className="text-xs text-neutral-300 truncate">{aula.titulo}</p>
-              </div>
-            ))}
-          </div>
-        );
-      }
-      // fallback para próxima aula
       if (nextMod && nextAula) {
         return (
           <div className="p-8">
@@ -134,9 +88,10 @@ export default function Aluno() {
               <span className="text-neutral-300">{nextAula.titulo}</span>
               <button
                 className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
-                onClick={() =>
-                  handleSelectAula(nextMod.id, nextAula.id)
-                }
+                onClick={() => {
+                  setModuloSelecionado(nextMod.id);
+                  setAulaSelecionada(nextAula.id);
+                }}
               >
                 Continuar
               </button>
@@ -146,12 +101,112 @@ export default function Aluno() {
       }
       return <p className="p-8 text-neutral-300">Você concluiu todas as aulas!</p>;
     }
-    // ... restante sem alterações
-    // modulos, progresso, conquistas, bloqueados seguem igual
+    if (mobileTab === "modulos") {
+      if (!modulo) {
+        return (
+          <div className="container mx-auto mt-8 space-y-8">
+            {linhas.map((linha) => {
+              const mods = modulos.filter((m) => m.linha === linha);
+              if (!mods.length) return null;
+              return (
+                <div key={linha}>
+                  <h3 className="text-2xl font-semibold mb-4">{linha}</h3>
+                  <ModuloCarousel
+                    modulos={mods}
+                    alunoLayout
+                    onModuloClick={(m) => {
+                      setModuloSelecionado(m.id);
+                      setAulaSelecionada(m.aulas[0]?.id ?? null);
+                    }}
+                  />
+                </div>
+              );
+            })}
+          </div>
+        );
+      }
+      if (modulo.bloqueado) {
+        setModuloSelecionado(null);
+        return null;
+      }
+      return (
+        <>
+          <button
+            className="mb-6 mt-8 ml-4 flex items-center gap-2 text-neutral-400 hover:text-white transition"
+            onClick={() => setModuloSelecionado(null)}
+          >
+            <ArrowLeft size={20} /> Voltar
+          </button>
+          <div className="flex-1 flex overflow-hidden">
+            <AulaPlayer
+              modulo={modulo}
+              aulaSelecionadaId={aulaSelecionada ?? modulo.aulas[0]?.id}
+              onSelecionarAula={setAulaSelecionada}
+              onMarcarAssistida={(id) =>
+                marcarAulaAssistida(modulo.id, id)
+              }
+            />
+          </div>
+        </>
+      );
+    }
+    if (mobileTab === "progresso") {
+      return (
+        <div className="p-8">
+          <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
+            <BarChart2 size={24} /> Progresso Geral
+          </h2>
+          <Progress value={progresso} className="h-4 bg-neutral-800" />
+          <div className="mt-2 text-lg">{progresso}% concluído</div>
+        </div>
+      );
+    }
+    if (mobileTab === "conquistas") {
+      return (
+        <div className="p-8">
+          <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
+            <Award size={24} className="text-yellow-400" /> Conquistas
+          </h2>
+          <ul className="text-base">
+            <li className="mb-2">
+              {aulasAssistidas >= 1 ? (
+                <CheckCircle
+                  className="inline text-green-400 mr-1"
+                  size={18}
+                />
+              ) : (
+                <span className="inline-block w-5" />
+              )}
+              Primeira aula assistida
+            </li>
+            <li>
+              {progresso === 100 ? (
+                <CheckCircle
+                  className="inline text-green-400 mr-1"
+                  size={18}
+                />
+              ) : (
+                <span className="inline-block w-5" />
+              )}
+              Curso completo!
+            </li>
+          </ul>
+        </div>
+      );
+    }
+    if (mobileTab === "bloqueados") {
+      return (
+        <div className="p-8">
+          <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
+            <Lock size={24} className="text-red-400" /> Bloqueados
+          </h2>
+          <ModuloCarousel modulos={modulos} alunoLayout showLocked />
+        </div>
+      );
+    }
     return null;
   }
 
-  // drawer, sidebar e footer seguem sem alterações...
   const MobileDrawer = (
     <div
       className={`fixed inset-0 z-40 bg-black/60 transition-opacity ${
@@ -303,12 +358,15 @@ export default function Aluno() {
           </div>
         )}
         {/* miniatura Continuar Assistindo alinhada à esquerda */}
-        {moduloSelecionado === null && inProgress.length === 0 && nextMod && nextAula && (
+        {moduloSelecionado === null && nextMod && nextAula && (
           <div className="container mx-auto mb-8">
             <h3 className="text-2xl font-semibold mb-2">Continuar Assistindo</h3>
             <div
               className="flex items-center gap-4 cursor-pointer"
-              onClick={() => handleSelectAula(nextMod.id, nextAula.id)}
+              onClick={() => {
+                setModuloSelecionado(nextMod.id);
+                setAulaSelecionada(nextAula.id);
+              }}
             >
               <img
                 src={getYoutubeThumbnail(nextAula.videoUrl)}
