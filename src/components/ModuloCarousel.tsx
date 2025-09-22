@@ -52,10 +52,10 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
 
   // Layout helpers
   const mobileCardWidth = alunoLayout
-    ? "w-[70vw] max-w-[320px] min-w-[220px]"
+    ? "w-[60vw] max-w-[280px] min-w-[180px]"
     : "min-w-1/2 max-w-[90vw]";
   const mobilePeek = alunoLayout
-    ? { flex: "0 0 66%", marginRight: "2vw" }
+    ? { flex: "0 0 60%", marginRight: "2vw" }
     : { flex: "0 0 50%" };
   const desktopGridCols = alunoLayout
     ? "md:grid-cols-3 lg:grid-cols-5"
@@ -199,5 +199,5 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
         ))}
       </div>
     </div>
-  );
-};
+);
+}
