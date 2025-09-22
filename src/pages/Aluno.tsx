@@ -56,6 +56,21 @@ export default function Aluno() {
     .flatMap((m) => m.aulas.map((a) => ({ modulo: m, aula: a })))
     .filter(({ aula }) => !aula.assistida);
 
+  // cálculo de próxima aula
+  const { nextMod, nextAula } = (() => {
+    let nm = null;
+    let na = null;
+    for (const m of modulos) {
+      const a = m.aulas.find((a) => !a.assistida);
+      if (a) {
+        nm = m;
+        na = a;
+        break;
+      }
+    }
+    return { nextMod: nm as typeof m, nextAula: na as typeof a };
+  })();
+
   const linhas = Array.from(new Set(modulos.map((m) => m.linha)));
   const totalAulas = modulos.reduce((sum, m) => sum + m.aulas.length, 0);
   const aulasAssistidas = modulos.reduce(
@@ -296,7 +311,92 @@ export default function Aluno() {
           <User size={20} className="text-green-500" />
           <span>Perfil</span>
         </Link>
-      </aside>
-  // (restante do arquivo permanece inalterado)
+      </nav>
+    </aside>
+  );
+
+  const MobileFooter = (
+    <nav className="fixed bottom-0 left-0 right-0 z-30 flex md:hidden bg-neutral-950 border-t border-neutral-800 h-16">
+      {MENU_ITEMS.map((item) => (
+        <button
+          key={item.key}
+          onClick={() => {
+            setMobileTab(item.key);
+            if (item.key === "modulos") setModuloSelecionado(null);
+          }}
+          className={`flex-1 flex flex-col items-center justify-center ${
+            mobileTab === item.key
+              ? "bg-green-600 text-white"
+              : "text-neutral-300 hover:bg-green-600 hover:text-white"
+          }`}
+        >
+          <item.icon size={22} className="text-green-500" />
+          <span className="text-xs">{item.label}</span>
+        </button>
+      ))}
+      <Link
+        to="/perfil"
+        className="flex-1 flex flex-col items-center justify-center text-neutral-300 hover:bg-green-600 hover:text-white"
+      >
+        <User size={22} className="text-green-500" />
+        <span className="text-xs">Perfil</span>
+      </Link>
+    </nav>
+  );
+
+  return (
+    <div className="min-h-screen w-screen flex flex-col md:flex-row bg-neutral-900 text-white relative">
+      <button
+        className="md:hidden fixed top-4 left-4 z-20 bg-neutral-950 rounded-full p-2 border border-neutral-800 shadow-lg"
+        onClick={() => setMobileMenuOpen(true)}
+      >
+        <Menu size={28} className="text-green-500" />
+      </button>
+      {MobileDrawer}
+      {DesktopSidebar}
+      <div className="flex-1 flex flex-col pt-12 md:pt-0">
+        {bannerUrl && moduloSelecionado === null && (
+          <div className="mx-4 my-4 flex justify-center">
+            <div className="w-full max-w-[1600px] h-[400px] overflow-hidden rounded-lg">
+              <img
+                src={bannerUrl} alt="Banner Aluno"
+                className="w-full h-full object-cover object-left"
+              />
+            </div>
+          </div>
+        )}
+        {/* miniatura Continuar Assistindo com todos os vídeos não concluídos */}
+        {moduloSelecionado === null && partialAulas.length > 0 && (
+          <div className="container mx-auto mb-8">
+            <h3 className="text-2xl font-semibold mb-2">Continuar Assistindo</h3>
+            <div className="flex overflow-x-auto gap-6 pb-2">
+              {partialAulas.map(({ modulo: m, aula: a }) => (
+                <div
+                  key={`${m.id}-${a.id}`}
+                  className="flex-shrink-0 cursor-pointer"
+                  onClick={() => {
+                    setModuloSelecionado(m.id);
+                    setAulaSelecionada(a.id);
+                  }}
+                >
+                  <img
+                    src={getYoutubeThumbnail(a.videoUrl)}
+                    alt={a.titulo}
+                    className="w-56 h-auto rounded-lg"
+                  />
+                  <p className="mt-2 text-lg font-medium">{m.nome}</p>
+                  <p className="text-neutral-300 truncate">{a.titulo}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+        <div className="flex-1 overflow-auto pb-[84px] md:pb-5">
+          {renderMainContent()}
+        </div>
+        {MobileFooter}
+        <Footer />
+      </div>
+    </div>
 );
 }
