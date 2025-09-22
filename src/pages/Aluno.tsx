@@ -10,6 +10,8 @@ import {
   BarChart2,
   Award,
   Lock,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { useModulos } from "@/context/ModulosContext";
@@ -28,9 +30,8 @@ export default function Aluno() {
   const [moduloSelecionado, setModuloSelecionado] = useState<number | null>(null);
   const [aulaSelecionada, setAulaSelecionada] = useState<number | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [mobileTab, setMobileTab] = useState<
-    typeof MENU_ITEMS[number]["key"]
-  >("modulos");
+  const [mobileTab, setMobileTab] = useState<typeof MENU_ITEMS[number]["key"]>("modulos");
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   // Progresso geral
   const totalAulas = modulos.reduce((acc, m) => acc + m.aulas.length, 0);
@@ -43,7 +44,6 @@ export default function Aluno() {
   const modulo = modulos.find((m) => m.id === moduloSelecionado);
 
   function renderMainContent() {
-    // Aba Módulos
     if (mobileTab === "modulos") {
       if (!modulo) {
         return (
@@ -89,7 +89,6 @@ export default function Aluno() {
       }
     }
 
-    // Aba Progresso
     if (mobileTab === "progresso") {
       return (
         <div className="p-8">
@@ -102,7 +101,6 @@ export default function Aluno() {
       );
     }
 
-    // Aba Conquistas
     if (mobileTab === "conquistas") {
       return (
         <div className="p-8">
@@ -131,7 +129,6 @@ export default function Aluno() {
       );
     }
 
-    // Aba Bloqueados
     if (mobileTab === "bloqueados") {
       return (
         <div className="p-8">
@@ -146,7 +143,7 @@ export default function Aluno() {
     return null;
   }
 
-  // Drawer lateral (mobile)
+  // Mobile drawer
   const MobileDrawer = (
     <div
       className={`fixed inset-0 z-40 bg-black/60 transition-opacity duration-200 ${
@@ -194,30 +191,53 @@ export default function Aluno() {
     </div>
   );
 
-  // Nav superior (desktop)
-  const DesktopNav = (
-    <nav className="hidden md:flex bg-neutral-950 border-b border-neutral-800">
-      {MENU_ITEMS.map((item) => {
-        const Icon = item.icon;
-        return (
-          <button
-            key={item.key}
-            className={`flex-1 flex items-center justify-center gap-2 py-3 text-sm font-medium ${
-              mobileTab === item.key ? "bg-neutral-900 text-white" : "text-neutral-400 hover:text-white"
-            }`}
-            onClick={() => {
-              setMobileTab(item.key);
-              setModuloSelecionado(null);
-            }}
-          >
-            <Icon size={18} /> {item.label}
-          </button>
-        );
-      })}
-    </nav>
+  // Desktop sidebar
+  const DesktopSidebar = (
+    <aside
+      className={`hidden md:flex flex-col bg-neutral-950 border-r border-neutral-800 transition-all ${
+        sidebarCollapsed ? "w-20" : "w-64"
+      }`}
+    >
+      <div className="flex items-center justify-between p-4">
+        {!sidebarCollapsed && (
+          <h2 className="text-xl font-bold flex items-center gap-2">
+            <Layers size={24} /> Aluno
+          </h2>
+        )}
+        <button
+          className="p-2 text-neutral-400 hover:text-white"
+          onClick={() => setSidebarCollapsed((prev) => !prev)}
+          aria-label="Toggle sidebar"
+        >
+          {sidebarCollapsed ? <ChevronRight size={24} /> : <ChevronLeft size={24} />}
+        </button>
+      </div>
+      <nav className="flex flex-col flex-1 p-2">
+        {MENU_ITEMS.map((item) => {
+          const Icon = item.icon;
+          return (
+            <button
+              key={item.key}
+              className={`flex items-center gap-2 w-full px-3 py-2 my-1 rounded text-sm font-medium transition-colors ${
+                mobileTab === item.key
+                  ? "bg-neutral-900 text-white"
+                  : "text-neutral-300 hover:bg-neutral-800 hover:text-white"
+              }`}
+              onClick={() => {
+                setMobileTab(item.key);
+                setModuloSelecionado(null);
+              }}
+            >
+              <Icon size={20} />
+              {!sidebarCollapsed && item.label}
+            </button>
+          );
+        })}
+      </nav>
+    </aside>
   );
 
-  // Menu rodapé (mobile)
+  // Mobile footer
   const MobileFooter = (
     <nav className="fixed bottom-0 left-0 right-0 z-30 flex md:hidden bg-neutral-950 border-t border-neutral-800 h-16">
       {MENU_ITEMS.map((item) => {
@@ -242,8 +262,8 @@ export default function Aluno() {
   );
 
   return (
-    <div className="min-h-screen h-screen w-screen flex flex-col bg-neutral-900 text-white overflow-hidden relative">
-      {/* Menu hambúrguer mobile */}
+    <div className="min-h-screen h-screen w-screen flex flex-col md:flex-row bg-neutral-900 text-white overflow-hidden relative">
+      {/* Mobile hamburger */}
       <button
         className="md:hidden fixed top-4 left-4 z-50 bg-neutral-950 rounded-full p-2 border border-neutral-800 shadow-lg"
         onClick={() => setMobileMenuOpen(true)}
@@ -252,9 +272,11 @@ export default function Aluno() {
         <Menu size={28} />
       </button>
       {MobileDrawer}
-      {DesktopNav}
-      <main className="flex-1 overflow-auto">{renderMainContent()}</main>
-      {MobileFooter}
+      {DesktopSidebar}
+      <div className="flex-1 flex flex-col">
+        <main className="flex-1 overflow-auto">{renderMainContent()}</main>
+        {MobileFooter}
+      </div>
     </div>
   );
 }
