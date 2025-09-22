@@ -1,8 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { CheckCircle, ChevronLeft, ChevronRight, Lock } from "lucide-react";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { CheckCircle, Lock } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 import { useUser } from "@/context/UserContext";
@@ -29,6 +28,13 @@ interface AulaPlayerProps {
   onMarcarAssistida: (aulaId: number) => void;
 }
 
+function getYoutubeThumbnail(url: string): string {
+  const match = url.match(
+    /(?:youtube\.com\/(?:embed\/|watch\?v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/
+  );
+  return match ? `https://img.youtube.com/vi/${match[1]}/hqdefault.jpg` : "/placeholder.svg";
+}
+
 export function AulaPlayer({
   modulo,
   aulaSelecionadaId,
@@ -37,6 +43,7 @@ export function AulaPlayer({
 }: AulaPlayerProps) {
   const { name } = useUser();
   const aulas = modulo.aulas;
+  const now = Date.now();
 
   if (!aulas || aulas.length === 0) {
     return (
@@ -48,40 +55,19 @@ export function AulaPlayer({
 
   const aulaIndex = aulas.findIndex((a) => a.id === aulaSelecionadaId);
   const aula = aulas[aulaIndex] ?? aulas[0];
-  const hasPrev = aulaIndex > 0;
-  const hasNext = aulaIndex < aulas.length - 1;
 
-  const totalAulasModulo = aulas.length;
-  const assistidasModulo = aulas.filter((a) => a.assistida).length;
-  const progressoModulo = totalAulasModulo
-    ? Math.round((assistidasModulo / totalAulasModulo) * 100)
-    : 0;
+  const total = aulas.length;
+  const done = aulas.filter((a) => a.assistida).length;
+  const progresso = total ? Math.round((done / total) * 100) : 0;
 
-  const [tab, setTab] = useState("video");
-  const embedUrl = aula.videoUrl;
-
-  const now = Date.now();
-  const isLocked =
+  const isLockedCurrent =
     aula.bloqueado === true || (aula.releaseDate && now < aula.releaseDate);
-
-  if (isLocked) {
-    const releaseText = aula.releaseDate
-      ? new Date(aula.releaseDate).toLocaleDateString()
-      : "";
-    return (
-      <div className="flex flex-col items-center justify-center h-full text-neutral-300">
-        <Lock size={48} className="text-red-500 mb-4" />
-        <p className="text-lg">
-          Aula "{aula.titulo}" bloqueada{releaseText && ` até ${releaseText}`}.
-        </p>
-      </div>
-    );
-  }
 
   return (
     <div className="flex flex-col md:flex-row gap-6 w-full h-full">
+      {/* Vídeo */}
       <div className="w-full md:w-2/3 flex flex-col pl-4 md:pl-8">
-        <div className="flex justify-end items-center mb-2">
+        <div className="flex justify-between items-center mb-2">
           {!aula.assistida ? (
             <button
               className="text-xs bg-green-600 px-3 py-1 rounded hover:bg-green-700 text-white"
@@ -94,27 +80,60 @@ export function AulaPlayer({
               <CheckCircle size={16} /> Concluída
             </span>
           )}
+          <span className="text-xs text-neutral-300">{progresso}% concluído</span>
         </div>
-        <div className="mb-4 px-2">
-          <Progress value={progressoModulo} className="h-2 bg-neutral-800" />
-          <div className="text-xs text-neutral-400 mt-1">
-            {progressoModulo}% do módulo concluído
+        {isLockedCurrent ? (
+          <div className="flex flex-col items-center justify-center h-full text-neutral-300">
+            <Lock size={48} className="text-red-500 mb-4" />
+            <p className="text-lg">
+              Aula "{aula.titulo}" bloqueada até{" "}
+              {aula.releaseDate
+                ? new Date(aula.releaseDate).toLocaleDateString()
+                : ""}
+              .
+            </p>
           </div>
-        </div>
-        <div className="aspect-video bg-black rounded-lg overflow-hidden mb-4 shadow-lg">
-          <iframe
-            src={embedUrl}
-            title={aula.titulo}
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-            className="w-full h-full"
-          />
-        </div>
-
-        {/* ... restante inalterado */}
+        ) : (
+          <div className="aspect-video bg-black rounded-lg overflow-hidden mb-4 shadow-lg">
+            <iframe
+              src={aula.videoUrl}
+              title={aula.titulo}
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+              className="w-full h-full"
+            />
+          </div>
+        )}
       </div>
 
-      {/* ... restante inalterado */}
+      {/* Miniaturas */}
+      <div className="w-full md:w-1/3 overflow-auto space-y-4 pr-4">
+        {aulas.map((a) => {
+          const blocked = a.bloqueado === true || (a.releaseDate && now < a.releaseDate);
+          return (
+            <div
+              key={a.id}
+              className={cn(
+                "relative rounded-lg overflow-hidden cursor-pointer",
+                blocked && "opacity-50 cursor-not-allowed"
+              )}
+              onClick={() => !blocked && onSelecionarAula(a.id)}
+            >
+              <img
+                src={getYoutubeThumbnail(a.videoUrl)}
+                alt={a.titulo}
+                className="w-full h-20 object-cover"
+              />
+              {blocked && (
+                <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+                  <Lock size={24} className="text-white" />
+                </div>
+              )}
+              <p className="text-sm text-white mt-1 px-1 truncate">{a.titulo}</p>
+            </div>
+          );
+        })}
+      </div>
     </div>
-);
+  );
 }
