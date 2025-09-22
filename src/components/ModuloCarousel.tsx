@@ -1,9 +1,23 @@
 import React from "react";
 import useEmblaCarousel from "embla-carousel-react";
 import { ChevronLeft, ChevronRight, Video, Lock } from "lucide-react";
+import SimpleProgress from "@/components/SimpleProgress";
 
-type Aula = { id: number; titulo: string; videoUrl: string; bloqueado?: boolean };
-type Modulo = { id: number; nome: string; capa: string; aulas: Aula[]; bloqueado?: boolean; releaseDate?: number };
+type Aula = {
+  id: number;
+  titulo: string;
+  videoUrl: string;
+  bloqueado?: boolean;
+  assistida?: boolean;
+};
+type Modulo = {
+  id: number;
+  nome: string;
+  capa: string;
+  aulas: Aula[];
+  bloqueado?: boolean;
+  releaseDate?: number;
+};
 
 interface ModuloCarouselProps {
   modulos: Modulo[];
@@ -64,66 +78,74 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
         <div className="relative">
           <div className="overflow-visible" ref={emblaRef}>
             <div className="flex">
-              {filteredModulos.map((modulo) => (
-                <div
-                  key={modulo.id}
-                  className={`${mobileCardWidth} flex-shrink-0 px-2`}
-                  style={alunoLayout ? { flex: "0 0 60%", marginRight: "2vw" } : undefined}
-                >
+              {filteredModulos.map((modulo) => {
+                const total = modulo.aulas.length;
+                const concluido = modulo.aulas.filter((a) => a.assistida).length;
+                const progresso = total ? Math.round((concluido / total) * 100) : 0;
+                return (
                   <div
-                    className={`bg-neutral-800 rounded-lg p-4 shadow-lg flex flex-col h-full cursor-pointer relative transition-transform transform hover:scale-105 ${
-                      modulo.bloqueado ? "grayscale opacity-70" : ""
-                    }`}
-                    onClick={
-                      !modulo.bloqueado && onModuloClick
-                        ? () => onModuloClick(modulo)
-                        : undefined
-                    }
+                    key={modulo.id}
+                    className={`${mobileCardWidth} flex-shrink-0 px-2`}
+                    style={alunoLayout ? { flex: "0 0 60%", marginRight: "2vw" } : undefined}
                   >
-                    {modulo.releaseDate && now < modulo.releaseDate && (
-                      <div className="absolute top-0 inset-x-0 bg-yellow-500 text-black text-xs text-center py-1 rounded-t-lg">
-                        Liberado em {new Date(modulo.releaseDate).toLocaleDateString()}
+                    <div
+                      className={`bg-neutral-800 rounded-lg p-4 shadow-lg flex flex-col h-full cursor-pointer relative transition-transform transform hover:scale-105 ${
+                        modulo.bloqueado ? "grayscale opacity-70" : ""
+                      }`}
+                      onClick={
+                        !modulo.bloqueado && onModuloClick
+                          ? () => onModuloClick(modulo)
+                          : undefined
+                      }
+                    >
+                      {modulo.releaseDate && now < modulo.releaseDate && (
+                        <div className="absolute top-0 inset-x-0 bg-yellow-500 text-black text-xs text-center py-1 rounded-t-lg">
+                          Liberado em {new Date(modulo.releaseDate).toLocaleDateString()}
+                        </div>
+                      )}
+                      {modulo.bloqueado && (
+                        <Lock
+                          size={28}
+                          className="absolute top-2 right-2 text-red-500 bg-neutral-900 rounded-full p-1"
+                        />
+                      )}
+                      <div className="mb-2 flex flex-col items-center">
+                        <img
+                          src={modulo.capa}
+                          alt={modulo.nome}
+                          className="w-full aspect-[3/4] object-cover rounded mb-2"
+                          onError={(e) =>
+                            (e.currentTarget.src =
+                              "https://placehold.co/300x400?text=Sem+Capa")
+                          }
+                        />
+                        <h2 className="text-base font-semibold text-center">
+                          {modulo.nome}
+                        </h2>
+                        <div className="w-full mt-2">
+                          <SimpleProgress value={progresso} />
+                        </div>
                       </div>
-                    )}
-                    {modulo.bloqueado && (
-                      <Lock
-                        size={28}
-                        className="absolute top-2 right-2 text-red-500 bg-neutral-900 rounded-full p-1"
-                      />
-                    )}
-                    <div className="mb-2 flex flex-col items-center">
-                      <img
-                        src={modulo.capa}
-                        alt={modulo.nome}
-                        className="w-full aspect-[3/4] object-cover rounded mb-2"
-                        onError={(e) =>
-                          (e.currentTarget.src =
-                            "https://placehold.co/300x400?text=Sem+Capa")
-                        }
-                      />
-                      <h2 className="text-base font-semibold text-center">
-                        {modulo.nome}
-                      </h2>
+                      <ul>
+                        {modulo.aulas.map((aula) => (
+                          <li
+                            key={aula.id}
+                            className="flex items-center gap-2 mb-1 text-xs"
+                          >
+                            <Video size={16} /> {aula.titulo}
+                            {aula.bloqueado && (
+                              <Lock
+                                size={12}
+                                className="ml-1 text-red-500"
+                              />
+                            )}
+                          </li>
+                        ))}
+                      </ul>
                     </div>
-                    <ul>
-                      {modulo.aulas.map((aula) => (
-                        <li
-                          key={aula.id}
-                          className="flex items-center gap-2 mb-1 text-xs"
-                        >
-                          <Video size={16} /> {aula.titulo}
-                          {aula.bloqueado && (
-                            <Lock
-                              size={12}
-                              className="ml-1 text-red-500"
-                            />
-                          )}
-                        </li>
-                      ))}
-                    </ul>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
           {/* Nav buttons */}
@@ -150,56 +172,64 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
 
       {/* Desktop carousel */}
       <div className="hidden md:flex overflow-x-auto gap-4 snap-x snap-mandatory px-2">
-        {filteredModulos.map((modulo) => (
-          <div
-            key={modulo.id}
-            className={`snap-start flex-shrink-0 w-[20%] bg-neutral-800 rounded-lg p-3 shadow-lg flex flex-col cursor-pointer relative transition-transform transform hover:scale-105 ${
-              modulo.bloqueado ? "grayscale opacity-70" : ""
-            }`}
-            onClick={
-              !modulo.bloqueado && onModuloClick
-                ? () => onModuloClick(modulo)
-                : undefined
-            }
-          >
-            {modulo.releaseDate && now < modulo.releaseDate && (
-              <div className="absolute top-0 inset-x-0 bg-yellow-500 text-black text-xs text-center py-1 rounded-t-lg">
-                Liberado em {new Date(modulo.releaseDate).toLocaleDateString()}
+        {filteredModulos.map((modulo) => {
+          const total = modulo.aulas.length;
+          const concluido = modulo.aulas.filter((a) => a.assistida).length;
+          const progresso = total ? Math.round((concluido / total) * 100) : 0;
+          return (
+            <div
+              key={modulo.id}
+              className={`snap-start flex-shrink-0 w-[20%] bg-neutral-800 rounded-lg p-3 shadow-lg flex flex-col cursor-pointer relative transition-transform transform hover:scale-105 ${
+                modulo.bloqueado ? "grayscale opacity-70" : ""
+              }`}
+              onClick={
+                !modulo.bloqueado && onModuloClick
+                  ? () => onModuloClick(modulo)
+                  : undefined
+              }
+            >
+              {modulo.releaseDate && now < modulo.releaseDate && (
+                <div className="absolute top-0 inset-x-0 bg-yellow-500 text-black text-xs text-center py-1 rounded-t-lg">
+                  Liberado em {new Date(modulo.releaseDate).toLocaleDateString()}
+                </div>
+              )}
+              {modulo.bloqueado && (
+                <Lock
+                  size={28}
+                  className="absolute top-2 right-2 text-red-500 bg-neutral-900 rounded-full p-1"
+                />
+              )}
+              <div className="mb-2 flex flex-col items-center">
+                <img
+                  src={modulo.capa}
+                  alt={modulo.nome}
+                  className="w-full aspect-[3/4] object-cover rounded mb-2"
+                  onError={(e) =>
+                    (e.currentTarget.src =
+                      "https://placehold.co/300x400?text=Sem+Capa")
+                  }
+                />
+                <h2 className="text-base font-semibold text-center">
+                  {modulo.nome}
+                </h2>
+                <div className="w-full mt-2">
+                  <SimpleProgress value={progresso} />
+                </div>
               </div>
-            )}
-            {modulo.bloqueado && (
-              <Lock
-                size={28}
-                className="absolute top-2 right-2 text-red-500 bg-neutral-900 rounded-full p-1"
-              />
-            )}
-            <div className="mb-2 flex flex-col items-center">
-              <img
-                src={modulo.capa}
-                alt={modulo.nome}
-                className="w-full aspect-[3/4] object-cover rounded mb-2"
-                onError={(e) =>
-                  (e.currentTarget.src =
-                    "https://placehold.co/300x400?text=Sem+Capa")
-                }
-              />
-              <h2 className="text-base font-semibold text-center">
-                {modulo.nome}
-              </h2>
+              <ul>
+                {modulo.aulas.map((aula) => (
+                  <li
+                    key={aula.id}
+                    className="flex items-center gap-2 mb-1 text-xs"
+                  >
+                    <Video size={16} /> {aula.titulo}
+                    {aula.bloqueado && <Lock size={12} className="ml-1 text-red-500" />}
+                  </li>
+                ))}
+              </ul>
             </div>
-            <ul>
-              {modulo.aulas.map((aula) => (
-                <li
-                  key={aula.id}
-                  className="flex items-center gap-2 mb-1 text-xs"
-                >
-                  <Video size={16} /> {aula.titulo}
-                  {aula.bloqueado && <Lock size={12} className="ml-1 text-red-500" />}
-                </li>
-              ))}
-            </ul>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
