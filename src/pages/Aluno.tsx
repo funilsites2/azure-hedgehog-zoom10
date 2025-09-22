@@ -276,7 +276,7 @@ export default function Aluno() {
   return (
     <div className="min-h-screen h-screen w-screen flex flex-col md:flex-row bg-neutral-900 text-white overflow-hidden relative">
       <button
-        className="md:hidden fixed top-4 left-4 z-50 bg-neutral-950 rounded-full p-2 border border-neutral-800 shadow-lg"
+        className="md:hidden fixed top-4 left-4 z-20 bg-neutral-950 rounded-full p-2 border border-neutral-800 shadow-lg"
         onClick={() => setMobileMenuOpen(true)}
         aria-label="Abrir menu"
       >
@@ -284,10 +284,10 @@ export default function Aluno() {
       </button>
       {MobileDrawer}
       {DesktopSidebar}
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col pt-12 md:pt-0">
         <main className="flex-1 overflow-auto">{renderMainContent()}</main>
         {MobileFooter}
       </div>
     </div>
-  );
+);
 }
