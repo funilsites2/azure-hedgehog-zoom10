@@ -56,7 +56,9 @@ const Perfil: React.FC = () => {
   const MobileDrawer = (
     <div
       className={`fixed inset-0 z-40 bg-black/60 transition-opacity ${
-        mobileMenuOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+        mobileMenuOpen
+          ? "opacity-100 pointer-events-auto"
+          : "opacity-0 pointer-events-none"
       }`}
       onClick={() => setMobileMenuOpen(false)}
     >
@@ -70,28 +72,28 @@ const Perfil: React.FC = () => {
           className="self-end text-neutral-400 hover:text-white"
           onClick={() => setMobileMenuOpen(false)}
         >
-          <X size={28} />
+          <X size={28} className="text-green-500" />
         </button>
         <h2 className="text-2xl font-bold flex items-center gap-2">
-          <Layers size={28} /> Área do Aluno
+          <Layers size={28} className="text-green-500" /> Área do Aluno
         </h2>
         <nav className="flex flex-col gap-4">
           {MENU_ITEMS.map((item) => (
             <Link
               key={item.key}
               to={item.key === "modulos" ? "/aluno" : "#"}
-              className="flex items-center gap-2 px-2 py-2 rounded text-neutral-300 hover:bg-neutral-800 hover:text-white"
+              className="flex items-center gap-2 px-2 py-2 rounded border border-green-500 text-neutral-300 hover:bg-neutral-800 hover:text-white"
               onClick={() => setMobileMenuOpen(false)}
             >
-              <item.icon size={20} /> {item.label}
+              <item.icon size={20} className="text-green-500" /> {item.label}
             </Link>
           ))}
           <Link
             to="/perfil"
-            className="flex items-center gap-2 px-2 py-2 rounded text-neutral-300 hover:bg-neutral-800 hover:text-white"
+            className="flex items-center gap-2 px-2 py-2 rounded border border-green-500 text-neutral-300 hover:bg-neutral-800 hover:text-white"
             onClick={() => setMobileMenuOpen(false)}
           >
-            <User size={20} /> Perfil
+            <User size={20} className="text-green-500" /> Perfil
           </Link>
         </nav>
       </div>
@@ -105,7 +107,9 @@ const Perfil: React.FC = () => {
       }`}
     >
       <div className="p-4 flex flex-col items-center space-y-4">
-        {logoUrl && <img src={logoUrl} alt="Logo" className="w-12 h-12 object-contain" />}
+        {logoUrl && (
+          <img src={logoUrl} alt="Logo" className="w-12 h-12 object-contain" />
+        )}
         <img
           src={photoUrl || "/placeholder.svg"}
           alt="Foto do aluno"
@@ -115,14 +119,18 @@ const Perfil: React.FC = () => {
       <div className="flex items-center justify-between p-4">
         {!sidebarCollapsed && (
           <h2 className="text-xl font-bold flex items-center gap-2">
-            <Layers size={24} /> Área do Aluno
+            <Layers size={24} className="text-green-500" /> Área do Aluno
           </h2>
         )}
         <button
           className="p-2 text-neutral-400 hover:text-white"
           onClick={() => setSidebarCollapsed((prev) => !prev)}
         >
-          {sidebarCollapsed ? <ChevronRight size={24} /> : <ChevronLeft size={24} />}
+          {sidebarCollapsed ? (
+            <ChevronRight size={24} className="text-green-500" />
+          ) : (
+            <ChevronLeft size={24} className="text-green-500" />
+          )}
         </button>
       </div>
       <nav className="flex flex-col flex-1 p-2">
@@ -130,17 +138,17 @@ const Perfil: React.FC = () => {
           <Link
             key={item.key}
             to={item.key === "modulos" ? "/aluno" : "#"}
-            className="flex items-center gap-2 w-full px-3 py-2 my-1 rounded text-sm font-medium text-neutral-300 hover:bg-neutral-800 hover:text-white"
+            className="flex items-center gap-2 w-full px-3 py-2 my-1 rounded border border-green-500 text-neutral-300 hover:bg-neutral-800 hover:text-white"
           >
-            <item.icon size={20} />
+            <item.icon size={20} className="text-green-500" />
             {!sidebarCollapsed && item.label}
           </Link>
         ))}
         <Link
           to="/perfil"
-          className="flex items-center gap-2 w-full px-3 py-2 my-1 rounded text-sm font-medium text-neutral-300 hover:bg-neutral-800 hover:text-white"
+          className="flex items-center gap-2 w-full px-3 py-2 my-1 rounded border border-green-500 text-neutral-300 hover:bg-neutral-800 hover:text-white"
         >
-          <User size={20} />
+          <User size={20} className="text-green-500" />
           {!sidebarCollapsed && "Perfil"}
         </Link>
       </nav>
@@ -153,17 +161,17 @@ const Perfil: React.FC = () => {
         <Link
           key={item.key}
           to={item.key === "modulos" ? "/aluno" : "#"}
-          className="flex-1 flex flex-col items-center justify-center gap-1 text-xs text-neutral-300 hover:text-white"
+          className="flex-1 flex flex-col items-center justify-center gap-1 p-2 border border-green-500 rounded text-xs text-neutral-300 hover:text-white"
         >
-          <item.icon size={22} />
+          <item.icon size={22} className="text-green-500" />
           {item.label}
         </Link>
       ))}
       <Link
         to="/perfil"
-        className="flex-1 flex flex-col items-center justify-center gap-1 text-xs text-neutral-300 hover:text-white"
+        className="flex-1 flex flex-col items-center justify-center gap-1 p-2 border border-green-500 rounded text-xs text-neutral-300 hover:text-white"
       >
-        <User size={22} />
+        <User size={22} className="text-green-500" />
         Perfil
       </Link>
     </nav>
@@ -175,7 +183,7 @@ const Perfil: React.FC = () => {
         className="md:hidden fixed top-4 left-4 z-20 bg-neutral-950 rounded-full p-2 border border-neutral-800 shadow-lg"
         onClick={() => setMobileMenuOpen(true)}
       >
-        <Menu size={28} />
+        <Menu size={28} className="text-green-500" />
       </button>
       {MobileDrawer}
       {DesktopSidebar}
