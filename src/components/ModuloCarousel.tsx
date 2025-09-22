@@ -19,9 +19,10 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
   showLocked,
 }) => {
   // Determine which modules to show
-  const filteredModulos = showLocked === true
-    ? modulos.filter((m) => m.bloqueado)
-    : showLocked === false
+  const filteredModulos =
+    showLocked === true
+      ? modulos.filter((m) => m.bloqueado)
+      : showLocked === false
       ? modulos.filter((m) => !m.bloqueado)
       : modulos;
 
@@ -80,7 +81,9 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
                 >
                   <div
                     className={`bg-neutral-800 rounded-lg p-4 shadow-lg flex flex-col h-full cursor-pointer relative transition-transform transform hover:scale-105 ${
-                      modulo.bloqueado ? "grayscale opacity-70 pointer-events-none" : ""
+                      modulo.bloqueado
+                        ? "grayscale opacity-70 pointer-events-none"
+                        : ""
                     }`}
                     onClick={
                       !modulo.bloqueado && onModuloClick
@@ -104,14 +107,22 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
                             "https://placehold.co/300x400?text=Sem+Capa")
                         }
                       />
-                      <h2 className="text-base font-semibold text-center">{modulo.nome}</h2>
+                      <h2 className="text-base font-semibold text-center">
+                        {modulo.nome}
+                      </h2>
                     </div>
                     <ul>
                       {modulo.aulas.map((aula) => (
-                        <li key={aula.id} className="flex items-center gap-2 mb-1 text-xs">
+                        <li
+                          key={aula.id}
+                          className="flex items-center gap-2 mb-1 text-xs"
+                        >
                           <Video size={16} /> {aula.titulo}
                           {aula.bloqueado && (
-                            <Lock size={12} className="ml-1 text-red-500" />
+                            <Lock
+                              size={12}
+                              className="ml-1 text-red-500"
+                            />
                           )}
                         </li>
                       ))}
@@ -143,12 +154,16 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
         </div>
       </div>
       {/* Desktop grid */}
-      <div className={`hidden md:grid grid-cols-1 ${desktopGridCols} gap-4`}>
+      <div
+        className={`hidden md:grid grid-cols-1 ${desktopGridCols} gap-4`}
+      >
         {filteredModulos.map((modulo) => (
           <div
             key={modulo.id}
             className={`bg-neutral-800 rounded-lg p-3 shadow-lg flex flex-col h-full cursor-pointer relative transition-transform transform hover:scale-105 ${
-              modulo.bloqueado ? "grayscale opacity-70 pointer-events-none" : ""
+              modulo.bloqueado
+                ? "grayscale opacity-70 pointer-events-none"
+                : ""
             }`}
             onClick={
               !modulo.bloqueado && onModuloClick
@@ -172,14 +187,22 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
                     "https://placehold.co/300x400?text=Sem+Capa")
                 }
               />
-              <h2 className="text-base font-semibold text-center">{modulo.nome}</h2>
+              <h2 className="text-base font-semibold text-center">
+                {modulo.nome}
+              </h2>
             </div>
             <ul>
               {modulo.aulas.map((aula) => (
-                <li key={aula.id} className="flex items-center gap-2 mb-1 text-xs">
+                <li
+                  key={aula.id}
+                  className="flex items-center gap-2 mb-1 text-xs"
+                >
                   <Video size={16} /> {aula.titulo}
                   {aula.bloqueado && (
-                    <Lock size={12} className="ml-1 text-red-500" />
+                    <Lock
+                      size={12}
+                      className="ml-1 text-red-500"
+                    />
                   )}
                 </li>
               ))}
@@ -188,4 +211,5 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
         ))}
       </div>
     </div>
-);
+  );
+};
