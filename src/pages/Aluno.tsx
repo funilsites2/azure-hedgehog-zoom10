@@ -1,17 +1,14 @@
 import { useState } from "react";
 import {
-  Layers,
+  Menu,
+  X,
   ArrowLeft,
   BookOpen,
   BarChart2,
   Award,
   Lock,
-  Menu,
-  X,
-  User,
   CheckCircle,
 } from "lucide-react";
-import { Link } from "react-router-dom";
 import { Progress } from "@/components/ui/progress";
 import { useModulos } from "@/context/ModulosContext";
 import { AulaPlayer } from "@/components/AulaPlayer";
@@ -35,13 +32,13 @@ export default function Aluno() {
   const { logoUrl } = useLogo();
   const { photoUrl } = usePhoto();
   const { name } = useUser();
+
   const [moduloSelecionado, setModuloSelecionado] = useState<number | null>(null);
   const [aulaSelecionada, setAulaSelecionada] = useState<number | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mobileTab, setMobileTab] = useState<typeof MENU_ITEMS[number]["key"]>(
     "modulos"
   );
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   const linhas = Array.from(new Set(modulos.map((m) => m.linha)));
   const totalAulas = modulos.reduce((sum, m) => sum + m.aulas.length, 0);
@@ -49,7 +46,9 @@ export default function Aluno() {
     (sum, m) => sum + m.aulas.filter((a) => a.assistida).length,
     0
   );
-  const progresso = totalAulas ? Math.round((aulasAssistidas / totalAulas) * 100) : 0;
+  const progresso = totalAulas
+    ? Math.round((aulasAssistidas / totalAulas) * 100)
+    : 0;
   const modulo = modulos.find((m) => m.id === moduloSelecionado);
 
   function renderMainContent() {
@@ -94,7 +93,9 @@ export default function Aluno() {
               modulo={modulo}
               aulaSelecionadaId={aulaSelecionada ?? modulo.aulas[0]?.id}
               onSelecionarAula={setAulaSelecionada}
-              onMarcarAssistida={(id) => marcarAulaAssistida(modulo.id, id)}
+              onMarcarAssistida={(id) =>
+                marcarAulaAssistida(modulo.id, id)
+              }
             />
           </div>
         </>
@@ -120,7 +121,10 @@ export default function Aluno() {
           <ul className="text-base">
             <li className="mb-2">
               {aulasAssistidas >= 1 ? (
-                <CheckCircle className="inline text-green-400 mr-1" size={18} />
+                <CheckCircle
+                  className="inline text-green-400 mr-1"
+                  size={18}
+                />
               ) : (
                 <span className="inline-block w-5" />
               )}
@@ -128,7 +132,10 @@ export default function Aluno() {
             </li>
             <li>
               {progresso === 100 ? (
-                <CheckCircle className="inline text-green-400 mr-1" size={18} />
+                <CheckCircle
+                  className="inline text-green-400 mr-1"
+                  size={18}
+                />
               ) : (
                 <span className="inline-block w-5" />
               )}
@@ -151,11 +158,103 @@ export default function Aluno() {
     return null;
   }
 
-  // ... o resto do componente permanece igual (menus, sidebar, footer)
+  const MobileDrawer = (
+    <div
+      className={`fixed inset-0 z-40 bg-black/60 transition-opacity ${
+        mobileMenuOpen
+          ? "opacity-100 pointer-events-auto"
+          : "opacity-0 pointer-events-none"
+      }`}
+      onClick={() => setMobileMenuOpen(false)}
+    >
+      <div
+        className={`absolute left-0 top-0 h-full w-64 bg-neutral-950/90 backdrop-blur-sm p-6 flex flex-col gap-4 transition-transform ${
+          mobileMenuOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <button
+          className="self-end text-neutral-400 hover:text-white"
+          onClick={() => setMobileMenuOpen(false)}
+        >
+          <X size={28} className="text-green-500" />
+        </button>
+        <h2 className="text-xl font-bold text-white">Olá, {name}</h2>
+        <nav className="flex flex-col mt-4 space-y-2">
+          {MENU_ITEMS.map((item) => (
+            <button
+              key={item.key}
+              onClick={() => {
+                setMobileTab(item.key);
+                setMobileMenuOpen(false);
+              }}
+              className="flex items-center gap-3 px-4 py-3 text-neutral-300 hover:bg-green-600 hover:text-white rounded"
+            >
+              <item.icon size={20} className="text-green-500" />
+              <span>{item.label}</span>
+            </button>
+          ))}
+        </nav>
+      </div>
+    </div>
+  );
+
+  const DesktopSidebar = (
+    <aside className="hidden md:flex flex-col bg-neutral-950 p-6 space-y-6">
+      <h2 className="text-xl font-bold text-white">Olá, {name}</h2>
+      <img
+        src={photoUrl || "/placeholder.svg"}
+        alt="Foto do aluno"
+        className="w-16 h-16 rounded-full border-2 border-green-500"
+      />
+      <nav className="flex flex-col space-y-2 mt-4">
+        {MENU_ITEMS.map((item) => (
+          <button
+            key={item.key}
+            onClick={() => setMobileTab(item.key)}
+            className={`flex items-center gap-3 px-4 py-3 text-neutral-300 rounded ${
+              mobileTab === item.key
+                ? "bg-green-600 text-white"
+                : "hover:bg-green-600 hover:text-white"
+            }`}
+          >
+            <item.icon size={20} className="text-green-500" />
+            <span>{item.label}</span>
+          </button>
+        ))}
+      </nav>
+    </aside>
+  );
+
+  const MobileFooter = (
+    <nav className="fixed bottom-0 left-0 right-0 z-30 flex md:hidden bg-neutral-950 border-t border-neutral-800 h-16">
+      {MENU_ITEMS.map((item) => (
+        <button
+          key={item.key}
+          onClick={() => setMobileTab(item.key)}
+          className={`flex-1 flex flex-col items-center justify-center text-neutral-300 ${
+            mobileTab === item.key
+              ? "bg-green-600 text-white"
+              : "hover:bg-green-600 hover:text-white"
+          }`}
+        >
+          <item.icon size={22} className="text-green-500" />
+          <span className="text-xs">{item.label}</span>
+        </button>
+      ))}
+    </nav>
+  );
+
   return (
     <div className="min-h-screen w-screen flex flex-col md:flex-row bg-neutral-900 text-white relative">
-      {/* Mobile Drawer e DesktopSidebar idênticos à área de Aluno */}
-      {/* ... */}
+      <button
+        className="md:hidden fixed top-4 left-4 z-20 bg-neutral-950 rounded-full p-2 border border-neutral-800 shadow-lg"
+        onClick={() => setMobileMenuOpen(true)}
+      >
+        <Menu size={28} className="text-green-500" />
+      </button>
+      {MobileDrawer}
+      {DesktopSidebar}
       <div className="flex-1 flex flex-col pt-12 md:pt-0">
         {bannerUrl && moduloSelecionado === null && (
           <div className="mb-6 mx-auto w-full max-w-[1600px] h-[200px] md:h-[400px] overflow-hidden rounded-lg">
@@ -169,7 +268,8 @@ export default function Aluno() {
         <div className="flex-1 overflow-auto pb-[84px] md:pb-5">
           {renderMainContent()}
         </div>
-        {/* MobileFooter e Footer */}
+        {MobileFooter}
+        <Footer />
       </div>
     </div>
   );
