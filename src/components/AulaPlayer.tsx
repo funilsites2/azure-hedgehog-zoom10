@@ -112,7 +112,7 @@ export function AulaPlayer({
               <TabsTrigger value="resumo">Resumo</TabsTrigger>
               <TabsTrigger value="apresentacao">Apresentação</TabsTrigger>
               <TabsTrigger value="mapa">Mapa Mental</TabsTrigger>
-            </TabsList>
+            </div>
             <div className="flex gap-2 ml-4">
               {hasPrev && (
                 <button
@@ -163,15 +163,9 @@ export function AulaPlayer({
             </div>
           </TabsContent>
         </Tabs>
-
-        <div className="mt-4">
-          <span className="font-semibold text-lg">
-            {modulo.nome} - {aula.titulo}
-          </span>
-        </div>
       </div>
 
-      <div className="w-full md:w-1/3 flex-shrink-0 flex flex-col">
+      <div className="w-full md:w-1/3 flex-shrink-0 flex flex-col px-4">
         <div className="bg-neutral-800 rounded-lg p-3 shadow-lg h-full flex flex-col">
           <div className="font-semibold mb-2 text-neutral-200 text-center">
             Aulas do módulo
