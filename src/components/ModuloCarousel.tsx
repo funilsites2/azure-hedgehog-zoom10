@@ -179,14 +179,6 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
                   className="absolute top-2 right-2 text-red-500 bg-neutral-900 rounded-full p-1"
                 />
               )}
-              <div className="bg-neutral-800 p-3 flex flex-col items-center">
-                <h2 className="text-base font-semibold text-center text-white">
-                  {modulo.nome}
-                </h2>
-                <div className="w-full mt-2">
-                  <SimpleProgress value={progresso} />
-                </div>
-              </div>
               <img
                 src={modulo.capa}
                 alt={modulo.nome}
@@ -196,6 +188,14 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
                     "https://placehold.co/300x400?text=Sem+Capa")
                 }
               />
+              <div className="p-3 flex flex-col items-center">
+                <h2 className="text-base font-semibold text-center text-white">
+                  {modulo.nome}
+                </h2>
+                <div className="w-full mt-2">
+                  <SimpleProgress value={progresso} />
+                </div>
+              </div>
             </div>
           );
         })}
