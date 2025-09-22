@@ -56,21 +56,6 @@ export default function Aluno() {
     .flatMap((m) => m.aulas.map((a) => ({ modulo: m, aula: a })))
     .filter(({ aula }) => !aula.assistida);
 
-  // cálculo de próxima aula
-  const { nextMod, nextAula } = (() => {
-    let nm = null;
-    let na = null;
-    for (const m of modulos) {
-      const a = m.aulas.find((a) => !a.assistida);
-      if (a) {
-        nm = m;
-        na = a;
-        break;
-      }
-    }
-    return { nextMod: nm as typeof m, nextAula: na as typeof a };
-  })();
-
   const linhas = Array.from(new Set(modulos.map((m) => m.linha)));
   const totalAulas = modulos.reduce((sum, m) => sum + m.aulas.length, 0);
   const aulasAssistidas = modulos.reduce(
@@ -359,7 +344,8 @@ export default function Aluno() {
           <div className="mx-4 my-4 flex justify-center">
             <div className="w-full max-w-[1600px] h-[400px] overflow-hidden rounded-lg">
               <img
-                src={bannerUrl} alt="Banner Aluno"
+                src={bannerUrl}
+                alt="Banner Aluno"
                 className="w-full h-full object-cover object-left"
               />
             </div>
@@ -373,17 +359,22 @@ export default function Aluno() {
               {partialAulas.map(({ modulo: m, aula: a }) => (
                 <div
                   key={`${m.id}-${a.id}`}
-                  className="flex-shrink-0 cursor-pointer"
+                  className="flex-shrink-0 cursor-pointer group"
                   onClick={() => {
                     setModuloSelecionado(m.id);
                     setAulaSelecionada(a.id);
                   }}
                 >
-                  <img
-                    src={getYoutubeThumbnail(a.videoUrl)}
-                    alt={a.titulo}
-                    className="w-56 h-auto rounded-lg"
-                  />
+                  <div className="relative rounded-lg overflow-hidden">
+                    <img
+                      src={getYoutubeThumbnail(a.videoUrl)}
+                      alt={a.titulo}
+                      className="w-56 h-auto transition-transform duration-300 transform group-hover:scale-105"
+                    />
+                    <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-colors">
+                      <Play size={48} className="text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                    </div>
+                  </div>
                   <p className="mt-2 text-lg font-medium">{m.nome}</p>
                   <p className="text-neutral-300 truncate">{a.titulo}</p>
                 </div>
