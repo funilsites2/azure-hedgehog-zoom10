@@ -3,9 +3,7 @@ import {
   Plus,
   Video,
   Layers,
-  Trash2,
   Edit,
-  Lock as LockIcon,
   Unlock,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -24,6 +22,10 @@ export default function Admin() {
     setAulaReleaseDays,
     duplicarModulo,
   } = useModulos();
+
+  const linhas = Array.from(
+    new Set(modulos.map((m) => m.linha).filter((l) => l.trim() !== ""))
+  );
 
   const [novaAulaExistente, setNovaAulaExistente] = useState<{
     moduloId: number | "";
@@ -212,37 +214,50 @@ export default function Admin() {
               })()}
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
-              {modulos.map((m) => (
-                <div
-                  key={m.id}
-                  className="bg-neutral-800 p-4 rounded-lg flex flex-col"
-                >
-                  <img
-                    src={m.capa}
-                    alt={m.nome}
-                    className="w-full h-32 object-cover rounded mb-2"
-                  />
-                  <h2 className="font-semibold mb-2">{m.nome}</h2>
-                  <div className="mt-auto flex gap-2">
-                    <Button onClick={() => iniciarEdicao(m.id)}>
-                      <Edit size={16} />
-                    </Button>
-                    <Button variant="secondary" onClick={() => duplicarModulo(m.id)} title="Duplicar Módulo">
-                      <Layers size={16} />
-                    </Button>
-                    <Button
-                      variant="secondary"
-                      onClick={() =>
-                        setAulaReleaseDays(m.id, 0, 0)
-                      }
-                    >
-                      <Unlock size={16} />
-                    </Button>
+            <>
+              {linhas.map((linha) => (
+                <div key={linha}>
+                  <h2 className="text-2xl font-semibold mt-8 mb-4">{linha}</h2>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {modulos
+                      .filter((m) => m.linha === linha)
+                      .map((m) => (
+                        <div
+                          key={m.id}
+                          className="bg-neutral-800 p-4 rounded-lg flex flex-col"
+                        >
+                          <img
+                            src={m.capa}
+                            alt={m.nome}
+                            className="w-full h-32 object-cover rounded mb-2"
+                          />
+                          <h3 className="font-semibold mb-2">{m.nome}</h3>
+                          <div className="mt-auto flex gap-2">
+                            <Button onClick={() => iniciarEdicao(m.id)}>
+                              <Edit size={16} />
+                            </Button>
+                            <Button
+                              variant="secondary"
+                              onClick={() => duplicarModulo(m.id)}
+                              title="Duplicar Módulo"
+                            >
+                              <Layers size={16} />
+                            </Button>
+                            <Button
+                              variant="secondary"
+                              onClick={() =>
+                                setAulaReleaseDays(m.id, 0, 0)
+                              }
+                            >
+                              <Unlock size={16} />
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
                   </div>
                 </div>
               ))}
-            </div>
+            </>
           )}
         </main>
       </div>
