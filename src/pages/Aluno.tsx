@@ -30,7 +30,7 @@ function getYoutubeThumbnail(url: string): string {
 }
 
 const MENU_ITEMS = [
-  { key: "continuar", label: "Continuar Assistindo", icon: Play },
+  { key: "continuar", label: "Continuar", icon: Play },
   { key: "modulos", label: "Módulos", icon: BookOpen },
   { key: "progresso", label: "Progresso", icon: BarChart2 },
   { key: "conquistas", label: "Conquistas", icon: Award },
@@ -308,7 +308,30 @@ export default function Aluno() {
 
   const MobileFooter = (
     <nav className="fixed bottom-0 left-0 right-0 z-30 flex md:hidden bg-neutral-950 border-t border-neutral-800 h-16">
-      {/* ... */}
+      {MENU_ITEMS.map((item) => (
+        <button
+          key={item.key}
+          onClick={() => {
+            setMobileTab(item.key);
+            if (item.key === "modulos") setModuloSelecionado(null);
+          }}
+          className={`flex-1 flex flex-col items-center justify-center ${
+            mobileTab === item.key
+              ? "bg-green-600 text-white"
+              : "text-neutral-300 hover:bg-green-600 hover:text-white"
+          }`}
+        >
+          <item.icon size={22} className="text-green-500" />
+          <span className="text-xs">{item.label}</span>
+        </button>
+      ))}
+      <Link
+        to="/perfil"
+        className="flex-1 flex flex-col items-center justify-center text-neutral-300 hover:bg-green-600 hover:text-white"
+      >
+        <User size={22} className="text-green-500" />
+        <span className="text-xs">Perfil</span>
+      </Link>
     </nav>
   );
 
@@ -364,5 +387,5 @@ export default function Aluno() {
         <Footer />
       </div>
     </div>
-);
+  );
 }
