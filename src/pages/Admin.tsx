@@ -57,8 +57,9 @@ export default function Admin() {
   return (
     <>
       <div className="min-h-screen bg-neutral-900 text-white flex">
-        <aside className="w-80 bg-neutral-950 p-6 flex-shrink-0">
+        <aside className="w-80 bg-neutral-950 p-6 flex-shrink-0 space-y-6">
           <LogoSettings />
+          <BannerSettings />
           <h3 className="font-semibold mb-4">Novo Módulo</h3>
           <ModuleForm
             onSubmit={(nome, capa, aulas, linha, delayDays) =>
@@ -66,22 +67,23 @@ export default function Admin() {
             }
             submitLabel="Adicionar Módulo"
           />
-          {/* ...restante da sidebar sem alterações */}
         </aside>
-        <main className="flex-1 p-8 overflow-auto pb-16 md:pb-5">
-          <h1 className="text-3xl font-bold mb-6">Módulos</h1>
-          {/* ...mobile e desktop view */}
-          <div className="hidden md:flex flex-col gap-8">
+        <main className="flex-1 p-8 overflow-auto pb-16 md:pb-5 space-y-8">
+          <h1 className="text-3xl font-bold">Módulos</h1>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {linhas.map((linha) => {
               const mods = modulos.filter((m) => m.linha === linha);
               return (
                 mods.length > 0 && (
-                  <div key={linha}>
-                    <h2 className="text-2xl font-semibold mb-4">{linha}</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  <div key={linha} className="space-y-4">
+                    <h2 className="text-2xl font-semibold">{linha}</h2>
+                    <div className="space-y-4">
                       {mods.map((modulo) =>
                         editandoId === modulo.id ? (
-                          <div key={modulo.id} className="bg-neutral-800 p-4 rounded shadow">
+                          <div
+                            key={modulo.id}
+                            className="bg-neutral-800 p-4 rounded shadow"
+                          >
                             <ModuleForm
                               initialNome={modulo.nome}
                               initialCapa={modulo.capa}
@@ -90,18 +92,62 @@ export default function Admin() {
                                 titulo: a.titulo,
                                 videoUrl: a.videoUrl,
                               }))}
-                              initialDelayDays={modulo.releaseDate ? Math.max(0, Math.ceil((modulo.releaseDate - Date.now()) / (1000*60*60*24))) : 0}
+                              initialDelayDays={
+                                modulo.releaseDate
+                                  ? Math.max(
+                                      0,
+                                      Math.ceil(
+                                        (modulo.releaseDate - Date.now()) /
+                                          (1000 * 60 * 60 * 24)
+                                      )
+                                    )
+                                  : 0
+                              }
                               onSubmit={handleEditSubmit}
                               onCancel={cancelarEdicao}
                               submitLabel="Salvar Edição"
                             />
                           </div>
                         ) : (
-                          <div key={modulo.id} className="bg-neutral-800 rounded-lg p-4 shadow flex flex-col h-full">
-                            {/* ...exibição normal */}
-                             <Button onClick={() => iniciarEdicao(modulo.id)}>
-                              Editar
-                            </Button>
+                          <div
+                            key={modulo.id}
+                            className="bg-neutral-800 rounded-lg p-4 shadow flex flex-col h-full"
+                          >
+                            <img
+                              src={modulo.capa}
+                              alt={modulo.nome}
+                              className="w-full h-32 object-cover rounded mb-4"
+                            />
+                            <h3 className="text-lg font-medium mb-2">
+                              {modulo.nome}
+                            </h3>
+                            <div className="mt-auto flex flex-col space-y-2">
+                              <Button onClick={() => iniciarEdicao(modulo.id)}>
+                                <Edit size={16} className="mr-2" />
+                                Editar
+                              </Button>
+                              <Button
+                                variant="secondary"
+                                onClick={() =>
+                                  setModuloBloqueado(
+                                    modulo.id,
+                                    !modulo.bloqueado
+                                  )
+                                }
+                              >
+                                {modulo.bloqueado ? (
+                                  <>
+                                    <Unlock size={16} className="mr-2" />
+                                    Desbloquear
+                                  </>
+                                ) : (
+                                  <>
+                                    <Lock size={16} className="mr-2" />
+                                    Bloquear
+                                  </>
+                                )}
+                              </Button>
+                            </div>
                           </div>
                         )
                       )}
