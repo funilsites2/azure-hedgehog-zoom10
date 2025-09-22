@@ -129,13 +129,8 @@ export function AulaPlayer({
                 className="w-full h-20 object-cover"
               />
               {blocked && (
-                <div className="absolute inset-0 bg-black bg-opacity-50 flex flex-col items-center justify-center text-center px-2">
-                  <Lock size={24} className="text-white mb-2" />
-                  {a.releaseDate && (
-                    <span className="text-xs text-white">
-                      Liberado em {new Date(a.releaseDate).toLocaleString()}
-                    </span>
-                  )}
+                <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+                  <Lock size={24} className="text-white" />
                 </div>
               )}
               <p className="text-sm text-white mt-1 px-1 truncate">{a.titulo}</p>
