@@ -8,7 +8,9 @@ import {
   Award,
   Lock,
   CheckCircle,
+  User,
 } from "lucide-react";
+import { Link } from "react-router-dom";
 import { Progress } from "@/components/ui/progress";
 import { useModulos } from "@/context/ModulosContext";
 import { AulaPlayer } from "@/components/AulaPlayer";
@@ -194,6 +196,14 @@ export default function Aluno() {
               <span>{item.label}</span>
             </button>
           ))}
+          <Link
+            to="/perfil"
+            onClick={() => setMobileMenuOpen(false)}
+            className="flex items-center gap-3 px-4 py-3 text-neutral-300 hover:bg-green-600 hover:text-white rounded"
+          >
+            <User size={20} className="text-green-500" />
+            <span>Perfil</span>
+          </Link>
         </nav>
       </div>
     </div>
@@ -222,6 +232,13 @@ export default function Aluno() {
             <span>{item.label}</span>
           </button>
         ))}
+        <Link
+          to="/perfil"
+          className="flex items-center gap-3 px-4 py-3 text-neutral-300 hover:bg-green-600 hover:text-white rounded"
+        >
+          <User size={20} className="text-green-500" />
+          <span>Perfil</span>
+        </Link>
       </nav>
     </aside>
   );
@@ -242,6 +259,13 @@ export default function Aluno() {
           <span className="text-xs">{item.label}</span>
         </button>
       ))}
+      <Link
+        to="/perfil"
+        className="flex-1 flex flex-col items-center justify-center text-neutral-300 hover:bg-green-600 hover:text-white"
+      >
+        <User size={22} className="text-green-500" />
+        <span className="text-xs">Perfil</span>
+      </Link>
     </nav>
   );
 
