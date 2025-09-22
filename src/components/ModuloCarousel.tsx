@@ -1,7 +1,6 @@
 import React from "react";
 import useEmblaCarousel from "embla-carousel-react";
 import { ChevronLeft, ChevronRight, Video, Lock } from "lucide-react";
-import HoverPreview from "@/components/HoverPreview";
 
 type Aula = { id: number; titulo: string; videoUrl: string; bloqueado?: boolean };
 type Modulo = { id: number; nome: string; capa: string; aulas: Aula[]; bloqueado?: boolean };
@@ -82,7 +81,9 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
                 >
                   <div
                     className={`bg-neutral-800 rounded-lg p-4 shadow-lg flex flex-col h-full cursor-pointer relative transition-transform transform hover:scale-105 ${
-                      modulo.bloqueado ? "grayscale opacity-70 pointer-events-none" : ""
+                      modulo.bloqueado
+                        ? "grayscale opacity-70 pointer-events-none"
+                        : ""
                     }`}
                     onClick={
                       !modulo.bloqueado && onModuloClick
@@ -96,23 +97,32 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
                         className="absolute top-2 right-2 text-red-500 bg-neutral-900 rounded-full p-1"
                       />
                     )}
-                    <div className="mb-2 flex flex-col items-center w-full">
-                      <div className="w-full aspect-[3/4] rounded overflow-hidden mb-2">
-                        <HoverPreview
-                          videoUrl={modulo.aulas[0]?.videoUrl}
-                          imageSrc={modulo.capa}
-                          alt={modulo.nome}
-                          className="w-full h-full"
-                        />
-                      </div>
-                      <h2 className="text-base font-semibold text-center">{modulo.nome}</h2>
+                    <div className="mb-2 flex flex-col items-center">
+                      <img
+                        src={modulo.capa}
+                        alt={modulo.nome}
+                        className="w-full aspect-[3/4] object-cover rounded mb-2"
+                        onError={(e) =>
+                          (e.currentTarget.src =
+                            "https://placehold.co/300x400?text=Sem+Capa")
+                        }
+                      />
+                      <h2 className="text-base font-semibold text-center">
+                        {modulo.nome}
+                      </h2>
                     </div>
                     <ul>
                       {modulo.aulas.map((aula) => (
-                        <li key={aula.id} className="flex items-center gap-2 mb-1 text-xs">
+                        <li
+                          key={aula.id}
+                          className="flex items-center gap-2 mb-1 text-xs"
+                        >
                           <Video size={16} /> {aula.titulo}
                           {aula.bloqueado && (
-                            <Lock size={12} className="ml-1 text-red-500" />
+                            <Lock
+                              size={12}
+                              className="ml-1 text-red-500"
+                            />
                           )}
                         </li>
                       ))}
@@ -144,12 +154,16 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
         </div>
       </div>
       {/* Desktop grid */}
-      <div className={`hidden md:grid grid-cols-1 ${desktopGridCols} gap-4`}>
+      <div
+        className={`hidden md:grid grid-cols-1 ${desktopGridCols} gap-4`}
+      >
         {filteredModulos.map((modulo) => (
           <div
             key={modulo.id}
             className={`bg-neutral-800 rounded-lg p-3 shadow-lg flex flex-col h-full cursor-pointer relative transition-transform transform hover:scale-105 ${
-              modulo.bloqueado ? "grayscale opacity-70 pointer-events-none" : ""
+              modulo.bloqueado
+                ? "grayscale opacity-70 pointer-events-none"
+                : ""
             }`}
             onClick={
               !modulo.bloqueado && onModuloClick
@@ -163,23 +177,32 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
                 className="absolute top-2 right-2 text-red-500 bg-neutral-900 rounded-full p-1"
               />
             )}
-            <div className="mb-2 flex flex-col items-center w-full">
-              <div className="w-full aspect-[3/4] rounded overflow-hidden mb-2">
-                <HoverPreview
-                  videoUrl={modulo.aulas[0]?.videoUrl}
-                  imageSrc={modulo.capa}
-                  alt={modulo.nome}
-                  className="w-full h-full"
-                />
-              </div>
-              <h2 className="text-base font-semibold text-center">{modulo.nome}</h2>
+            <div className="mb-2 flex flex-col items-center">
+              <img
+                src={modulo.capa}
+                alt={modulo.nome}
+                className="w-full aspect-[3/4] object-cover rounded mb-2"
+                onError={(e) =>
+                  (e.currentTarget.src =
+                    "https://placehold.co/300x400?text=Sem+Capa")
+                }
+              />
+              <h2 className="text-base font-semibold text-center">
+                {modulo.nome}
+              </h2>
             </div>
             <ul>
               {modulo.aulas.map((aula) => (
-                <li key={aula.id} className="flex items-center gap-2 mb-1 text-xs">
+                <li
+                  key={aula.id}
+                  className="flex items-center gap-2 mb-1 text-xs"
+                >
                   <Video size={16} /> {aula.titulo}
                   {aula.bloqueado && (
-                    <Lock size={12} className="ml-1 text-red-500" />
+                    <Lock
+                      size={12}
+                      className="ml-1 text-red-500"
+                    />
                   )}
                 </li>
               ))}
