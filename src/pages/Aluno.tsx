@@ -321,8 +321,8 @@ export default function Aluno() {
       {DesktopSidebar}
       <div className="flex-1 flex flex-col pt-12 md:pt-0">
         {bannerUrl && moduloSelecionado === null && (
-          <div className="mb-6">
-            <div className="container mx-auto h-[200px] md:h-[400px] overflow-hidden rounded-lg">
+          <div className="mx-4 my-4">
+            <div className="w-full h-[200px] md:h-[400px] overflow-hidden rounded-lg">
               <img
                 src={bannerUrl}
                 alt="Banner Aluno"
