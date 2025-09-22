@@ -209,6 +209,19 @@ export default function Aluno() {
         sidebarCollapsed ? "w-20" : "w-64"
       }`}
     >
+      {/* Logo and student image */}
+      <div className="p-4 flex flex-col items-center space-y-4">
+        <img
+          src="/placeholder.svg"
+          alt="Logo"
+          className="w-12 h-12"
+        />
+        <img
+          src="/placeholder.svg"
+          alt="Foto do aluno"
+          className="w-16 h-16 rounded-full border-2 border-neutral-800"
+        />
+      </div>
       <div className="flex items-center justify-between p-4">
         {!sidebarCollapsed && (
           <h2 className="text-xl font-bold flex items-center gap-2">
@@ -299,5 +312,5 @@ export default function Aluno() {
         <Footer />
       </div>
     </div>
-);
+  );
 }
