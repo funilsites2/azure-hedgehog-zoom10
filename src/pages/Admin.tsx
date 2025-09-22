@@ -10,7 +10,6 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useModulos } from "@/context/ModulosContext";
-import { ModuloCarousel } from "@/components/ModuloCarousel";
 import { ModuleForm } from "@/components/ModuleForm";
 import { BannerSettings } from "@/components/BannerSettings";
 import { LogoSettings } from "@/components/LogoSettings";
@@ -189,52 +188,55 @@ export default function Admin() {
               })()}
             </div>
           ) : (
-            <>
-              <ModuloCarousel modulos={modulos} />
-
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-8">
-                {modulos.map((m) => (
-                  <div
-                    key={m.id}
-                    className="bg-neutral-800 p-4 rounded-lg flex flex-col justify-between"
-                  >
-                    <div>
-                      <h3 className="text-xl font-semibold">{m.nome}</h3>
-                      <p className="text-sm text-neutral-400">
-                        Linha: {m.linha}
-                      </p>
-                    </div>
-                    <div className="flex gap-2 mt-4">
-                      <Button
-                        variant="secondary"
-                        onClick={() => iniciarEdicao(m.id)}
-                      >
-                        <Edit size={16} className="mr-1" />
-                        Editar
-                      </Button>
-                      <Button
-                        variant={m.bloqueado ? "destructive" : "outline"}
-                        onClick={() =>
-                          setModuloBloqueado(m.id, !m.bloqueado)
-                        }
-                      >
-                        {m.bloqueado ? (
-                          <>
-                            <Unlock size={16} className="mr-1" />
-                            Desbloquear
-                          </>
-                        ) : (
-                          <>
-                            <LockIcon size={16} className="mr-1" />
-                            Bloquear
-                          </>
-                        )}
-                      </Button>
-                    </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
+              {modulos.map((m) => (
+                <div
+                  key={m.id}
+                  className="bg-neutral-800 p-4 rounded-lg flex flex-col justify-between"
+                >
+                  <div>
+                    <h3 className="text-xl font-semibold">{m.nome}</h3>
+                    <p className="text-sm text-neutral-400 mb-2">
+                      Linha: {m.linha}
+                    </p>
+                    <img
+                      src={m.capa}
+                      alt={m.nome}
+                      className="w-full h-32 object-cover rounded mb-4"
+                    />
                   </div>
-                ))}
-              </div>
-            </>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="secondary"
+                      onClick={() => iniciarEdicao(m.id)}
+                      className="flex-1"
+                    >
+                      <Edit size={16} className="mr-1" />
+                      Editar
+                    </Button>
+                    <Button
+                      variant={m.bloqueado ? "destructive" : "outline"}
+                      onClick={() =>
+                        setModuloBloqueado(m.id, !m.bloqueado)
+                      }
+                      className="flex-1"
+                    >
+                      {m.bloqueado ? (
+                        <>
+                          <Unlock size={16} className="mr-1" />
+                          Desbloquear
+                        </>
+                      ) : (
+                        <>
+                          <LockIcon size={16} className="mr-1" />
+                          Bloquear
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
           )}
         </main>
       </div>
