@@ -3,7 +3,7 @@ import useEmblaCarousel from "embla-carousel-react";
 import { ChevronLeft, ChevronRight, Video, Lock } from "lucide-react";
 
 type Aula = { id: number; titulo: string; videoUrl: string; bloqueado?: boolean };
-type Modulo = { id: number; nome: string; capa: string; aulas: Aula[]; bloqueado?: boolean };
+type Modulo = { id: number; nome: string; capa: string; aulas: Aula[]; bloqueado?: boolean; releaseDate?: number };
 
 interface ModuloCarouselProps {
   modulos: Modulo[];
@@ -18,6 +18,8 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
   alunoLayout = false,
   showLocked,
 }) => {
+  const now = Date.now();
+
   // Filter modules
   const filteredModulos =
     showLocked === true
@@ -84,6 +86,11 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
                         : undefined
                     }
                   >
+                    {modulo.releaseDate && now < modulo.releaseDate && (
+                      <div className="absolute top-0 inset-x-0 bg-yellow-500 text-black text-xs text-center py-1 rounded-t-lg">
+                        Liberado em {new Date(modulo.releaseDate).toLocaleDateString()}
+                      </div>
+                    )}
                     {modulo.bloqueado && (
                       <Lock
                         size={28}
@@ -161,6 +168,11 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
                 : undefined
             }
           >
+            {modulo.releaseDate && now < modulo.releaseDate && (
+              <div className="absolute top-0 inset-x-0 bg-yellow-500 text-black text-xs text-center py-1 rounded-t-lg">
+                Liberado em {new Date(modulo.releaseDate).toLocaleDateString()}
+              </div>
+            )}
             {modulo.bloqueado && (
               <Lock
                 size={28}
