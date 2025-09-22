@@ -1,6 +1,6 @@
 import React from "react";
 import useEmblaCarousel from "embla-carousel-react";
-import { ChevronLeft, ChevronRight, Video, Lock } from "lucide-react";
+import { ChevronLeft, ChevronRight, Lock } from "lucide-react";
 import SimpleProgress from "@/components/SimpleProgress";
 
 type Aula = {
@@ -123,19 +123,6 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
                           <SimpleProgress value={progresso} />
                         </div>
                       </div>
-                      <ul>
-                        {modulo.aulas.map((aula) => (
-                          <li
-                            key={aula.id}
-                            className="flex items-center gap-2 mb-1 text-xs"
-                          >
-                            <Video size={16} /> {aula.titulo}
-                            {aula.bloqueado && (
-                              <Lock size={12} className="ml-1 text-red-500" />
-                            )}
-                          </li>
-                        ))}
-                      </ul>
                     </div>
                   </div>
                 );
@@ -163,7 +150,7 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
         </div>
       </div>
 
-      {/* Desktop carousel without scrollbar */}
+      {/* Desktop carousel sem scrollbar */}
       <div className="hidden md:flex overflow-x-auto gap-4 snap-x snap-mandatory px-2 no-scrollbar">
         {filteredModulos.map((modulo) => {
           const total = modulo.aulas.length;
@@ -209,17 +196,6 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
                   <SimpleProgress value={progresso} />
                 </div>
               </div>
-              <ul>
-                {modulo.aulas.map((aula) => (
-                  <li
-                    key={aula.id}
-                    className="flex items-center gap-2 mb-1 text-xs"
-                  >
-                    <Video size={16} /> {aula.titulo}
-                    {aula.bloqueado && <Lock size={12} className="ml-1 text-red-500" />}
-                  </li>
-                ))}
-              </ul>
             </div>
           );
         })}
