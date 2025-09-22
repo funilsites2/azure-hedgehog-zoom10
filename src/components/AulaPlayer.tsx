@@ -87,9 +87,7 @@ export function AulaPlayer({
             <Lock size={48} className="text-red-500 mb-4" />
             <p className="text-lg">
               Aula "{aula.titulo}" bloqueada até{" "}
-              {aula.releaseDate
-                ? new Date(aula.releaseDate).toLocaleDateString()
-                : ""}
+              {aula.releaseDate ? new Date(aula.releaseDate).toLocaleString() : ""}
               .
             </p>
           </div>
@@ -122,7 +120,7 @@ export function AulaPlayer({
             >
               {blockedByDate && (
                 <div className="absolute top-0 inset-x-0 bg-yellow-500 text-black text-xs text-center py-1 z-10 rounded-t-lg">
-                  Liberado em {new Date(a.releaseDate!).toLocaleDateString()}
+                  Liberado em {new Date(a.releaseDate!).toLocaleString()}
                 </div>
               )}
               <img
@@ -141,5 +139,5 @@ export function AulaPlayer({
         })}
       </div>
     </div>
-);
+  );
 }
