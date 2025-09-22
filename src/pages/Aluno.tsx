@@ -170,7 +170,7 @@ export default function Aluno() {
       onClick={() => setMobileMenuOpen(false)}
     >
       <div
-        className={`absolute left-0 top-0 h-full w-64 bg-neutral-950/90 backdrop-blur-sm p-6 flex flex-col gap-4 transition-transform ${
+        className={`absolute left-0 top-0 h-full w-64 bg-neutral-950/90 backdrop-blur-sm p-6 flex flex-col gap-6 transition-transform ${
           mobileMenuOpen ? "translate-x-0" : "-translate-x-full"
         }`}
         onClick={(e) => e.stopPropagation()}
@@ -181,7 +181,14 @@ export default function Aluno() {
         >
           <X size={28} className="text-green-500" />
         </button>
-        <h2 className="text-xl font-bold text-white">Olá, {name}</h2>
+        <div className="flex flex-col items-center space-y-2">
+          <img
+            src={photoUrl || "/placeholder.svg"}
+            alt="Foto do aluno"
+            className="w-16 h-16 rounded-full border-2 border-green-500"
+          />
+          <h2 className="text-xl font-bold text-white">Olá, {name}</h2>
+        </div>
         <nav className="flex flex-col mt-4 space-y-2">
           {MENU_ITEMS.map((item) => (
             <button
@@ -210,19 +217,19 @@ export default function Aluno() {
   );
 
   const DesktopSidebar = (
-    <aside className="hidden md:flex flex-col bg-neutral-950 p-6 space-y-6">
-      <h2 className="text-xl font-bold text-white">Olá, {name}</h2>
+    <aside className="hidden md:flex flex-col items-center bg-neutral-950 p-6 space-y-6">
       <img
         src={photoUrl || "/placeholder.svg"}
         alt="Foto do aluno"
         className="w-16 h-16 rounded-full border-2 border-green-500"
       />
-      <nav className="flex flex-col space-y-2 mt-4">
+      <h2 className="text-xl font-bold text-white">Olá, {name}</h2>
+      <nav className="flex flex-col space-y-2 w-full">
         {MENU_ITEMS.map((item) => (
           <button
             key={item.key}
             onClick={() => setMobileTab(item.key)}
-            className={`flex items-center gap-3 px-4 py-3 text-neutral-300 rounded ${
+            className={`flex items-center gap-3 px-4 py-3 w-full text-neutral-300 rounded ${
               mobileTab === item.key
                 ? "bg-green-600 text-white"
                 : "hover:bg-green-600 hover:text-white"
@@ -234,7 +241,7 @@ export default function Aluno() {
         ))}
         <Link
           to="/perfil"
-          className="flex items-center gap-3 px-4 py-3 text-neutral-300 hover:bg-green-600 hover:text-white rounded"
+          className="flex items-center gap-3 px-4 py-3 w-full text-neutral-300 hover:bg-green-600 hover:text-white rounded"
         >
           <User size={20} className="text-green-500" />
           <span>Perfil</span>
@@ -296,5 +303,5 @@ export default function Aluno() {
         <Footer />
       </div>
     </div>
-  );
+);
 }
