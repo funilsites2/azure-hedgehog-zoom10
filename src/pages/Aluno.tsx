@@ -230,7 +230,7 @@ export default function Aluno() {
           <Link
             to="/perfil"
             onClick={() => setMobileMenuOpen(false)}
-            className="flex items-center gap-3 px-4 py-3 text-neutral-300 hover:bg-green-600 hover=text-white rounded"
+            className="flex items-center gap-3 px-4 py-3 text-neutral-300 hover:bg-green-600 hover:text-white rounded"
           >
             <User size={20} className="text-green-500" />
             <span>Perfil</span>
@@ -321,14 +321,72 @@ export default function Aluno() {
       {MobileDrawer}
       {DesktopSidebar}
       <div className="flex-1 flex flex-col pt-12 md:pt-0">
-        {bannerUrl && moduloSelecionado === null && ( ... )}
-        {moduloSelecionado === null && partialAulas.length > 0 && ( ... )}
-        <div className="flex-1 overflow-auto pb-[84px] md:pb-5">
-          {moduloSelecionado !== null && modulo && (
-            <div className="px-4 py-2 border-b border-neutral-800">
-              <h2 className="text-2xl font-semibold">{modulo.nome}</h2>
+        {bannerUrl && moduloSelecionado === null && (
+          <div className="mx-4 my-4 flex justify-center">
+            <div className="w-full max-w-[1600px] h-[400px] overflow-hidden rounded-lg">
+              <img
+                src={bannerUrl}
+                alt="Banner Aluno"
+                className="w-full h-full object-cover object-left"
+              />
             </div>
-          )}
+          </div>
+        )}
+        {moduloSelecionado === null && partialAulas.length > 0 && (
+          <div className="container mx-auto mb-8">
+            <div className="bg-neutral-800 bg-opacity-20 p-4 rounded-lg">
+              <h3 className="text-2xl font-semibold mb-4">Continuar Assistindo</h3>
+              <div className="flex overflow-x-auto gap-6 pb-2">
+                {partialAulas.map(({ modulo: m, aula: a }) => {
+                  const blockedByDate = a.releaseDate ? now < a.releaseDate : false;
+                  return (
+                    <div
+                      key={`${m.id}-${a.id}`}
+                      className={`flex-shrink-0 group ${
+                        blockedByDate
+                          ? "cursor-not-allowed opacity-50"
+                          : "cursor-pointer"
+                      }`}
+                      onClick={() => {
+                        if (!blockedByDate) {
+                          setModuloSelecionado(m.id);
+                          setAulaSelecionada(a.id);
+                        }
+                      }}
+                    >
+                      <div className="relative rounded-lg overflow-hidden">
+                        {blockedByDate && (
+                          <div className="absolute top-0 inset-x-0 bg-yellow-500 text-black text-xs text-center py-1 z-10">
+                            Liberado em{" "}
+                            {new Date(a.releaseDate!).toLocaleDateString()}
+                          </div>
+                        )}
+                        <img
+                          src={getYoutubeThumbnail(a.videoUrl)}
+                          alt={a.titulo}
+                          className="w-56 h-auto transition-transform duration-300 transform group-hover:scale-105"
+                        />
+                        <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-colors">
+                          <Play
+                            size={48}
+                            className="text-white opacity-0 group-hover:opacity-100 transition-opacity"
+                          />
+                        </div>
+                        <div className="absolute top-0 left-0 right-0 p-2 bg-black bg-opacity-60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col">
+                          <span className="text-white text-sm font-semibold">
+                            {m.nome}
+                          </span>
+                          <span className="text-white text-xs">{a.titulo}</span>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        )}
+        <div className="flex-1 overflow-auto pb-[84px] md:pb-5">
           {renderMainContent()}
         </div>
         {MobileFooter}
