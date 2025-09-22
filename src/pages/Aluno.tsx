@@ -22,6 +22,13 @@ import { usePhoto } from "@/context/PhotoContext";
 import { useUser } from "@/context/UserContext";
 import { Footer } from "@/components/Footer";
 
+function getYoutubeThumbnail(url: string): string {
+  const match = url.match(
+    /(?:youtube\.com\/(?:embed\/|watch\?v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/
+  );
+  return match ? `https://img.youtube.com/vi/${match[1]}/hqdefault.jpg` : "/placeholder.svg";
+}
+
 const MENU_ITEMS = [
   { key: "continuar", label: "Continuar Assistindo", icon: Play },
   { key: "modulos", label: "Módulos", icon: BookOpen },
@@ -44,6 +51,21 @@ export default function Aluno() {
     "modulos"
   );
 
+  // calcula próxima aula não assistida
+  const { nextMod, nextAula } = (() => {
+    let nm = null;
+    let na = null;
+    for (const m of modulos) {
+      const a = m.aulas.find((a) => !a.assistida);
+      if (a) {
+        nm = m;
+        na = a;
+        break;
+      }
+    }
+    return { nextMod: nm as typeof m, nextAula: na as typeof a };
+  })();
+
   const linhas = Array.from(new Set(modulos.map((m) => m.linha)));
   const totalAulas = modulos.reduce((sum, m) => sum + m.aulas.length, 0);
   const aulasAssistidas = modulos.reduce(
@@ -57,21 +79,10 @@ export default function Aluno() {
 
   function renderMainContent() {
     if (mobileTab === "continuar") {
-      // encontra próxima aula não assistida
-      let nextMod;
-      let nextAula;
-      for (const m of modulos) {
-        const a = m.aulas.find((a) => !a.assistida);
-        if (a) {
-          nextMod = m;
-          nextAula = a;
-          break;
-        }
-      }
-      return (
-        <div className="p-8">
-          <h2 className="text-2xl font-bold mb-4">Continuar Assistindo</h2>
-          {nextMod && nextAula ? (
+      if (nextMod && nextAula) {
+        return (
+          <div className="p-8">
+            <h2 className="text-2xl font-bold mb-4">Continuar Assistindo</h2>
             <div className="flex flex-col gap-4">
               <span className="text-lg font-semibold">{nextMod.nome}</span>
               <span className="text-neutral-300">{nextAula.titulo}</span>
@@ -85,14 +96,11 @@ export default function Aluno() {
                 Continuar
               </button>
             </div>
-          ) : (
-            <p className="text-neutral-300">Você concluiu todas as aulas!</p>
-          )}
-        </div>
-      );
+          </div>
+        );
+      }
+      return <p className="p-8 text-neutral-300">Você concluiu todas as aulas!</p>;
     }
-
-    // restante das abas existentes...
     if (mobileTab === "modulos") {
       if (!modulo) {
         return (
@@ -269,7 +277,6 @@ export default function Aluno() {
 
   return (
     <div className="min-h-screen w-screen flex flex-col md:flex-row bg-neutral-900 text-white relative">
-      {/* botão mobile menu */}
       {MobileDrawer}
       {DesktopSidebar}
       <div className="flex-1 flex flex-col pt-12 md:pt-0">
@@ -282,6 +289,28 @@ export default function Aluno() {
                 className="w-full h-full object-cover object-left"
               />
             </div>
+          </div>
+        )}
+        {/* miniatura Continuar Assistindo */}
+        {moduloSelecionado === null && nextMod && nextAula && (
+          <div className="mx-auto mb-8 max-w-md text-center">
+            <h3 className="text-2xl font-semibold mb-2">Continuar Assistindo</h3>
+            <img
+              src={getYoutubeThumbnail(nextAula.videoUrl)}
+              alt={nextAula.titulo}
+              className="w-full h-auto rounded-lg mb-2"
+            />
+            <p className="text-lg font-medium">{nextMod.nome}</p>
+            <p className="text-neutral-300 mb-4">{nextAula.titulo}</p>
+            <button
+              className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+              onClick={() => {
+                setModuloSelecionado(nextMod.id);
+                setAulaSelecionada(nextAula.id);
+              }}
+            >
+              Continuar
+            </button>
           </div>
         )}
         <div className="flex-1 overflow-auto pb-[84px] md:pb-5">
