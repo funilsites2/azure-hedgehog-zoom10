@@ -82,13 +82,14 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
                 >
                   <div
                     className={`bg-neutral-800 rounded-lg p-4 shadow-lg flex flex-col h-full cursor-pointer relative transition-transform transform hover:scale-105 ${
-                      modulo.bloqueado ? "grayscale opacity-70 pointer-events-none" : ""
+                      modulo.bloqueado ? "grayscale opacity-70 cursor-not-allowed" : ""
                     }`}
                     onClick={
                       !modulo.bloqueado && onModuloClick
                         ? () => onModuloClick(modulo)
                         : undefined
                     }
+                    aria-disabled={modulo.bloqueado ? true : undefined}
                   >
                     {modulo.bloqueado && (
                       <Lock
@@ -149,13 +150,14 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
           <div
             key={modulo.id}
             className={`bg-neutral-800 rounded-lg p-3 shadow-lg flex flex-col h-full cursor-pointer relative transition-transform transform hover:scale-105 ${
-              modulo.bloqueado ? "grayscale opacity-70 pointer-events-none" : ""
+              modulo.bloqueado ? "grayscale opacity-70 cursor-not-allowed" : ""
             }`}
             onClick={
               !modulo.bloqueado && onModuloClick
                 ? () => onModuloClick(modulo)
                 : undefined
             }
+            aria-disabled={modulo.bloqueado ? true : undefined}
           >
             {modulo.bloqueado && (
               <Lock
