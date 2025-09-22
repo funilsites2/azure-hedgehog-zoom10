@@ -61,13 +61,12 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
     ? "md:grid-cols-3 lg:grid-cols-5"
     : "md:grid-cols-2 lg:grid-cols-3";
 
-  // Render
   return (
     <div>
       {/* Mobile carousel */}
       <div className="block md:hidden">
         <div className="relative">
-          <div className="overflow-hidden" ref={emblaRef}>
+          <div className="overflow-visible" ref={emblaRef}>
             <div className="flex">
               {filteredModulos.map((modulo) => (
                 <div
@@ -189,9 +188,7 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
                   className="flex items-center gap-2 mb-1 text-xs"
                 >
                   <Video size={16} /> {aula.titulo}
-                  {aula.bloqueado && (
-                    <Lock size={12} className="ml-1 text-red-500" />
-                  )}
+                  {aula.bloqueado && <Lock size={12} className="ml-1 text-red-500" />}
                 </li>
               ))}
             </ul>
