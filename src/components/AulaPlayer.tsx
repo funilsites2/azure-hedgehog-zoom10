@@ -1,8 +1,11 @@
+"use client";
+
 import { useState } from "react";
 import { CheckCircle, ChevronLeft, ChevronRight } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
+import { useUser } from "@/context/UserContext";
 
 type Aula = {
   id: number;
@@ -24,11 +27,10 @@ interface AulaPlayerProps {
   onMarcarAssistida: (aulaId: number) => void;
 }
 
-// Função para extrair thumbnail do YouTube
 function getYoutubeThumbnail(url: string): string | null {
   try {
     const match = url.match(
-      /(?:youtube\.com\/(?:embed\/|watch\?v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/
+      /(?:youtube\\.com\\/(?:embed\\/|watch\\?v=)|youtu\\.be\\/)([a-zA-Z0-9_-]{11})/
     );
     if (match && match[1]) {
       return `https://img.youtube.com/vi/${match[1]}/hqdefault.jpg`;
@@ -45,9 +47,8 @@ export function AulaPlayer({
   onSelecionarAula,
   onMarcarAssistida,
 }: AulaPlayerProps) {
+  const { name } = useUser();
   const aulas = modulo.aulas;
-
-  // Guard for modules without aulas
   if (!aulas || aulas.length === 0) {
     return (
       <div className="flex items-center justify-center h-full">
@@ -61,7 +62,6 @@ export function AulaPlayer({
   const hasPrev = aulaIndex > 0;
   const hasNext = aulaIndex < aulas.length - 1;
 
-  // Module progress calculation
   const totalAulasModulo = aulas.length;
   const assistidasModulo = aulas.filter((a) => a.assistida).length;
   const progressoModulo = totalAulasModulo
@@ -72,9 +72,7 @@ export function AulaPlayer({
 
   return (
     <div className="flex flex-col md:flex-row gap-6 w-full h-full">
-      {/* Player + Controls */}
       <div className="w-full md:w-2/3 flex flex-col">
-        {/* Top: Concluir Aula */}
         <div className="flex justify-end items-center mb-2">
           {!aula.assistida ? (
             <button
@@ -89,15 +87,13 @@ export function AulaPlayer({
             </span>
           )}
         </div>
-        {/* Module Progress */}
         <div className="mb-4 px-2">
           <Progress value={progressoModulo} className="h-2 bg-neutral-800" />
           <div className="text-xs text-neutral-400 mt-1">
             {progressoModulo}% do módulo concluído
           </div>
         </div>
-        {/* Video */}
-        <div className="aspect-video bg-black rounded-lg overflow-hidden mb-4 shadow-lg w-full">
+        <div className="aspect-video bg-black rounded-lg overflow-hidden mb-4 shadow-lg">
           <iframe
             src={aula.videoUrl}
             title={aula.titulo}
@@ -106,7 +102,6 @@ export function AulaPlayer({
             className="w-full h-full"
           />
         </div>
-        {/* Tabs */}
         <Tabs value={tab} onValueChange={setTab} className="w-full">
           <TabsList className="bg-neutral-800 mb-2">
             <TabsTrigger value="video">Vídeo</TabsTrigger>
@@ -122,8 +117,8 @@ export function AulaPlayer({
           </TabsContent>
           <TabsContent value="texto">
             <div className="text-neutral-300 text-sm">
-              <b>Conteúdo em texto:</b> <br />
-              Aqui você pode colocar a transcrição ou texto da aula.
+              Olá, {name}!<br/>
+              <b>Conteúdo em texto:</b> Aqui você pode colocar a transcrição ou texto da aula.
             </div>
           </TabsContent>
           <TabsContent value="resumo">
@@ -145,13 +140,11 @@ export function AulaPlayer({
             </div>
           </TabsContent>
         </Tabs>
-        {/* Title */}
         <div className="mt-4">
           <span className="font-semibold text-lg">
             {modulo.nome} - {aula.titulo}
           </span>
         </div>
-        {/* Bottom: Navegação de Aulas */}
         <div className="flex justify-between mt-4">
           {hasPrev ? (
             <button
@@ -171,7 +164,6 @@ export function AulaPlayer({
           ) : <div />}
         </div>
       </div>
-      {/* Lista lateral de aulas */}
       <div className="w-full md:w-1/3 flex-shrink-0 flex flex-col">
         <div className="bg-neutral-800 rounded-lg p-3 shadow-lg h-full flex flex-col">
           <div className="font-semibold mb-2 text-neutral-200 text-center">
