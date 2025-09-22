@@ -77,7 +77,7 @@ export function AulaPlayer({
         <div className="flex justify-end items-center mb-2">
           {!aula.assistida ? (
             <button
-              className="text-xs bg-green-600 px-3 py-1 rounded hover:bg-green-700"
+              className="text-xs bg-green-600 px-3 py-1 rounded hover:bg-green-700 text-white"
               onClick={() => onMarcarAssistida(aula.id)}
             >
               Concluir Aula
@@ -116,7 +116,7 @@ export function AulaPlayer({
             <div className="flex gap-2 ml-4">
               {hasPrev && (
                 <button
-                  className="flex items-center gap-1 text-sm bg-neutral-800 px-3 py-1 rounded hover:bg-neutral-700"
+                  className="flex items-center gap-1 text-sm bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700"
                   onClick={() => onSelecionarAula(aulas[aulaIndex - 1].id)}
                 >
                   <ChevronLeft size={16} /> Voltar
@@ -124,7 +124,7 @@ export function AulaPlayer({
               )}
               {hasNext && (
                 <button
-                  className="flex items-center gap-1 text-sm bg-neutral-800 px-3 py-1 rounded hover:bg-neutral-700"
+                  className="flex items-center gap-1 text-sm bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700"
                   onClick={() => onSelecionarAula(aulas[aulaIndex + 1].id)}
                 >
                   Próxima <ChevronRight size={16} />
