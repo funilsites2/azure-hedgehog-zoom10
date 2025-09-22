@@ -116,7 +116,7 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
                               "https://placehold.co/300x400?text=Sem+Capa")
                           }
                         />
-                        <h2 className="text-base font-semibold text-center">
+                        <h2 className="text-base font-semibold text-center text-white">
                           {modulo.nome}
                         </h2>
                         <div className="w-full mt-2">
@@ -159,7 +159,7 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
           return (
             <div
               key={modulo.id}
-              className={`snap-start flex-shrink-0 w-[20%] bg-neutral-800 rounded-lg p-3 shadow-lg flex flex-col cursor-pointer relative transition-transform transform hover:scale-105 ${
+              className={`snap-start flex-shrink-0 w-[20%] rounded-lg shadow-lg overflow-hidden cursor-pointer relative transition-transform transform hover:scale-105 ${
                 modulo.bloqueado ? "grayscale opacity-70" : ""
               }`}
               onClick={
@@ -179,23 +179,23 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
                   className="absolute top-2 right-2 text-red-500 bg-neutral-900 rounded-full p-1"
                 />
               )}
-              <div className="mb-2 flex flex-col items-center">
-                <img
-                  src={modulo.capa}
-                  alt={modulo.nome}
-                  className="w-full aspect-[3/4] object-cover rounded mb-2"
-                  onError={(e) =>
-                    (e.currentTarget.src =
-                      "https://placehold.co/300x400?text=Sem+Capa")
-                  }
-                />
-                <h2 className="text-base font-semibold text-center">
+              <div className="bg-neutral-800 p-3 flex flex-col items-center">
+                <h2 className="text-base font-semibold text-center text-white">
                   {modulo.nome}
                 </h2>
                 <div className="w-full mt-2">
                   <SimpleProgress value={progresso} />
                 </div>
               </div>
+              <img
+                src={modulo.capa}
+                alt={modulo.nome}
+                className="w-full aspect-[3/4] object-cover"
+                onError={(e) =>
+                  (e.currentTarget.src =
+                    "https://placehold.co/300x400?text=Sem+Capa")
+                }
+              />
             </div>
           );
         })}
