@@ -23,7 +23,7 @@ interface ModuloCarouselProps {
   modulos: Modulo[];
   onModuloClick?: (modulo: Modulo) => void;
   alunoLayout?: boolean;
-  showLocked?: boolean; // true = only locked, false = only unlocked, undefined = all
+  showLocked?: boolean;
 }
 
 export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
@@ -34,7 +34,6 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
 }) => {
   const now = Date.now();
 
-  // Filter modules
   const filteredModulos =
     showLocked === true
       ? modulos.filter((m) => m.bloqueado)
@@ -42,7 +41,6 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
       ? modulos.filter((m) => !m.bloqueado)
       : modulos;
 
-  // Embla carousel setup for mobile
   const [emblaRef, emblaApi] = useEmblaCarousel({
     slidesToScroll: 1,
     containScroll: "trimSnaps",
@@ -66,7 +64,6 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
     return () => emblaApi.off("select", onSelect);
   }, [emblaApi]);
 
-  // Layout helpers
   const mobileCardWidth = alunoLayout
     ? "w-[60vw] max-w-[280px] min-w-[180px]"
     : "min-w-1/2 max-w-[90vw]";
@@ -134,10 +131,7 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
                           >
                             <Video size={16} /> {aula.titulo}
                             {aula.bloqueado && (
-                              <Lock
-                                size={12}
-                                className="ml-1 text-red-500"
-                              />
+                              <Lock size={12} className="ml-1 text-red-500" />
                             )}
                           </li>
                         ))}
@@ -148,7 +142,6 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
               })}
             </div>
           </div>
-          {/* Nav buttons */}
           <button
             className="absolute left-0 top-1/2 -translate-y-1/2 bg-neutral-900/80 rounded-full p-2 z-10"
             onClick={() => emblaApi && emblaApi.scrollPrev()}
@@ -170,8 +163,8 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
         </div>
       </div>
 
-      {/* Desktop carousel */}
-      <div className="hidden md:flex overflow-x-auto gap-4 snap-x snap-mandatory px-2">
+      {/* Desktop carousel without scrollbar */}
+      <div className="hidden md:flex overflow-x-auto gap-4 snap-x snap-mandatory px-2 no-scrollbar">
         {filteredModulos.map((modulo) => {
           const total = modulo.aulas.length;
           const concluido = modulo.aulas.filter((a) => a.assistida).length;
