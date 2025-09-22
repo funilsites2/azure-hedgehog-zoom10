@@ -387,6 +387,11 @@ export default function Aluno() {
           </div>
         )}
         <div className="flex-1 overflow-auto pb-[84px] md:pb-5">
+          {moduloSelecionado !== null && modulo && (
+            <div className="px-6 py-4 bg-neutral-800">
+              <h1 className="text-2xl font-bold">{modulo.nome}</h1>
+            </div>
+          )}
           {renderMainContent()}
         </div>
         {MobileFooter}
