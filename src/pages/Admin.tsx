@@ -50,8 +50,6 @@ export default function Admin() {
     }
   };
 
-  const linhas = Array.from(new Set(modulos.map((m) => m.linha)));
-
   return (
     <>
       <div className="min-h-screen bg-neutral-900 text-white flex">
@@ -59,7 +57,6 @@ export default function Admin() {
           <LogoSettings />
           <BannerSettings />
 
-          {/* Formulário de Módulo */}
           <div>
             <h3 className="font-semibold mb-2">Novo Módulo</h3>
             <ModuleForm
@@ -70,7 +67,6 @@ export default function Admin() {
             />
           </div>
 
-          {/* Adicionar Aula Existente */}
           <div>
             <h3 className="font-semibold mb-2">Nova Aula</h3>
             <div className="space-y-2">
@@ -159,7 +155,7 @@ export default function Admin() {
 
         <main className="flex-1 p-8 overflow-auto pb-16 md:pb-5 space-y-8">
           <h1 className="text-3xl font-bold">Módulos</h1>
-          {/* ... restante inalterado */}
+          <ModuloCarousel modulos={modulos} />
         </main>
       </div>
       <Footer />
