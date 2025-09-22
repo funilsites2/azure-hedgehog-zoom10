@@ -3,40 +3,34 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 
 type BannerContextType = {
-  banners: string[];
-  addBanner: (url: string) => void;
-  removeBanner: (index: number) => void;
+  bannerUrl: string | null;
+  setBanner: (url: string) => void;
+  removeBanner: () => void;
 };
 
-const STORAGE_KEY = "banners_area_aluno";
+const STORAGE_KEY = "banner_area_aluno";
 
 const BannerContext = createContext<BannerContextType | undefined>(undefined);
 
 export const BannerProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [banners, setBanners] = useState<string[]>(() => {
+  const [bannerUrl, setBannerUrl] = useState<string | null>(() => {
     const stored = localStorage.getItem(STORAGE_KEY);
-    return stored ? JSON.parse(stored) : [];
+    return stored ? JSON.parse(stored) : null;
   });
 
   useEffect(() => {
-    if (banners.length) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(banners));
+    if (bannerUrl) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(bannerUrl));
     } else {
       localStorage.removeItem(STORAGE_KEY);
     }
-  }, [banners]);
+  }, [bannerUrl]);
 
-  const addBanner = (url: string) => {
-    if (!url.trim() || banners.length >= 3) return;
-    setBanners((prev) => [...prev, url.trim()]);
-  };
-
-  const removeBanner = (index: number) => {
-    setBanners((prev) => prev.filter((_, i) => i !== index));
-  };
+  const setBanner = (url: string) => setBannerUrl(url);
+  const removeBanner = () => setBannerUrl(null);
 
   return (
-    <BannerContext.Provider value={{ banners, addBanner, removeBanner }}>
+    <BannerContext.Provider value={{ bannerUrl, setBanner, removeBanner }}>
       {children}
     </BannerContext.Provider>
   );
