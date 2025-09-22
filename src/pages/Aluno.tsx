@@ -102,7 +102,7 @@ export default function Aluno() {
                         setAulaSelecionada(aula.id);
                       }}
                     >
-                      <div className="relative w-full h-32 rounded overflow-hidden">
+                      <div className="relative w-full h-32 rounded overflow-hidden transition-transform duration-300 ease-out group-hover:scale-95">
                         <img
                           src={getYoutubeThumbnail(aula.videoUrl)}
                           alt={aula.titulo}
