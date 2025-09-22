@@ -9,6 +9,7 @@ import {
   Lock,
   CheckCircle,
   User,
+  Play,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import SimpleProgress from "@/components/SimpleProgress";
@@ -108,6 +109,15 @@ export default function Aluno() {
                           alt={aula.titulo}
                           className="w-full h-full object-cover"
                         />
+                        {/* Ícone de Play no hover */}
+                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                          <div className="opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 transition-all duration-300">
+                            <div className="bg-black/50 rounded-full p-2 ring-1 ring-white/20">
+                              <Play size={28} className="text-white" />
+                            </div>
+                          </div>
+                        </div>
+                        {/* Overlay de título e módulo no hover */}
                         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
                           <div className="absolute bottom-0 left-0 right-0 p-2">
                             <p className="text-white text-sm font-medium truncate">
