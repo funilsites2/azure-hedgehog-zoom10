@@ -102,62 +102,64 @@ export function AulaPlayer({
             className="w-full h-full"
           />
         </div>
-        <div className="flex justify-between mb-4">
-          {hasPrev ? (
-            <button
-              className="flex items-center gap-1 text-sm bg-neutral-800 px-3 py-1 rounded hover:bg-neutral-700"
-              onClick={() => onSelecionarAula(aulas[aulaIndex - 1].id)}
-            >
-              <ChevronLeft size={16} /> Voltar
-            </button>
-          ) : <div />}
-          {hasNext ? (
-            <button
-              className="flex items-center gap-1 text-sm bg-neutral-800 px-3 py-1 rounded hover:bg-neutral-700"
-              onClick={() => onSelecionarAula(aulas[aulaIndex + 1].id)}
-            >
-              Próxima <ChevronRight size={16} />
-            </button>
-          ) : <div />}
+        <div className="flex justify-between items-center mb-4">
+          <Tabs value={tab} onValueChange={setTab} className="w-full">
+            <TabsList className="bg-neutral-800">
+              <TabsTrigger value="video">Vídeo</TabsTrigger>
+              <TabsTrigger value="texto">Aula em texto</TabsTrigger>
+              <TabsTrigger value="resumo">Resumo</TabsTrigger>
+              <TabsTrigger value="apresentacao">Apresentação</TabsTrigger>
+              <TabsTrigger value="mapa">Mapa Mental</TabsTrigger>
+            </TabsList>
+          </Tabs>
+          <div className="flex gap-2 ml-4">
+            {hasPrev && (
+              <button
+                className="flex items-center gap-1 text-sm bg-neutral-800 px-3 py-1 rounded hover:bg-neutral-700"
+                onClick={() => onSelecionarAula(aulas[aulaIndex - 1].id)}
+              >
+                <ChevronLeft size={16} /> Voltar
+              </button>
+            )}
+            {hasNext && (
+              <button
+                className="flex items-center gap-1 text-sm bg-neutral-800 px-3 py-1 rounded hover:bg-neutral-700"
+                onClick={() => onSelecionarAula(aulas[aulaIndex + 1].id)}
+              >
+                Próxima <ChevronRight size={16} />
+              </button>
+            )}
+          </div>
         </div>
-        <Tabs value={tab} onValueChange={setTab} className="w-full">
-          <TabsList className="bg-neutral-800 mb-2">
-            <TabsTrigger value="video">Vídeo</TabsTrigger>
-            <TabsTrigger value="texto">Aula em texto</TabsTrigger>
-            <TabsTrigger value="resumo">Resumo</TabsTrigger>
-            <TabsTrigger value="apresentacao">Apresentação</TabsTrigger>
-            <TabsTrigger value="mapa">Mapa Mental</TabsTrigger>
-          </TabsList>
-          <TabsContent value="video">
-            <div className="text-neutral-300 text-sm">
-              Assista ao vídeo acima para acompanhar a aula.
-            </div>
-          </TabsContent>
-          <TabsContent value="texto">
-            <div className="text-neutral-300 text-sm">
-              Olá, {name}!<br/>
-              <b>Conteúdo em texto:</b> Aqui você pode colocar a transcrição ou texto da aula.
-            </div>
-          </TabsContent>
-          <TabsContent value="resumo">
-            <div className="text-neutral-300 text-sm">
-              <b>Resumo:</b> <br />
-              Pontos principais da aula.
-            </div>
-          </TabsContent>
-          <TabsContent value="apresentacao">
-            <div className="text-neutral-300 text-sm">
-              <b>Apresentação:</b> <br />
-              Slides ou materiais de apoio.
-            </div>
-          </TabsContent>
-          <TabsContent value="mapa">
-            <div className="text-neutral-300 text-sm">
-              <b>Mapa Mental:</b> <br />
-              Imagem ou link para mapa mental.
-            </div>
-          </TabsContent>
-        </Tabs>
+        <TabsContent value="video">
+          <div className="text-neutral-300 text-sm">
+            Assista ao vídeo acima para acompanhar a aula.
+          </div>
+        </TabsContent>
+        <TabsContent value="texto">
+          <div className="text-neutral-300 text-sm">
+            Olá, {name}!<br/>
+            <b>Conteúdo em texto:</b> Aqui você pode colocar a transcrição ou texto da aula.
+          </div>
+        </TabsContent>
+        <TabsContent value="resumo">
+          <div className="text-neutral-300 text-sm">
+            <b>Resumo:</b> <br />
+            Pontos principais da aula.
+          </div>
+        </TabsContent>
+        <TabsContent value="apresentacao">
+          <div className="text-neutral-300 text-sm">
+            <b>Apresentação:</b> <br />
+            Slides ou materiais de apoio.
+          </div>
+        </TabsContent>
+        <TabsContent value="mapa">
+          <div className="text-neutral-300 text-sm">
+            <b>Mapa Mental:</b> <br />
+            Imagem ou link para mapa mental.
+          </div>
+        </TabsContent>
         <div className="mt-4">
           <span className="font-semibold text-lg">
             {modulo.nome} - {aula.titulo}
