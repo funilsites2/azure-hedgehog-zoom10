@@ -102,6 +102,24 @@ export function AulaPlayer({
             className="w-full h-full"
           />
         </div>
+        <div className="flex justify-between mb-4">
+          {hasPrev ? (
+            <button
+              className="flex items-center gap-1 text-sm bg-neutral-800 px-3 py-1 rounded hover:bg-neutral-700"
+              onClick={() => onSelecionarAula(aulas[aulaIndex - 1].id)}
+            >
+              <ChevronLeft size={16} /> Voltar
+            </button>
+          ) : <div />}
+          {hasNext ? (
+            <button
+              className="flex items-center gap-1 text-sm bg-neutral-800 px-3 py-1 rounded hover:bg-neutral-700"
+              onClick={() => onSelecionarAula(aulas[aulaIndex + 1].id)}
+            >
+              Próxima <ChevronRight size={16} />
+            </button>
+          ) : <div />}
+        </div>
         <Tabs value={tab} onValueChange={setTab} className="w-full">
           <TabsList className="bg-neutral-800 mb-2">
             <TabsTrigger value="video">Vídeo</TabsTrigger>
@@ -144,24 +162,6 @@ export function AulaPlayer({
           <span className="font-semibold text-lg">
             {modulo.nome} - {aula.titulo}
           </span>
-        </div>
-        <div className="flex justify-between mt-4">
-          {hasPrev ? (
-            <button
-              className="flex items-center gap-1 text-sm bg-neutral-800 px-3 py-1 rounded hover:bg-neutral-700"
-              onClick={() => onSelecionarAula(aulas[aulaIndex - 1].id)}
-            >
-              <ChevronLeft size={16} /> Voltar
-            </button>
-          ) : <div />}
-          {hasNext ? (
-            <button
-              className="flex items-center gap-1 text-sm bg-neutral-800 px-3 py-1 rounded hover:bg-neutral-700"
-              onClick={() => onSelecionarAula(aulas[aulaIndex + 1].id)}
-            >
-              Próxima <ChevronRight size={16} />
-            </button>
-          ) : <div />}
         </div>
       </div>
       <div className="w-full md:w-1/3 flex-shrink-0 flex flex-col">
