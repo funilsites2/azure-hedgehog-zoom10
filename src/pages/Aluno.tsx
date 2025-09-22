@@ -22,6 +22,15 @@ import { useUser } from "@/context/UserContext";
 import { Footer } from "@/components/Footer";
 import { showSuccess } from "@/utils/toast";
 
+function getYoutubeThumbnail(url: string): string {
+  const match = url.match(
+    /(?:youtube\.com\/(?:embed\/|watch\?v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/
+  );
+  return match
+    ? `https://img.youtube.com/vi/${match[1]}/hqdefault.jpg`
+    : "/placeholder.svg";
+}
+
 const MENU_ITEMS = [
   { key: "modulos", label: "Módulos", icon: BookOpen },
   { key: "progresso", label: "Progresso", icon: BarChart2 },
@@ -76,28 +85,57 @@ export default function Aluno() {
     if (mobileTab === "modulos") {
       if (!modulo) {
         return (
-          <div className="mx-4 mt-8 space-y-6">
-            {linhas.map((linha) => {
-              const mods = modulos.filter((m) => m.linha === linha);
-              if (!mods.length) return null;
-              return (
-                <div
-                  key={linha}
-                  className="bg-neutral-800 bg-opacity-20 p-4 rounded-lg"
-                >
-                  <h3 className="text-2xl font-semibold mb-4">{linha}</h3>
-                  <ModuloCarousel
-                    modulos={mods}
-                    alunoLayout
-                    onModuloClick={(m) => {
-                      setModuloSelecionado(m.id);
-                      setAulaSelecionada(m.aulas[0]?.id ?? null);
-                    }}
-                  />
+          <>
+            {/* Bloco de Continuar Assistindo */}
+            {partialAulas.length > 0 && (
+              <div className="mx-4 mt-8 mb-8">
+                <h2 className="text-2xl font-semibold mb-4 text-white">Continuar Assistindo</h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                  {partialAulas.map(({ modulo: m, aula }) => (
+                    <div
+                      key={aula.id}
+                      className="bg-neutral-800 p-4 rounded-lg cursor-pointer hover:bg-neutral-700 transition"
+                      onClick={() => {
+                        setModuloSelecionado(m.id);
+                        setAulaSelecionada(aula.id);
+                      }}
+                    >
+                      <img
+                        src={getYoutubeThumbnail(aula.videoUrl)}
+                        alt={aula.titulo}
+                        className="w-full h-32 object-cover rounded mb-2"
+                      />
+                      <p className="text-white font-medium truncate">{aula.titulo}</p>
+                      <p className="text-neutral-400 text-sm truncate">{m.nome}</p>
+                    </div>
+                  ))}
                 </div>
-              );
-            })}
-          </div>
+              </div>
+            )}
+            {/* Blocos de módulos por linha */}
+            <div className="mx-4 space-y-6">
+              {linhas.map((linha) => {
+                const mods = modulos.filter((m) => m.linha === linha);
+                if (!mods.length) return null;
+                return (
+                  <div
+                    key={linha}
+                    className="bg-neutral-800 bg-opacity-20 p-4 rounded-lg"
+                  >
+                    <h3 className="text-2xl font-semibold mb-4 text-white">{linha}</h3>
+                    <ModuloCarousel
+                      modulos={mods}
+                      alunoLayout
+                      onModuloClick={(m) => {
+                        setModuloSelecionado(m.id);
+                        setAulaSelecionada(m.aulas[0]?.id ?? null);
+                      }}
+                    />
+                  </div>
+                );
+              })}
+            </div>
+          </>
         );
       }
       if (modulo.bloqueado) {
@@ -254,7 +292,7 @@ export default function Aluno() {
               setMobileTab(item.key);
               if (item.key === "modulos") setModuloSelecionado(null);
             }}
-            className={`flex items-center gap-3 px-4 py-3 w-full text-neutral-300 rounded ${
+            className={`flex items	center gap-3 px-4 py-3 w-full text-neutral-300 rounded ${
               mobileTab === item.key
                 ? "bg-green-600 text-white"
                 : "hover:bg-green-600 hover:text-white"
@@ -296,7 +334,7 @@ export default function Aluno() {
       ))}
       <Link
         to="/perfil"
-        className="flex-1 flex flex-col items-center justify-center text-neutral-300 hover:bg-green-600 hover:text-white"
+        className="flex-1 flex flex-col	items-center justify-center text-neutral-300 hover:bg-green-600 hover:text-white"
       >
         <User size={22} className="text-green-500" />
         <span className="text-xs">Perfil</span>
@@ -324,11 +362,6 @@ export default function Aluno() {
                 className="w-full h-full object-cover object-left"
               />
             </div>
-          </div>
-        )}
-        {moduloSelecionado === null && partialAulas.length > 0 && (
-          <div className="mx-4 mb-8">
-            {/* próximas aulas */}
           </div>
         )}
         <div className="flex-1 overflow-auto pb-[84px] md:pb-5">
