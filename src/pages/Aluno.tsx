@@ -347,31 +347,33 @@ export default function Aluno() {
         )}
         {moduloSelecionado === null && partialAulas.length > 0 && (
           <div className="container mx-auto mb-8">
-            <h3 className="text-2xl font-semibold mb-2">Continuar Assistindo</h3>
-            <div className="flex overflow-x-auto gap-6 pb-2">
-              {partialAulas.map(({ modulo: m, aula: a }) => (
-                <div
-                  key={`${m.id}-${a.id}`}
-                  className="flex-shrink-0 cursor-pointer group"
-                  onClick={() => {
-                    setModuloSelecionado(m.id);
-                    setAulaSelecionada(a.id);
-                  }}
-                >
-                  <div className="relative rounded-lg overflow-hidden">
-                    <img
-                      src={getYoutubeThumbnail(a.videoUrl)}
-                      alt={a.titulo}
-                      className="w-56 h-auto transition-transform duration-300 transform group-hover:scale-105"
-                    />
-                    <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-colors">
-                      <Play size={48} className="text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div className="bg-neutral-800 bg-opacity-20 p-4 rounded-lg">
+              <h3 className="text-2xl font-semibold mb-4">Continuar Assistindo</h3>
+              <div className="flex overflow-x-auto gap-6 pb-2">
+                {partialAulas.map(({ modulo: m, aula: a }) => (
+                  <div
+                    key={`${m.id}-${a.id}`}
+                    className="flex-shrink-0 cursor-pointer group"
+                    onClick={() => {
+                      setModuloSelecionado(m.id);
+                      setAulaSelecionada(a.id);
+                    }}
+                  >
+                    <div className="relative rounded-lg overflow-hidden">
+                      <img
+                        src={getYoutubeThumbnail(a.videoUrl)}
+                        alt={a.titulo}
+                        className="w-56 h-auto transition-transform duration-300 transform group-hover:scale-105"
+                      />
+                      <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-colors">
+                        <Play size={48} className="text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                      </div>
                     </div>
+                    <p className="mt-2 text-lg font-medium">{m.nome}</p>
+                    <p className="text-neutral-300 truncate">{a.titulo}</p>
                   </div>
-                  <p className="mt-2 text-lg font-medium">{m.nome}</p>
-                  <p className="text-neutral-300 truncate">{a.titulo}</p>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           </div>
         )}
@@ -382,5 +384,5 @@ export default function Aluno() {
         <Footer />
       </div>
     </div>
-);
+  );
 }
