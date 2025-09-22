@@ -133,18 +133,6 @@ export const ModuleForm: React.FC<ModuleFormProps> = ({
       />
       <div className="space-y-2">
         <div className="flex gap-2">
-          <input
-            className="flex-1 p-2 rounded bg-neutral-800 text-white"
-            placeholder="Título da aula"
-            value={novaAula.titulo}
-            onChange={(e) => setNovaAula((a) => ({ ...a, titulo: e.target.value }))}
-          />
-          <input
-            className="flex-1 p-2 rounded bg-neutral-800 text-white"
-            placeholder="URL do vídeo"
-            value={novaAula.videoUrl}
-            onChange={(e) => setNovaAula((a) => ({ ...a, videoUrl: e.target.value }))}
-          />
           <Button type="button" onClick={addAula}>
             <Plus size={16} />
           </Button>
