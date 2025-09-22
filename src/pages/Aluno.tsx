@@ -304,7 +304,7 @@ export default function Aluno() {
   );
 
   const DesktopSidebar = (
-    <aside className="hidden md:flex flex-col items-center bg-neutral-950 p-6 space-y-6">
+    <aside className="hidden md:flex fixed left-0 top-0 h-screen w-64 z-30 flex-col items-center bg-neutral-950 p-6 space-y-6 border-r border-neutral-800">
       {logoUrl && (
         <img src={logoUrl} alt="Logo" className="w-12 h-12 object-contain" />
       )}
@@ -387,7 +387,7 @@ export default function Aluno() {
       </button>
       {MobileDrawer}
       {DesktopSidebar}
-      <div className="flex-1 flex flex-col pt-12 md:pt-0">
+      <div className="flex-1 flex flex-col pt-12 md:pt-0 md:ml-64">
         {bannerUrl && moduloSelecionado === null && (
           <div className="mx-4 my-4 flex justify-center">
             <div className="w-full max-w-[1600px] h-[400px] overflow-hidden rounded-lg">
