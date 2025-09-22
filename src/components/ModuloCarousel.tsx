@@ -9,18 +9,23 @@ interface ModuloCarouselProps {
   modulos: Modulo[];
   onModuloClick?: (modulo: Modulo) => void;
   alunoLayout?: boolean;
-  showLocked?: boolean; // se true, mostra só bloqueados
+  showLocked?: boolean; // true = only locked, false = only unlocked, undefined = all
 }
 
 export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
   modulos,
   onModuloClick,
   alunoLayout = false,
-  showLocked = false,
+  showLocked,
 }) => {
-  // Para mobile: 1.5 cards visíveis se alunoLayout, senão 2
-  const slidesToShow = alunoLayout ? 1.5 : 2;
+  // Determine which modules to show
+  const filteredModulos = showLocked === true
+    ? modulos.filter((m) => m.bloqueado)
+    : showLocked === false
+      ? modulos.filter((m) => !m.bloqueado)
+      : modulos;
 
+  // Embla carousel setup for mobile
   const [emblaRef, emblaApi] = useEmblaCarousel({
     slidesToScroll: 1,
     containScroll: "trimSnaps",
@@ -47,11 +52,10 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
     };
   }, [emblaApi]);
 
-  // Tamanhos dos cards
+  // Mobile card sizing
   const mobileCardWidth = alunoLayout
     ? "w-[70vw] max-w-[320px] min-w-[220px]"
     : "min-w-1/2 max-w-[90vw]";
-
   const mobilePeek = alunoLayout
     ? { flex: "0 0 66%", marginRight: "2vw" }
     : { flex: "0 0 50%" };
@@ -61,23 +65,18 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
     ? "md:grid-cols-3 lg:grid-cols-5"
     : "md:grid-cols-2 lg:grid-cols-3";
 
-  // Filtra se for para mostrar só bloqueados
-  const filteredModulos = showLocked
-    ? modulos.filter((m) => m.bloqueado)
-    : modulos.filter((m) => !m.bloqueado);
-
   return (
     <div>
-      {/* Mobile: carrossel */}
+      {/* Mobile carousel */}
       <div className="block md:hidden">
         <div className="relative">
           <div className="overflow-hidden" ref={emblaRef}>
             <div className="flex">
-              {filteredModulos.map((modulo, idx) => (
+              {filteredModulos.map((modulo) => (
                 <div
+                  key={modulo.id}
                   className={`${mobileCardWidth} flex-shrink-0 px-2`}
                   style={mobilePeek}
-                  key={modulo.id}
                 >
                   <div
                     className={`bg-neutral-800 rounded-lg p-4 shadow-lg flex flex-col h-full cursor-pointer relative ${
@@ -122,7 +121,7 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
               ))}
             </div>
           </div>
-          {/* Navegação */}
+          {/* Nav buttons */}
           <button
             className="absolute left-0 top-1/2 -translate-y-1/2 bg-neutral-900/80 rounded-full p-2 z-10"
             onClick={() => emblaApi && emblaApi.scrollPrev()}
@@ -143,7 +142,7 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
           </button>
         </div>
       </div>
-      {/* Desktop: grid */}
+      {/* Desktop grid */}
       <div className={`hidden md:grid grid-cols-1 ${desktopGridCols} gap-4`}>
         {filteredModulos.map((modulo) => (
           <div
