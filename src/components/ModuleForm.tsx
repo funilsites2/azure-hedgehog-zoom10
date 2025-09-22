@@ -43,6 +43,7 @@ export const ModuleForm: React.FC<ModuleFormProps> = ({
   const [linha, setLinha] = useState(initialLinha);
   const [aulas, setAulas] = useState<AulaInput[]>(initialAulas);
   const [novaAula, setNovaAula] = useState<AulaInput>({ titulo: "", videoUrl: "" });
+  const [isCreatingNewLinha, setIsCreatingNewLinha] = useState(false);
 
   const addAula = () => {
     if (!novaAula.titulo || !novaAula.videoUrl) return;
@@ -61,6 +62,7 @@ export const ModuleForm: React.FC<ModuleFormProps> = ({
     setCapa("");
     setLinha("");
     setAulas([]);
+    setIsCreatingNewLinha(false);
   };
 
   return (
@@ -77,19 +79,33 @@ export const ModuleForm: React.FC<ModuleFormProps> = ({
         value={capa}
         onChange={(e) => setCapa(e.target.value)}
       />
-      <Select onValueChange={setLinha} value={linha}>
-        <SelectTrigger className="w-full">
-          <SelectValue placeholder="Selecione ou digite a linha" />
+      <Select
+        onValueChange={(value) => {
+          if (value === "__new") {
+            setIsCreatingNewLinha(true);
+            setLinha("");
+          } else {
+            setIsCreatingNewLinha(false);
+            setLinha(value);
+          }
+        }}
+        value={isCreatingNewLinha ? "__new" : linha}
+      >
+        <SelectTrigger className="w-full bg-neutral-800 text-white">
+          <SelectValue placeholder="Selecionar linha" />
         </SelectTrigger>
-        <SelectContent>
+        <SelectContent className="bg-neutral-800 text-white">
           {existingLinhas.map((l) => (
             <SelectItem key={l} value={l}>
               {l}
             </SelectItem>
           ))}
+          <SelectItem key="__new" value="__new">
+            Criar nova linha
+          </SelectItem>
         </SelectContent>
       </Select>
-      {!existingLinhas.includes(linha) && (
+      {isCreatingNewLinha && (
         <input
           className="w-full p-2 rounded bg-neutral-800 text-white"
           placeholder="Nova linha"
@@ -135,5 +151,5 @@ export const ModuleForm: React.FC<ModuleFormProps> = ({
         )}
       </div>
     </div>
-  );
-};
+);
+}
