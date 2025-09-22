@@ -33,10 +33,7 @@ export default function Admin() {
   }>({ moduloId: "", titulo: "", videoUrl: "" });
 
   const [editandoId, setEditandoId] = useState<number | null>(null);
-
-  const iniciarEdicao = (moduloId: number) => {
-    setEditandoId(moduloId);
-  };
+  const iniciarEdicao = (moduloId: number) => setEditandoId(moduloId);
   const cancelarEdicao = () => setEditandoId(null);
 
   const handleEditSubmit = (
@@ -60,14 +57,82 @@ export default function Admin() {
         <aside className="w-80 bg-neutral-950 p-6 flex-shrink-0 space-y-6">
           <LogoSettings />
           <BannerSettings />
-          <h3 className="font-semibold mb-4">Novo Módulo</h3>
-          <ModuleForm
-            onSubmit={(nome, capa, aulas, linha, delayDays) =>
-              adicionarModulo(nome, capa, aulas, linha, delayDays)
-            }
-            submitLabel="Adicionar Módulo"
-          />
+
+          {/* Formulário de Módulo */}
+          <div>
+            <h3 className="font-semibold mb-2">Novo Módulo</h3>
+            <ModuleForm
+              onSubmit={(nome, capa, aulas, linha, delayDays) =>
+                adicionarModulo(nome, capa, aulas, linha, delayDays)
+              }
+              submitLabel="Adicionar Módulo"
+            />
+          </div>
+
+          {/* Adicionar Aula Existente */}
+          <div>
+            <h3 className="font-semibold mb-2">Nova Aula</h3>
+            <div className="space-y-2">
+              <select
+                className="w-full p-2 rounded bg-neutral-800 text-white"
+                value={novaAulaExistente.moduloId}
+                onChange={(e) =>
+                  setNovaAulaExistente((v) => ({
+                    ...v,
+                    moduloId:
+                      e.target.value === "" ? "" : Number(e.target.value),
+                  }))
+                }
+              >
+                <option value="">Selecionar módulo</option>
+                {modulos.map((m) => (
+                  <option key={m.id} value={m.id}>
+                    {m.nome}
+                  </option>
+                ))}
+              </select>
+              <input
+                className="w-full p-2 rounded bg-neutral-800 text-white"
+                placeholder="Título da aula"
+                value={novaAulaExistente.titulo}
+                onChange={(e) =>
+                  setNovaAulaExistente((v) => ({
+                    ...v,
+                    titulo: e.target.value,
+                  }))
+                }
+              />
+              <input
+                className="w-full p-2 rounded bg-neutral-800 text-white"
+                placeholder="URL do vídeo"
+                value={novaAulaExistente.videoUrl}
+                onChange={(e) =>
+                  setNovaAulaExistente((v) => ({
+                    ...v,
+                    videoUrl: e.target.value,
+                  }))
+                }
+              />
+              <Button
+                onClick={() => {
+                  const { moduloId, titulo, videoUrl } =
+                    novaAulaExistente;
+                  if (
+                    moduloId &&
+                    titulo.trim() !== "" &&
+                    videoUrl.trim() !== ""
+                  ) {
+                    adicionarAula(moduloId, titulo.trim(), videoUrl.trim());
+                    setNovaAulaExistente({ moduloId: "", titulo: "", videoUrl: "" });
+                  }
+                }}
+              >
+                Adicionar Aula
+              </Button>
+            </div>
+          </div>
         </aside>
+
         <main className="flex-1 p-8 overflow-auto pb-16 md:pb-5 space-y-8">
           <h1 className="text-3xl font-bold">Módulos</h1>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -122,7 +187,9 @@ export default function Admin() {
                               {modulo.nome}
                             </h3>
                             <div className="mt-auto flex flex-col space-y-2">
-                              <Button onClick={() => iniciarEdicao(modulo.id)}>
+                              <Button
+                                onClick={() => iniciarEdicao(modulo.id)}
+                              >
                                 <Edit size={16} className="mr-2" />
                                 Editar
                               </Button>
@@ -137,12 +204,18 @@ export default function Admin() {
                               >
                                 {modulo.bloqueado ? (
                                   <>
-                                    <Unlock size={16} className="mr-2" />
+                                    <Unlock
+                                      size={16}
+                                      className="mr-2"
+                                    />
                                     Desbloquear
                                   </>
                                 ) : (
                                   <>
-                                    <Lock size={16} className="mr-2" />
+                                    <Lock
+                                      size={16}
+                                      className="mr-2"
+                                    />
                                     Bloquear
                                   </>
                                 )}
