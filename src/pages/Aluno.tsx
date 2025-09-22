@@ -49,15 +49,24 @@ export default function Aluno() {
         return (
           <>
             <h1 className="text-3xl font-bold mb-6 mt-8 ml-8">Módulos</h1>
-            <div className="px-4">
-              <ModuloCarousel
-                modulos={modulos}
-                alunoLayout
-                onModuloClick={(m) => {
-                  setModuloSelecionado(m.id);
-                  setAulaSelecionada(m.aulas[0]?.id ?? null);
-                }}
-              />
+            <div className="space-y-8 px-4">
+              {[1, 2, 3].map((col) => {
+                const mods = modulos.filter((m) => m.coluna === col);
+                if (mods.length === 0) return null;
+                return (
+                  <div key={col}>
+                    <h2 className="text-2xl font-semibold mb-4">Linha {col}</h2>
+                    <ModuloCarousel
+                      modulos={mods}
+                      alunoLayout
+                      onModuloClick={(m) => {
+                        setModuloSelecionado(m.id);
+                        setAulaSelecionada(m.aulas[0]?.id ?? null);
+                      }}
+                    />
+                  </div>
+                );
+              })}
             </div>
           </>
         );
@@ -263,7 +272,6 @@ export default function Aluno() {
 
   return (
     <div className="min-h-screen h-screen w-screen flex flex-col md:flex-row bg-neutral-900 text-white overflow-hidden relative">
-      {/* Mobile hamburger */}
       <button
         className="md:hidden fixed top-4 left-4 z-50 bg-neutral-950 rounded-full p-2 border border-neutral-800 shadow-lg"
         onClick={() => setMobileMenuOpen(true)}
