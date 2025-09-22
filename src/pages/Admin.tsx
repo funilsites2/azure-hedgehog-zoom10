@@ -128,7 +128,7 @@ export default function Admin() {
           </div>
           <BannerSettings />
         </aside>
-        <main className="flex-1 p-8 overflow-auto pb-16 md:pb-0">
+        <main className="flex-1 p-8 overflow-auto pb-16 md:pb-5">
           <h1 className="text-3xl font-bold mb-6">Módulos</h1>
           <div className="block md:hidden mb-6">
             {linhas.map((linha) => {

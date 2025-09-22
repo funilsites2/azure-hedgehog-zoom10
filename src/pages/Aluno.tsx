@@ -48,7 +48,7 @@ export default function Aluno() {
     ? Math.round((aulasAssistidas / totalAulas) * 100)
     : 0;
 
-  const modulo = modulos.find((m) => m.id === moduloSelecionado);
+  const modulo = modulos.find((m) => m.id === móduloSelecionado);
 
   function renderMainContent() {
     if (mobileTab === "modulos") {
@@ -159,9 +159,7 @@ export default function Aluno() {
   const MobileDrawer = (
     <div
       className={`fixed inset-0 z-40 bg-black/60 transition-opacity duration-200 ${
-        mobileMenuOpen
-          ? "opacity-100 pointer-events-auto"
-          : "opacity-0 pointer-events-none"
+        mobileMenuOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
       }`}
       onClick={() => setMobileMenuOpen(false)}
     >
@@ -188,9 +186,7 @@ export default function Aluno() {
               <button
                 key={item.key}
                 className={`flex items-center gap-2 px-2 py-2 rounded text-left ${
-                  mobileTab === item.key
-                    ? "bg-neutral-800 text-white"
-                    : "text-neutral-300"
+                  mobileTab === item.key ? "bg-neutral-800 text-white" : "text-neutral-300"
                 }`}
                 onClick={() => {
                   setMobileTab(item.key);
@@ -287,9 +283,9 @@ export default function Aluno() {
       {MobileDrawer}
       {DesktopSidebar}
       <div className="flex-1 flex flex-col pt-12 md:pt-0">
-        <main className="flex-1 overflow-auto pb-16 md:pb-0">
+        <main className="flex-1 overflow-auto pb-16 md:pb-5">
           {bannerUrl && (
-            <div className="mb-6 mx-auto w-full max-w-[1600px] h-[200px] md:h-[400px] overflow-hidden rounded-lg">
+            <div className="mb-6 mx-auto w-full max-w-[1600px] h-[200px] md:h-[400px] overflow-hidden rounded-lg">  
               <img
                 src={bannerUrl}
                 alt="Banner Aluno"
