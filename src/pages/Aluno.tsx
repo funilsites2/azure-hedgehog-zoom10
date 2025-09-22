@@ -56,7 +56,6 @@ export default function Aluno() {
       if (!modulo) {
         return (
           <div className="mt-8 space-y-8 px-4">
-            <h2 className="text-xl font-semibold">Olá, {name}</h2>
             {linhas.map((linha) => {
               const mods = modulos.filter((m) => m.linha === linha);
               if (!mods.length) return null;
@@ -177,10 +176,7 @@ export default function Aluno() {
               key={item.key}
               to={item.key === "modulos" ? "/aluno" : "#"}
               className="relative flex items-center gap-3 px-4 py-3 transition-colors hover:bg-green-600 hover:text-white text-neutral-300"
-              onClick={() => {
-                setMobileTab(item.key);
-                setMobileMenuOpen(false);
-              }}
+              onClick={() => setMobileMenuOpen(false)}
             >
               <item.icon size={20} className="text-green-500" />
               <span className="flex-1">{item.label}</span>
@@ -224,19 +220,16 @@ export default function Aluno() {
             key={item.key}
             to={item.key === "modulos" ? "/aluno" : "#"}
             className="relative flex items-center gap-3 px-4 py-3 transition-colors hover:bg-green-600 hover:text-white text-neutral-300"
-            onClick={() => {
-              setMobileTab(item.key);
-              setModuloSelecionado(null);
-            }}
+            onClick={() => setMobileTab(item.key)}
           >
-            <item.icon size={20} className="text-green-500" />
+            <item.icon size={20}px className="text-green-500" />
             {!sidebarCollapsed && <span>{item.label}</span>}
             <div className="h-0.5 bg-green-500 w-full absolute left-0 bottom-0"></div>
           </Link>
         ))}
         <Link
           to="/perfil"
-            className="relative flex items-center gap-3 px-4 py-3 transition-colors hover:bg-green-600 hover:text-white text-neutral-300"
+          className="relative flex items-center gap-3 px-4 py-3 transition-colors hover:bg-green-600 hover:text-white text-neutral-300"
         >
           <User size={20} className="text-green-500" />
           {!sidebarCollapsed && <span>Perfil</span>}
@@ -253,7 +246,6 @@ export default function Aluno() {
           key={item.key}
           to={item.key === "modulos" ? "/aluno" : "#"}
           className="relative flex-1 flex flex-col items-center justify-center transition-colors hover:bg-green-600 hover:text-white text-neutral-300"
-          onClick={() => setMobileTab(item.key)}
         >
           <item.icon size={22} className="text-green-500" />
           <span className="text-xs">{item.label}</span>
@@ -282,7 +274,7 @@ export default function Aluno() {
       {MobileDrawer}
       {DesktopSidebar}
       <div className="flex-1 flex flex-col pt-12 md:pt-0">
-        {bannerUrl && moduloSelecionado === null && (
+        {bannerUrl && (
           <div className="mb-6 mx-auto w-full max-w-[1600px] h-[200px] md:h-[400px] overflow-hidden rounded-lg">
             <img
               src={bannerUrl}
@@ -291,9 +283,51 @@ export default function Aluno() {
             />
           </div>
         )}
-        <div className="flex-1 overflow-auto pb-[84px] md:pb-5">
-          {renderMainContent()}
-        </div>
+        <main className="flex-1 overflow-auto p-8 pb-[84px] md:pb-5">
+          <div className="max-w-md mx-auto space-y-8">
+            <h1 className="text-3xl font-bold">Perfil do Aluno</h1>
+            <PhotoSettings />
+            <div className="space-y-4">
+              <h2 className="text-2xl font-semibold">Editar Nome</h2>
+              <input
+                type="text"
+                className="w-full p-2 rounded bg-neutral-800 text-white"
+                value={nomeAluno}
+                onChange={(e) => setNomeAluno(e.target.value)}
+              />
+              <Button className="w-full" onClick={handleNameChange}>
+                Salvar Nome
+              </Button>
+            </div>
+            <div className="space-y-4">
+              <h2 className="text-2xl font-semibold">Alterar Senha</h2>
+              <input
+                type="password"
+                className="w-full p-2 rounded bg-neutral-800 text-white"
+                placeholder="Senha atual"
+                value={currentPwd}
+                onChange={(e) => setCurrentPwd(e.target.value)}
+              />
+              <input
+                type="password"
+                className="w-full p-2 rounded bg-neutral-800 text-white"
+                placeholder="Nova senha"
+                value={newPwd}
+                onChange={(e) => setNewPwd(e.target.value)}
+              />
+              <input
+                type="password"
+                className="w-full p-2 rounded bg-neutral-800 text-white"
+                placeholder="Confirme a nova senha"
+                value={confirmPwd}
+                onChange={(e) => setConfirmPwd(e.target.value)}
+              />
+              <Button className="w-full" onClick={handlePasswordChange}>
+                Atualizar Senha
+              </Button>
+            </div>
+          </div>
+        </main>
         {MobileFooter}
         <Footer />
       </div>
