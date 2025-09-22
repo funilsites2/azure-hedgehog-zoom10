@@ -343,9 +343,11 @@ export default function Aluno() {
                       <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-colors">
                         <Play size={48} className="text-white opacity-0 group-hover:opacity-100 transition-opacity" />
                       </div>
+                      <div className="absolute top-0 left-0 right-0 p-2 bg-black bg-opacity-60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col">
+                        <span className="text-white text-sm font-semibold">{m.nome}</span>
+                        <span className="text-white text-xs">{a.titulo}</span>
+                      </div>
                     </div>
-                    <p className="mt-2 text-lg font-medium">{m.nome}</p>
-                    <p className="text-neutral-300 truncate">{a.titulo}</p>
                   </div>
                 ))}
               </div>
