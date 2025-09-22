@@ -49,6 +49,11 @@ type ModulosContextType = {
     aulaId: number,
     bloqueado: boolean
   ) => void;
+  setAulaReleaseDays: (
+    moduloId: number,
+    aulaId: number,
+    delayDays: number
+  ) => void;
 };
 
 const STORAGE_KEY = "modulos_area_membros";
@@ -112,15 +117,12 @@ const initializeBlocks = (mods: Modulo[]): Modulo[] => {
   return mods.map((m) => {
     const moduleBlocked = m.bloqueado ?? (m.releaseDate ? now < m.releaseDate : false);
     const aulas = m.aulas.map((a, i, arr) => {
-      // Bloqueio manual tem prioridade
       if (a.bloqueado) {
         return a;
       }
-      // Bloqueio por releaseDate
       if (a.releaseDate && now < a.releaseDate) {
         return { ...a, bloqueado: true };
       }
-      // Bloqueio sequencial
       if (i === 0) {
         return { ...a, bloqueado: false };
       }
@@ -288,6 +290,29 @@ export const ModulosProvider: React.FC<{ children: React.ReactNode }> = ({
     );
   };
 
+  const setAulaReleaseDays = (
+    moduloId: number,
+    aulaId: number,
+    delayDays: number
+  ) => {
+    const now = Date.now();
+    const releaseDate = now + delayDays * 24 * 60 * 60 * 1000;
+    setModulos((prev) =>
+      initializeBlocks(
+        prev.map((m) =>
+          m.id === moduloId
+            ? {
+                ...m,
+                aulas: m.aulas.map((a) =>
+                  a.id === aulaId ? { ...a, releaseDate } : a
+                ),
+              }
+            : m
+        )
+      )
+    );
+  };
+
   return (
     <ModulosContext.Provider
       value={{
@@ -298,6 +323,7 @@ export const ModulosProvider: React.FC<{ children: React.ReactNode }> = ({
         editarModulo,
         setModuloBloqueado,
         setAulaBloqueada,
+        setAulaReleaseDays,
       }}
     >
       {children}
