@@ -76,12 +76,15 @@ export default function Aluno() {
     if (mobileTab === "modulos") {
       if (!modulo) {
         return (
-          <div className="container mx-auto mt-8 space-y-6">
+          <div className="mx-4 mt-8 space-y-6">
             {linhas.map((linha) => {
               const mods = modulos.filter((m) => m.linha === linha);
               if (!mods.length) return null;
               return (
-                <div key={linha} className="bg-neutral-800 bg-opacity-20 p-4 rounded-lg">
+                <div
+                  key={linha}
+                  className="bg-neutral-800 bg-opacity-20 p-4 rounded-lg"
+                >
                   <h3 className="text-2xl font-semibold mb-4">{linha}</h3>
                   <ModuloCarousel
                     modulos={mods}
@@ -324,7 +327,7 @@ export default function Aluno() {
           </div>
         )}
         {moduloSelecionado === null && partialAulas.length > 0 && (
-          <div className="container mx-auto mb-8">
+          <div className="mx-4 mb-8">
             {/* próximas aulas */}
           </div>
         )}
