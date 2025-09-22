@@ -15,6 +15,7 @@ import {
 import { useBanner } from "@/context/BannerContext";
 import { useLogo } from "@/context/LogoContext";
 import { usePhoto } from "@/context/PhotoContext";
+import { useStudent } from "@/context/StudentContext";
 import { PhotoSettings } from "@/components/PhotoSettings";
 import { Button } from "@/components/ui/button";
 import { showSuccess, showError } from "@/utils/toast";
@@ -31,6 +32,8 @@ const Perfil: React.FC = () => {
   const { bannerUrl } = useBanner();
   const { logoUrl } = useLogo();
   const { photoUrl } = usePhoto();
+  const { name, setName } = useStudent();
+  const [editingName, setEditingName] = useState(name);
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -73,14 +76,14 @@ const Perfil: React.FC = () => {
           <X size={28} className="text-green-500" />
         </button>
         <h2 className="text-2xl font-bold flex items-center gap-2">
-          <Layers size={28} className="text-green-500" /> Área do Aluno
+          <Layers size={28} className="text-green-500" /> {name || "Aluno"}
         </h2>
         <nav className="flex flex-col">
           {MENU_ITEMS.map((item) => (
             <Link
               key={item.key}
               to={item.key === "modulos" ? "/aluno" : "#"}
-              className="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-neutral-800 text-neutral-300"
+              className="relative flex items-center gap-3 px-4 py-3 transition-colors hover:bg-neutral-800 text-neutral-300"
               onClick={() => setMobileMenuOpen(false)}
             >
               <item.icon size={20} className="text-green-500" />
@@ -119,7 +122,7 @@ const Perfil: React.FC = () => {
       <div className="flex items-center justify-between p-4">
         {!sidebarCollapsed && (
           <h2 className="text-xl font-bold flex items-center gap-2">
-            <Layers size={24} className="text-green-500" /> Área do Aluno
+            <Layers size={24} className="text-green-500" /> {name || "Aluno"}
           </h2>
         )}
         <button
@@ -197,6 +200,19 @@ const Perfil: React.FC = () => {
             <h1 className="text-3xl font-bold">Perfil do Aluno</h1>
             <PhotoSettings />
             <div className="space-y-4">
+              <h2 className="text-2xl font-semibold">Nome do Aluno</h2>
+              <input
+                type="text"
+                className="w-full p-2 rounded bg-neutral-800 text-white"
+                placeholder="Nome do aluno"
+                value={editingName}
+                onChange={(e) => setEditingName(e.target.value)}
+              />
+              <Button className="w-full" onClick={() => setName(editingName)}>
+                Salvar Nome
+              </Button>
+            </div>
+            <div className="space-y-4">
               <h2 className="text-2xl font-semibold">Alterar Senha</h2>
               <input
                 type="password"
@@ -229,7 +245,6 @@ const Perfil: React.FC = () => {
         <Footer />
       </div>
     </div>
-  );
-};
+);
 
 export default Perfil;
