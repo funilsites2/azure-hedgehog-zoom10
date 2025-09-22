@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { CheckCircle, ChevronLeft, ChevronRight } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 
 type Aula = {
@@ -60,6 +61,13 @@ export function AulaPlayer({
   const hasPrev = aulaIndex > 0;
   const hasNext = aulaIndex < aulas.length - 1;
 
+  // Module progress calculation
+  const totalAulasModulo = aulas.length;
+  const assistidasModulo = aulas.filter((a) => a.assistida).length;
+  const progressoModulo = totalAulasModulo
+    ? Math.round((assistidasModulo / totalAulasModulo) * 100)
+    : 0;
+
   const [tab, setTab] = useState("video");
 
   return (
@@ -80,6 +88,13 @@ export function AulaPlayer({
               <CheckCircle size={16} /> Concluída
             </span>
           )}
+        </div>
+        {/* Module Progress */}
+        <div className="mb-4 px-2">
+          <Progress value={progressoModulo} className="h-2 bg-neutral-800" />
+          <div className="text-xs text-neutral-400 mt-1">
+            {progressoModulo}% do módulo concluído
+          </div>
         </div>
         {/* Video */}
         <div className="aspect-video bg-black rounded-lg overflow-hidden mb-4 shadow-lg w-full">
