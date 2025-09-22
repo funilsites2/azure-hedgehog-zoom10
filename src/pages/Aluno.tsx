@@ -48,7 +48,7 @@ export default function Aluno() {
     ? Math.round((aulasAssistidas / totalAulas) * 100)
     : 0;
 
-  const modulo = modulos.find((m) => m.id === móduloSelecionado);
+  const modulo = modulos.find((m) => m.id === moduloSelecionado);
 
   function renderMainContent() {
     if (mobileTab === "modulos") {
