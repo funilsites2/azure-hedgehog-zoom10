@@ -5,7 +5,7 @@ import {
   Layers,
   Trash2,
   Edit,
-  Lock,
+  Lock as LockIcon,
   Unlock,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -155,7 +155,87 @@ export default function Admin() {
 
         <main className="flex-1 p-8 overflow-auto pb-16 md:pb-5 space-y-8">
           <h1 className="text-3xl font-bold">Módulos</h1>
-          <ModuloCarousel modulos={modulos} />
+
+          {/* Edição de módulo */}
+          {editandoId !== null ? (
+            <div className="bg-neutral-800 p-6 rounded-lg">
+              <h2 className="text-2xl mb-4">Editando Módulo</h2>
+              {(() => {
+                const m = modulos.find((mod) => mod.id === editandoId);
+                if (!m) return null;
+                return (
+                  <ModuleForm
+                    initialNome={m.nome}
+                    initialCapa={m.capa}
+                    initialLinha={m.linha}
+                    initialAulas={m.aulas.map((a) => ({
+                      titulo: a.titulo,
+                      videoUrl: a.videoUrl,
+                    }))}
+                    initialDelayDays={m.releaseDate
+                      ? Math.max(
+                          0,
+                          Math.round(
+                            (m.releaseDate - Date.now()) /
+                              (1000 * 60 * 60 * 24)
+                          )
+                        )
+                      : 0}
+                    onSubmit={handleEditSubmit}
+                    onCancel={cancelarEdicao}
+                    submitLabel="Atualizar Módulo"
+                  />
+                );
+              })()}
+            </div>
+          ) : (
+            <>
+              <ModuloCarousel modulos={modulos} />
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-8">
+                {modulos.map((m) => (
+                  <div
+                    key={m.id}
+                    className="bg-neutral-800 p-4 rounded-lg flex flex-col justify-between"
+                  >
+                    <div>
+                      <h3 className="text-xl font-semibold">{m.nome}</h3>
+                      <p className="text-sm text-neutral-400">
+                        Linha: {m.linha}
+                      </p>
+                    </div>
+                    <div className="flex gap-2 mt-4">
+                      <Button
+                        variant="secondary"
+                        onClick={() => iniciarEdicao(m.id)}
+                      >
+                        <Edit size={16} className="mr-1" />
+                        Editar
+                      </Button>
+                      <Button
+                        variant={m.bloqueado ? "destructive" : "outline"}
+                        onClick={() =>
+                          setModuloBloqueado(m.id, !m.bloqueado)
+                        }
+                      >
+                        {m.bloqueado ? (
+                          <>
+                            <Unlock size={16} className="mr-1" />
+                            Desbloquear
+                          </>
+                        ) : (
+                          <>
+                            <LockIcon size={16} className="mr-1" />
+                            Bloquear
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
         </main>
       </div>
       <Footer />
