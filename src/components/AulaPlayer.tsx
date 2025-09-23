@@ -1,11 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { CheckCircle, Lock, Play } from "lucide-react";
+import { useState } from "react";
+import { CheckCircle, Lock } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 import { useUser } from "@/context/UserContext";
-import { useModulos } from "@/context/ModulosContext";
 
 type Aula = {
   id: number;
@@ -14,7 +13,6 @@ type Aula = {
   assistida?: boolean;
   bloqueado?: boolean;
   releaseDate?: number;
-  iniciado?: boolean;
 };
 
 type Modulo = {
@@ -44,9 +42,16 @@ export function AulaPlayer({
   onMarcarAssistida,
 }: AulaPlayerProps) {
   const { name } = useUser();
-  const { iniciarAula } = useModulos();
   const aulas = modulo.aulas;
   const now = Date.now();
+
+  if (!aulas || aulas.length === 0) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <span className="text-neutral-300">Nenhuma aula disponível neste módulo.</span>
+      </div>
+    );
+  }
 
   const aulaIndex = aulas.findIndex((a) => a.id === aulaSelecionadaId);
   const aula = aulas[aulaIndex] ?? aulas[0];
@@ -57,46 +62,6 @@ export function AulaPlayer({
 
   const isLockedCurrent =
     aula.bloqueado === true || (aula.releaseDate ? now < aula.releaseDate : false);
-
-  // playback tracking
-  const [playing, setPlaying] = useState(false);
-  const [secondsWatched, setSecondsWatched] = useState(0);
-  const [reported, setReported] = useState(false);
-
-  // reset when switching aula
-  useEffect(() => {
-    setPlaying(false);
-    setSecondsWatched(0);
-    setReported(false);
-  }, [aula.id]);
-
-  useEffect(() => {
-    let interval: ReturnType<typeof setInterval> | undefined;
-    if (playing) {
-      interval = setInterval(() => {
-        setSecondsWatched((s) => s + 1);
-      }, 1000);
-    }
-    return () => {
-      if (interval) clearInterval(interval);
-    };
-  }, [playing]);
-
-  // when reaching 5 seconds, mark as started
-  useEffect(() => {
-    if (!reported && secondsWatched >= 5) {
-      iniciarAula(modulo.id, aula.id);
-      setReported(true);
-    }
-  }, [secondsWatched, reported, iniciarAula, modulo.id, aula.id]);
-
-  if (!aulas || aulas.length === 0) {
-    return (
-      <div className="flex items-center justify-center h-full">
-        <span className="text-neutral-300">Nenhuma aula disponível neste módulo.</span>
-      </div>
-    );
-  }
 
   return (
     <div className="flex flex-col md:flex-row gap-6 w-full h-full">
@@ -127,43 +92,20 @@ export function AulaPlayer({
             </p>
           </div>
         ) : (
-          <>
-            {!playing ? (
-              <div
-                className="aspect-video bg-black rounded-lg overflow-hidden mb-4 shadow-lg relative flex items-center justify-center cursor-pointer"
-                onClick={() => setPlaying(true)}
-              >
-                <img
-                  src={getYoutubeThumbnail(aula.videoUrl)}
-                  alt={aula.titulo}
-                  className="w-full h-full object-cover"
-                />
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="bg-black/60 rounded-full p-4">
-                    <Play size={36} className="text-white" />
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <div className="aspect-video bg-black rounded-lg overflow-hidden mb-4 shadow-lg">
-                <iframe
-                  src={aula.videoUrl}
-                  title={aula.titulo}
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                  className="w-full h-full"
-                />
-              </div>
-            )}
-            <div className="text-xs text-neutral-400 mb-2">
-              Tempo assistido: {secondsWatched}s {reported && "(registrado)"}
-            </div>
-          </>
+          <div className="aspect-video bg-black rounded-lg overflow-hidden mb-4 shadow-lg">
+            <iframe
+              src={aula.videoUrl}
+              title={aula.titulo}
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+              className="w-full h-full"
+            />
+          </div>
         )}
       </div>
 
       {/* Miniaturas */}
-      <div className="w-full md:w-1/3 overflow-auto space-y-4">
+      <div className="w-full md:w-1/3 overflow-auto space-y-4 pr-4">
         {aulas.map((a) => {
           const blockedByDate = a.releaseDate ? now < a.releaseDate : false;
           const blockedSequential = a.bloqueado === true && !blockedByDate;

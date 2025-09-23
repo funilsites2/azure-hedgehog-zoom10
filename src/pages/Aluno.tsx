@@ -1,4 +1,3 @@
-=5s) em 'Continuar Assistindo'." >
 import { useState } from "react";
 import {
   Menu,
@@ -57,10 +56,9 @@ export default function Aluno() {
 
   const now = Date.now();
 
-  // agora 'partialAulas' só inclui aulas que foram iniciadas (iniciado === true) e não concluídas
   const partialAulas = modulos
     .flatMap((m) => m.aulas.map((a) => ({ modulo: m, aula: a })))
-    .filter(({ aula }) => !aula.assistida && !!aula.iniciado);
+    .filter(({ aula }) => !aula.assistida);
 
   const linhas = Array.from(new Set(modulos.map((m) => m.linha)));
   const totalAulas = modulos.reduce((sum, m) => sum + m.aulas.length, 0);
