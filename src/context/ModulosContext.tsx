@@ -281,15 +281,14 @@ export const ModulosProvider: React.FC<{ children: React.ReactNode }> = ({
     const releaseDate = now + delayDays * 24 * 60 * 60 * 1000;
     setModulos((prev) =>
       initializeBlocks(
-        prev.map((m) =>
-          m.id === moduloId
-            ? {
-                ...m,
-                nome: novoNome,
-                capa: novaCapa,
-                linha,
-                releaseDate,
-                aulas: novasAulas.map((a, idx) => ({
+        prev.map((m) => {
+          if (m.id !== moduloId) return m;
+
+          // Se o formulário não enviou aulas (caso de editar só o atraso),
+          // preserva todas as aulas existentes e apenas atualiza releaseDate
+          const aulasAtualizadas: Aula[] =
+            novasAulas && novasAulas.length > 0
+              ? novasAulas.map((a, idx) => ({
                   id: m.aulas[idx]?.id ?? now + idx + 1,
                   titulo: a.titulo,
                   videoUrl: a.videoUrl,
@@ -298,10 +297,21 @@ export const ModulosProvider: React.FC<{ children: React.ReactNode }> = ({
                   bloqueado: false,
                   releaseDate,
                   started: m.aulas[idx]?.started ?? false,
-                })),
-              }
-            : m
-        )
+                }))
+              : m.aulas.map((aExistente) => ({
+                  ...aExistente,
+                  releaseDate,
+                }));
+
+          return {
+            ...m,
+            nome: novoNome,
+            capa: novaCapa,
+            linha,
+            releaseDate,
+            aulas: aulasAtualizadas,
+          };
+        })
       )
     );
   };
