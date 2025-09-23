@@ -101,10 +101,15 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
                         </div>
                       )}
                       {modulo.bloqueado && (
-                        <Lock
-                          size={28}
-                          className="absolute top-2 right-2 text-red-500 bg-neutral-900 rounded-full p-1"
-                        />
+                        <div
+                          className="absolute top-2 right-2 left-auto z-20 transition-all duration-300 ease-out transform group-hover:top-1/2 group-hover:right-auto group-hover:left-1/2 group-hover:-translate-x-1/2 group-hover:-translate-y-1/2"
+                          aria-hidden
+                        >
+                          <Lock
+                            size={28}
+                            className="text-red-500 bg-neutral-900 rounded-full p-1"
+                          />
+                        </div>
                       )}
                       <div className="mb-2 flex flex-col items-center">
                         <img
@@ -174,10 +179,15 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
                 </div>
               )}
               {modulo.bloqueado && (
-                <Lock
-                  size={28}
-                  className="absolute top-2 right-2 text-red-500 bg-neutral-900 rounded-full p-1"
-                />
+                <div
+                  className="absolute top-2 right-2 left-auto z-20 transition-all duration-300 ease-out transform group-hover:top-1/2 group-hover:right-auto group-hover:left-1/2 group-hover:-translate-x-1/2 group-hover:-translate-y-1/2"
+                  aria-hidden
+                >
+                  <Lock
+                    size={28}
+                    className="text-red-500 bg-neutral-900 rounded-full p-1"
+                  />
+                </div>
               )}
               <img
                 src={modulo.capa}
