@@ -12,6 +12,7 @@ import { BannerSettings } from "@/components/BannerSettings";
 import { LogoSettings } from "@/components/LogoSettings";
 import { Footer } from "@/components/Footer";
 import UserMenu from "@/components/UserMenu";
+import { showSuccess } from "@/utils/toast";
 
 export default function Admin() {
   const {
@@ -48,6 +49,9 @@ export default function Admin() {
   ) => {
     if (editandoId !== null) {
       editarModulo(editandoId, nome, capa, aulas, linha, delayDays);
+      // Fechar editor e notificar usuário
+      setEditandoId(null);
+      showSuccess("Módulo atualizado com sucesso");
     }
   };
 
