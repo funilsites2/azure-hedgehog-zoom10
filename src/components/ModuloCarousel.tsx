@@ -8,7 +8,9 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDescription,
+  DialogClose,
 } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 
 type Aula = {
   id: number;
@@ -99,11 +101,15 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
                       className={`group bg-neutral-800 rounded-xl overflow-hidden p-4 shadow-lg flex flex-col h-full relative hover:z-10 ${
                         modulo.bloqueado || blockedByDate ? "grayscale" : ""
                       } ${blockedByDate ? "cursor-not-allowed" : "cursor-pointer"}`}
-                      onClick={
-                        !modulo.bloqueado && onModuloClick
-                          ? () => onModuloClick(modulo)
-                          : undefined
-                      }
+                      onClick={() => {
+                        if (blockedByDate) {
+                          setBlockedModulo(modulo);
+                          return;
+                        }
+                        if (!modulo.bloqueado && onModuloClick) {
+                          onModuloClick(modulo);
+                        }
+                      }}
                     >
                       {blockedByDate && (
                         <>
@@ -186,13 +192,14 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
               className={`group relative snap-start flex-shrink-0 w-[20%] rounded-xl shadow-lg overflow-hidden hover:z-10 ${
                 modulo.bloqueado || blockedByDate ? "grayscale" : ""
               } ${blockedByDate ? "cursor-not-allowed" : "cursor-pointer"}`}
-              onClick={
-                !modulo.bloqueado && onModuloClick
-                  ? () => onModuloClick(modulo)
-                  : undefined
-              }
-              onMouseEnter={() => {
-                if (blockedByDate) setBlockedModulo(modulo);
+              onClick={() => {
+                if (blockedByDate) {
+                  setBlockedModulo(modulo);
+                  return;
+                }
+                if (!modulo.bloqueado && onModuloClick) {
+                  onModuloClick(modulo);
+                }
               }}
             >
               {blockedByDate && (
@@ -248,10 +255,10 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
           if (!open) setBlockedModulo(null);
         }}
       >
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-md bg-white text-black">
           <DialogHeader>
             <DialogTitle>Módulo bloqueado temporariamente</DialogTitle>
-            <DialogDescription>
+            <DialogDescription className="text-black">
               {blockedModulo?.releaseDate
                 ? `Este módulo será liberado em ${new Date(
                     blockedModulo.releaseDate
@@ -259,9 +266,14 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
                 : "Este módulo está temporariamente indisponível."}
             </DialogDescription>
           </DialogHeader>
-          <div className="text-sm text-neutral-300">
+          <div className="text-sm text-black">
             Assim que a data for atingida, o conteúdo ficará disponível
             automaticamente para você.
+          </div>
+          <div className="mt-4 flex justify-end">
+            <DialogClose asChild>
+              <Button variant="secondary">Fechar</Button>
+            </DialogClose>
           </div>
         </DialogContent>
       </Dialog>
