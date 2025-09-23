@@ -291,7 +291,7 @@ export function AulaPlayer({
             <div
               key={a.id}
               className={cn(
-                "relative rounded-lg overflow-hidden cursor-pointer",
+                "relative rounded-xl overflow-hidden cursor-pointer",
                 blocked && "opacity-50 cursor-not-allowed"
               )}
               onClick={() => !blocked && onSelecionarAula(a.id)}
@@ -309,7 +309,7 @@ export function AulaPlayer({
               <img
                 src={getYoutubeThumbnail(a.videoUrl)}
                 alt={a.titulo}
-                className="w-full h-20 object-cover rounded-lg"
+                className="w-full h-20 object-cover rounded-xl"
               />
               {blocked && (
                 <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
