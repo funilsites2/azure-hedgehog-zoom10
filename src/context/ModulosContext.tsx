@@ -132,7 +132,10 @@ const getInitialModulos = (): Modulo[] => {
 const initializeBlocks = (mods: Modulo[]): Modulo[] => {
   const now = Date.now();
   return mods.map((m) => {
-    const moduleBlocked = m.bloqueado ?? (m.releaseDate ? now < m.releaseDate : false);
+    // Ajuste: bloqueia o módulo se estiver explicitamente bloqueado OU se a releaseDate estiver no futuro
+    const moduleBlocked =
+      (m.bloqueado ?? false) || (m.releaseDate ? now < m.releaseDate : false);
+
     const aulas = m.aulas.map((a, i, arr) => {
       const alreadyStarted = a.started ?? false;
       if (a.bloqueado) {
@@ -147,6 +150,7 @@ const initializeBlocks = (mods: Modulo[]): Modulo[] => {
       const prev = arr[i - 1];
       return { ...a, bloqueado: !prev.assistida, started: alreadyStarted };
     });
+
     return { ...m, bloqueado: moduleBlocked, aulas };
   });
 };
@@ -284,8 +288,7 @@ export const ModulosProvider: React.FC<{ children: React.ReactNode }> = ({
         prev.map((m) => {
           if (m.id !== moduloId) return m;
 
-          // Se o formulário não enviou aulas (caso de editar só o atraso),
-          // preserva todas as aulas existentes e apenas atualiza releaseDate
+          // Se novasAulas vier vazio, só atualiza releaseDate e mantém aulas existentes
           const aulasAtualizadas: Aula[] =
             novasAulas && novasAulas.length > 0
               ? novasAulas.map((a, idx) => ({
