@@ -30,6 +30,15 @@ function clampPct(v: number) {
   return Math.max(0, Math.min(100, Math.round(v)));
 }
 
+const reachedVariants = [
+  { bg: "bg-blue-600", border: "border-blue-400", ring: "ring-4 ring-blue-400/30" },
+  { bg: "bg-emerald-600", border: "border-emerald-400", ring: "ring-4 ring-emerald-400/30" },
+  { bg: "bg-indigo-600", border: "border-indigo-400", ring: "ring-4 ring-indigo-400/30" },
+  { bg: "bg-purple-600", border: "border-purple-400", ring: "ring-4 ring-purple-400/30" },
+  { bg: "bg-amber-600", border: "border-amber-400", ring: "ring-4 ring-amber-400/30" },
+  { bg: "bg-rose-600", border: "border-rose-400", ring: "ring-4 ring-rose-400/30" },
+];
+
 export default function GamificationMap({
   progresso,
   totalAulas,
@@ -70,14 +79,14 @@ export default function GamificationMap({
       </div>
 
       {/* Trilha com etapas (scrollável no mobile) */}
-      <div className="overflow-x-auto no-scrollbar">
+      <div className="overflow-x-auto overflow-y-visible no-scrollbar px-4">
         <div className="min-w-[680px] md:min-w-0">
-          <div className="relative mt-8 mb-10">
-            {/* Linha base */}
-            <div className="h-2 rounded-full bg-neutral-800" />
+          <div className="relative mt-8 mb-10 py-8">
+            {/* Linha base centralizada verticalmente */}
+            <div className="absolute left-0 right-0 top-1/2 -translate-y-1/2 h-2 rounded-full bg-neutral-800" />
             {/* Linha preenchida */}
             <div
-              className="absolute top-0 left-0 h-2 rounded-full bg-green-600"
+              className="absolute top-1/2 -translate-y-1/2 left-0 h-2 rounded-full bg-green-600"
               style={{ width: `${pct}%` }}
             />
             {/* Marcadores */}
@@ -86,23 +95,32 @@ export default function GamificationMap({
                 const reached = pct >= s.pct;
                 const current = i === activeIndex;
                 const Icon = s.icon;
+
+                const variant = reachedVariants[i % reachedVariants.length];
+                const circleReachedClasses = `${variant.bg} ${variant.border} ${variant.ring}`;
+                const circleCurrentClasses = "bg-neutral-900 border-green-500";
+                const circleDefaultClasses = "bg-neutral-900 border-neutral-700";
+
                 return (
                   <div key={s.pct} className="relative flex flex-col items-center">
                     <div
                       className={[
                         "flex items-center justify-center w-12 h-12 rounded-full border-2 transition",
                         reached
-                          ? "bg-green-600 border-green-400 shadow-[0_0_0_3px_rgba(34,197,94,0.25)]"
+                          ? circleReachedClasses
                           : current
-                          ? "bg-neutral-900 border-green-500"
-                          : "bg-neutral-900 border-neutral-700",
+                          ? circleCurrentClasses
+                          : circleDefaultClasses,
                       ].join(" ")}
                       title={`${s.label} (${s.pct}%)`}
                     >
                       {reached ? (
                         <CheckCircle size={22} className="text-white" />
                       ) : (
-                        <Icon size={22} className={current ? "text-green-400" : "text-neutral-400"} />
+                        <Icon
+                          size={22}
+                          className={current ? "text-green-400" : "text-neutral-400"}
+                        />
                       )}
                     </div>
                     <div className="mt-2 text-center">
