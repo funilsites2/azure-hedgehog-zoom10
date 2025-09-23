@@ -320,11 +320,11 @@ export default function Aluno() {
     </aside>
   );
 
-  // Header móvel com burger e logo centralizada
+  // Header móvel transparente com burger e logo sobre o fundo
   const MobileHeader = (
-    <header className="md:hidden fixed top-0 left-0 right-0 h-14 bg-neutral-950 border-b border-neutral-800 z-30 flex items-center px-4">
+    <header className="md:hidden fixed top-0 left-0 right-0 h-14 z-30 flex items-center px-4">
       <button
-        className="rounded-full p-2 border border-neutral-800 bg-neutral-900/80 shadow"
+        className="rounded-full p-2 active:scale-95 transition"
         onClick={() => setMobileMenuOpen(true)}
         aria-label="Abrir menu"
       >
@@ -413,7 +413,7 @@ export default function Aluno() {
                   return (
                     <div
                       key={aula.id}
-                      className="group snap-start flex-shrink-0 w-[260px] md:w-[300px] rounded-lg md:rounded-xl overflow-hidden cursor-pointer transition flex flex-col"
+                      className="group snap-start flex-shrink-0 w=[260px] md:w-[300px] rounded-lg md:rounded-xl overflow-hidden cursor-pointer transition flex flex-col"
                       onClick={() => {
                         setModuloSelecionado(m.id);
                         setAulaSelecionada(aula.id);
