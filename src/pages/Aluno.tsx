@@ -72,7 +72,7 @@ export default function Aluno() {
     : 0;
   const modulo = modulos.find((m) => m.id === moduloSelecionado);
 
-  // Aula atual e descrição (se existir)
+  // Aula atual e descrição
   const selectedAulaId = aulaSelecionada ?? (modulo?.aulas[0]?.id ?? null);
   const aulaAtual = modulo ? modulo.aulas.find((a) => a.id === selectedAulaId) : null;
   const descricaoAula = (aulaAtual && (aulaAtual as any).descricao) as string | undefined;
@@ -94,7 +94,6 @@ export default function Aluno() {
       if (!modulo) {
         return (
           <>
-            {/* Blocos de módulos por linha */}
             <div className="mx-4 space-y-6">
               {linhas.map((linha) => {
                 const mods = modulos.filter((m) => m.linha === linha);
@@ -132,7 +131,6 @@ export default function Aluno() {
             >
               <ArrowLeft size={20} /> Voltar
             </button>
-            {/* Título movido para abaixo do vídeo */}
           </div>
           <div className="flex-1 flex overflow-hidden">
             <AulaPlayer
@@ -140,16 +138,17 @@ export default function Aluno() {
               aulaSelecionadaId={aulaSelecionada ?? modulo.aulas[0]?.id}
               onSelecionarAula={setAulaSelecionada}
               onMarcarAssistida={handleMarcar}
+              belowVideo={
+                <div className="mt-3">
+                  <h1 className="text-2xl font-bold">{modulo.nome}</h1>
+                  {descricaoAula ? (
+                    <p className="text-sm md:text-base text-neutral-300 mt-2">
+                      {descricaoAula}
+                    </p>
+                  ) : null}
+                </div>
+              }
             />
-          </div>
-          {/* Título do módulo e descrição da aula abaixo do vídeo */}
-          <div className="px-4 md:px-6 mt-4">
-            <h1 className="text-2xl font-bold">{modulo.nome}</h1>
-            {descricaoAula ? (
-              <p className="text-sm md:text-base text-neutral-300 mt-2">
-                {descricaoAula}
-              </p>
-            ) : null}
           </div>
         </>
       );
@@ -172,14 +171,12 @@ export default function Aluno() {
             <Award size={24} className="text-yellow-400" /> Conquistas
           </h2>
 
-          {/* Mapa Gamificado */}
           <GamificationMap
             progresso={progresso}
             totalAulas={totalAulas}
             aulasAssistidas={aulasAssistidas}
           />
 
-          {/* Conquistas simples (mantidas) */}
           <div className="mt-8">
             <h3 className="text-lg font-semibold mb-3">Conquistas</h3>
             <ul className="text-base">
@@ -271,7 +268,7 @@ export default function Aluno() {
             className="flex items-center gap-3 px-4 py-3 text-neutral-300 hover:bg-green-600 hover:text-white rounded"
           >
             <User size={20} className="text-green-500" />
-            <span>Perfil</span>
+            <span className="text-xs">Perfil</span>
           </Link>
         </nav>
       </div>
@@ -363,7 +360,6 @@ export default function Aluno() {
       {MobileDrawer}
       {DesktopSidebar}
       <div className="flex-1 flex flex-col pt-12 md:pt-0 md:ml-64">
-        {/* Banner acima dos cards de Continuar Assistindo */}
         {bannerUrl && moduloSelecionado === null && (
           <div className="mx-4 my-4 flex justify-center">
             <div className="relative w-full max-w-[1600px] h=[400px] md:h-[400px] h-[400px] overflow-hidden rounded-lg">
@@ -376,7 +372,6 @@ export default function Aluno() {
           </div>
         )}
 
-        {/* Continuar Assistindo - abaixo do banner */}
         {moduloSelecionado === null && partialAulas.length > 0 && (
           <div className="mx-4 mt-4">
             <h2 className="text-2xl font-semibold mb-2 text-white">
@@ -405,7 +400,6 @@ export default function Aluno() {
                         setAulaSelecionada(aula.id);
                       }}
                     >
-                      {/* Altura reduzida para cortar as faixas pretas */}
                       <div className="relative w-full h-[130px] md:h-[160px] rounded-lg md:rounded-xl overflow-hidden transition-transform duration-300 ease-out group-hover:scale-95">
                         <img
                           src={getYoutubeThumbnail(aula.videoUrl)}

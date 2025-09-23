@@ -29,6 +29,7 @@ interface AulaPlayerProps {
   aulaSelecionadaId: number;
   onSelecionarAula: (aulaId: number) => void;
   onMarcarAssistida: (aulaId: number) => void;
+  belowVideo?: React.ReactNode;
 }
 
 function getYoutubeId(url: string): string | null {
@@ -50,6 +51,7 @@ export function AulaPlayer({
   aulaSelecionadaId,
   onSelecionarAula,
   onMarcarAssistida,
+  belowVideo,
 }: AulaPlayerProps) {
   const { name } = useUser();
   const { marcarAulaIniciada } = useModulos();
@@ -328,7 +330,7 @@ export function AulaPlayer({
           </div>
         ) : (
           <>
-            {/* Contêiner do player com arredondamento e clip */}
+            {/* Contêiner do player */}
             <div className="aspect-video bg-black rounded-lg overflow-hidden mb-3 shadow-lg flex items-stretch video-rounded">
               {getYoutubeId(aula.videoUrl) ? (
                 <div
@@ -345,7 +347,12 @@ export function AulaPlayer({
                 />
               )}
             </div>
-            {aula.descricao && (
+
+            {/* Bloco extra logo abaixo do vídeo (título/descrição fornecidos pelo pai) */}
+            {belowVideo}
+
+            {/* Se nada foi fornecido, mostra a descrição padrão */}
+            {!belowVideo && aula.descricao && (
               <p className="text-sm text-neutral-300 mb-4">{aula.descricao}</p>
             )}
           </>
@@ -356,7 +363,7 @@ export function AulaPlayer({
       <div className="w-full md:w-1/3 overflow-auto space-y-4 pr-4">
         {aulas.map((a) => {
           const blockedByDate = a.releaseDate ? now < a.releaseDate : false;
-          const blockedSequential = a.bloqueado === true && !blockedByDate;
+        const blockedSequential = a.bloqueado === true && !blockedByDate;
           const blocked = blockedByDate || blockedSequential;
 
           let savedPct = 0;
@@ -388,7 +395,6 @@ export function AulaPlayer({
                 </div>
               )}
 
-              {/* Contêiner da miniatura com recorte e raio */}
               <div className="relative flex-shrink-0 w-36 h-20 rounded-xl overflow-hidden">
                 <img
                   src={getYoutubeThumbnail(a.videoUrl)}
