@@ -385,18 +385,18 @@ export default function Aluno() {
                   return (
                     <div
                       key={aula.id}
-                      className="group snap-start flex-shrink-0 w-[260px] md:w-[300px] rounded-lg overflow-hidden cursor-pointer transition flex flex-col"
+                      className="group snap-start flex-shrink-0 w-[260px] md:w-[300px] rounded-lg md:rounded-xl overflow-hidden cursor-pointer transition flex flex-col"
                       onClick={() => {
                         setModuloSelecionado(m.id);
                         setAulaSelecionada(aula.id);
                       }}
                     >
                       {/* Altura reduzida para cortar as faixas pretas */}
-                      <div className="relative w-full h-[140px] md:h-[180px] rounded-lg overflow-hidden transition-transform duration-300 ease-out group-hover:scale-95">
+                      <div className="relative w-full h-[130px] md:h-[160px] rounded-lg md:rounded-xl overflow-hidden transition-transform duration-300 ease-out group-hover:scale-95">
                         <img
                           src={getYoutubeThumbnail(aula.videoUrl)}
                           alt={aula.titulo}
-                          className="w-full h-full object-cover rounded-lg"
+                          className="w-full h-full object-cover rounded-lg md:rounded-xl"
                         />
                         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                           <div className="opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 transition-all duration-300">
@@ -405,7 +405,7 @@ export default function Aluno() {
                             </div>
                           </div>
                         </div>
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent rounded-lg opacity-0 group-hover:opacity-100 transition-opacity">
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent rounded-lg md:rounded-xl opacity-0 group-hover:opacity-100 transition-opacity">
                           <div className="absolute bottom-0 left-0 right-0 p-2">
                             <p className="text-white text-sm font-medium truncate">
                               {aula.titulo}
