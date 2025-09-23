@@ -74,7 +74,7 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
       <div className="block md:hidden">
         <div className="relative">
           <div className="overflow-visible" ref={emblaRef}>
-            <div className="flex">
+            <div className="flex pb-20 md:pb-0">
               {filteredModulos.map((modulo) => {
                 const total = modulo.aulas.length;
                 const concluido = modulo.aulas.filter((a) => a.assistida).length;
