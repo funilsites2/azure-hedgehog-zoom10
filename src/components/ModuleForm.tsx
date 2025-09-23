@@ -17,6 +17,7 @@ export type AulaInput = {
   titulo: string;
   videoUrl: string;
   releaseDate?: number;
+  descricao?: string;
 };
 
 interface ModuleFormProps {
@@ -34,7 +35,7 @@ interface ModuleFormProps {
   ) => void;
   onCancel?: () => void;
   submitLabel?: string;
-  onAulasChange?: (aulas: AulaInput[]) => void; // new prop to notify parent when aulas change
+  onAulasChange?: (aulas: AulaInput[]) => void;
 }
 
 export const ModuleForm: React.FC<ModuleFormProps> = ({
@@ -57,7 +58,11 @@ export const ModuleForm: React.FC<ModuleFormProps> = ({
   const [capa, setCapa] = useState(initialCapa);
   const [linha, setLinha] = useState(initialLinha);
   const [aulas, setAulas] = useState<AulaInput[]>(initialAulas);
-  const [novaAula, setNovaAula] = useState<AulaInput>({ titulo: "", videoUrl: "" });
+  const [novaAula, setNovaAula] = useState<AulaInput>({
+    titulo: "",
+    videoUrl: "",
+    descricao: "",
+  });
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [isCreatingNewLinha, setIsCreatingNewLinha] = useState(false);
   const [delayDays, setDelayDays] = useState<number>(initialDelayDays);
@@ -73,9 +78,10 @@ export const ModuleForm: React.FC<ModuleFormProps> = ({
   const handleAddAula = () => {
     if (!novaAula.titulo.trim() || !novaAula.videoUrl.trim()) return;
     if (editingIndex !== null) {
-      // Preserve id and releaseDate from the existing aula when updating
       setAulas((prev) => {
-        const next = prev.map((a, i) => (i === editingIndex ? { ...a, ...novaAula } : a));
+        const next = prev.map((a, i) =>
+          i === editingIndex ? { ...a, ...novaAula } : a
+        );
         notifyAulasChange(next);
         return next;
       });
@@ -87,8 +93,7 @@ export const ModuleForm: React.FC<ModuleFormProps> = ({
         return next;
       });
     }
-    // Clear novaAula but remove any id/releaseDate to avoid accidental reuse
-    setNovaAula({ titulo: "", videoUrl: "" });
+    setNovaAula({ titulo: "", videoUrl: "", descricao: "" });
   };
 
   const removeAula = (idx: number) => {
@@ -99,7 +104,7 @@ export const ModuleForm: React.FC<ModuleFormProps> = ({
     });
     if (editingIndex === idx) {
       setEditingIndex(null);
-      setNovaAula({ titulo: "", videoUrl: "" });
+      setNovaAula({ titulo: "", videoUrl: "", descricao: "" });
     }
   };
 
@@ -118,7 +123,7 @@ export const ModuleForm: React.FC<ModuleFormProps> = ({
     setDelayDays(0);
     setIsCreatingNewLinha(false);
     setEditingIndex(null);
-    setNovaAula({ titulo: "", videoUrl: "" });
+    setNovaAula({ titulo: "", videoUrl: "", descricao: "" });
     notifyAulasChange([]);
   };
 
@@ -179,7 +184,6 @@ export const ModuleForm: React.FC<ModuleFormProps> = ({
         onChange={(e) => setDelayDays(Number(e.target.value))}
       />
 
-      {/* Inputs para adicionar/editar aulas */}
       <div className="space-y-2">
         <h3 className="font-semibold text-lg">Aulas</h3>
         <input
@@ -196,6 +200,14 @@ export const ModuleForm: React.FC<ModuleFormProps> = ({
           value={novaAula.videoUrl}
           onChange={(e) =>
             setNovaAula((v) => ({ ...v, videoUrl: e.target.value }))
+          }
+        />
+        <input
+          className="w-full p-2 rounded bg-neutral-800 text-white"
+          placeholder="Descrição da aula"
+          value={novaAula.descricao ?? ""}
+          onChange={(e) =>
+            setNovaAula((v) => ({ ...v, descricao: e.target.value }))
           }
         />
         <div className="flex gap-2">
@@ -233,5 +245,5 @@ export const ModuleForm: React.FC<ModuleFormProps> = ({
         )}
       </div>
     </div>
-);
-}
+  );
+};

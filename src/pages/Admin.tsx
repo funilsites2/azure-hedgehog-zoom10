@@ -34,7 +34,8 @@ export default function Admin() {
     titulo: string;
     videoUrl: string;
     delayDays: number;
-  }>({ moduloId: "", titulo: "", videoUrl: "", delayDays: 0 });
+    descricao: string;
+  }>({ moduloId: "", titulo: "", videoUrl: "", delayDays: 0, descricao: "" });
 
   const [editandoId, setEditandoId] = useState<number | null>(null);
   const iniciarEdicao = (moduloId: number) => setEditandoId(moduloId);
@@ -43,12 +44,11 @@ export default function Admin() {
   const handleEditSubmit = (
     nome: string,
     capa: string,
-    aulas: { titulo: string; videoUrl: string }[],
+    aulas: AulaInput[],
     linha: string,
     delayDays: number
   ) => {
     if (editandoId !== null) {
-      // Diagnostic logging to help find why edits aren't persisting
       console.log("[Admin] Edit submit payload:", {
         editandoId,
         nome,
@@ -58,11 +58,9 @@ export default function Admin() {
         delayDays,
       });
 
-      // Show a short toast so the user sees that the payload was received by the admin handler
       showSuccess(`Enviando edição: ${aulas.length} aula(s) — verifique o console para detalhes.`);
 
       editarModulo(editandoId, nome, capa, aulas, linha, delayDays);
-      // Fechar editor e notificar usuário
       setEditandoId(null);
       showSuccess("Módulo atualizado com sucesso");
     }
@@ -126,6 +124,17 @@ export default function Admin() {
                 }
               />
               <input
+                className="w-full p-2 rounded bg-neutral-800 text-white"
+                placeholder="Descrição da aula"
+                value={novaAulaExistente.descricao}
+                onChange={(e) =>
+                  setNovaAulaExistente((v) => ({
+                    ...v,
+                    descricao: e.target.value,
+                  }))
+                }
+              />
+              <input
                 type="number"
                 min={0}
                 className="w-full p-2 rounded bg-neutral-800 text-white"
@@ -145,9 +154,16 @@ export default function Admin() {
                     Number(novaAulaExistente.moduloId),
                     novaAulaExistente.titulo,
                     novaAulaExistente.videoUrl,
-                    novaAulaExistente.delayDays
+                    novaAulaExistente.delayDays,
+                    novaAulaExistente.descricao
                   );
-                  setNovaAulaExistente({ moduloId: "", titulo: "", videoUrl: "", delayDays: 0 });
+                  setNovaAulaExistente({
+                    moduloId: "",
+                    titulo: "",
+                    videoUrl: "",
+                    delayDays: 0,
+                    descricao: "",
+                  });
                 }}
               >
                 Adicionar Aula Existente
@@ -166,7 +182,6 @@ export default function Admin() {
                 const m = modulos.find((mod) => mod.id === editandoId);
                 if (!m) return null;
 
-                // compute delayDays to use when persisting onAulasChange
                 const computedDelayDays = m.releaseDate
                   ? Math.max(
                       0,
@@ -180,13 +195,11 @@ export default function Admin() {
                       initialNome={m.nome}
                       initialCapa={m.capa}
                       initialLinha={m.linha}
-                      // Pass the full aula objects so ids and releaseDate are preserved
                       initialAulas={m.aulas}
                       initialDelayDays={computedDelayDays}
                       onSubmit={handleEditSubmit}
                       submitLabel="Atualizar Módulo"
                       onAulasChange={(newAulas: AulaInput[]) => {
-                        // Persist aula-only changes immediately using editarModulo with current module metadata
                         try {
                           editarModulo(m.id, m.nome, m.capa, newAulas, m.linha, computedDelayDays);
                           showSuccess("Aulas atualizadas");
@@ -245,7 +258,6 @@ export default function Admin() {
               {linhas.map((linha) => (
                 <div key={linha}>
                   <h2 className="text-2xl font-semibold mt-8 mb-4">{linha}</h2>
-                  {/* mobile grid */}
                   <div className="grid grid-cols-1 gap-4 md:hidden">
                     {modulos
                       .filter((m) => m.linha === linha)
@@ -282,7 +294,6 @@ export default function Admin() {
                         </div>
                       ))}
                   </div>
-                  {/* desktop carousel */}
                   <div className="hidden md:flex overflow-x-auto gap-4 snap-x snap-mandatory px-2">
                     {modulos
                       .filter((m) => m.linha === linha)

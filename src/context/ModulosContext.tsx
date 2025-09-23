@@ -8,6 +8,7 @@ type Aula = {
   bloqueado?: boolean;
   releaseDate?: number;
   started?: boolean;
+  descricao?: string;
 };
 
 type Modulo = {
@@ -25,7 +26,10 @@ type ModulosContextType = {
   adicionarModulo: (
     nome: string,
     capa: string,
-    aulas?: Omit<Aula, "id" | "assistida" | "bloqueado" | "releaseDate" | "started">[],
+    aulas?: Omit<
+      Aula,
+      "id" | "assistida" | "bloqueado" | "releaseDate" | "started"
+    >[],
     linha?: string,
     delayDays?: number
   ) => void;
@@ -33,7 +37,8 @@ type ModulosContextType = {
     moduloId: number,
     titulo: string,
     videoUrl: string,
-    delayDays?: number
+    delayDays?: number,
+    descricao?: string
   ) => void;
   marcarAulaAssistida: (moduloId: number, aulaId: number) => void;
   marcarAulaIniciada: (moduloId: number, aulaId: number) => void;
@@ -41,7 +46,10 @@ type ModulosContextType = {
     moduloId: number,
     novoNome: string,
     novaCapa: string,
-    novasAulas: Omit<Aula, "id" | "assistida" | "bloqueado" | "releaseDate" | "started">[],
+    novasAulas: Omit<
+      Aula,
+      "id" | "assistida" | "bloqueado" | "releaseDate" | "started"
+    >[],
     linha?: string,
     delayDays?: number
   ) => void;
@@ -84,6 +92,7 @@ const getInitialModulos = (): Modulo[] => {
           bloqueado: false,
           releaseDate: now,
           started: false,
+          descricao: "Introdução ao módulo 1 e visão geral.",
         },
         {
           id: 2,
@@ -93,6 +102,7 @@ const getInitialModulos = (): Modulo[] => {
           bloqueado: false,
           releaseDate: now,
           started: false,
+          descricao: "Conceitos fundamentais para continuar.",
         },
       ],
       releaseDate: now,
@@ -111,6 +121,7 @@ const getInitialModulos = (): Modulo[] => {
           bloqueado: false,
           releaseDate: now,
           started: false,
+          descricao: "Iniciando o módulo 2 com práticas.",
         },
       ],
       releaseDate: now,
@@ -156,7 +167,10 @@ export const ModulosProvider: React.FC<{ children: React.ReactNode }> = ({
   const adicionarModulo = (
     nome: string,
     capa: string,
-    aulas: Omit<Aula, "id" | "assistida" | "bloqueado" | "releaseDate" | "started">[] = [],
+    aulas: Omit<
+      Aula,
+      "id" | "assistida" | "bloqueado" | "releaseDate" | "started"
+    >[] = [],
     linha: string = "",
     delayDays: number = 0
   ) => {
@@ -174,6 +188,7 @@ export const ModulosProvider: React.FC<{ children: React.ReactNode }> = ({
             id: now + i + 1,
             titulo: a.titulo,
             videoUrl: a.videoUrl,
+            descricao: a.descricao,
             assistida: false,
             bloqueado: i !== 0,
             releaseDate,
@@ -189,7 +204,8 @@ export const ModulosProvider: React.FC<{ children: React.ReactNode }> = ({
     moduloId: number,
     titulo: string,
     videoUrl: string,
-    delayDays: number = 0
+    delayDays: number = 0,
+    descricao: string = ""
   ) => {
     const now = Date.now();
     const releaseDate = now + delayDays * 24 * 60 * 60 * 1000;
@@ -204,6 +220,7 @@ export const ModulosProvider: React.FC<{ children: React.ReactNode }> = ({
                   id: now,
                   titulo,
                   videoUrl,
+                  descricao,
                   assistida: false,
                   bloqueado: true,
                   releaseDate,
@@ -253,7 +270,10 @@ export const ModulosProvider: React.FC<{ children: React.ReactNode }> = ({
     moduloId: number,
     novoNome: string,
     novaCapa: string,
-    novasAulas: Omit<Aula, "id" | "assistida" | "bloqueado" | "releaseDate" | "started">[] = [],
+    novasAulas: Omit<
+      Aula,
+      "id" | "assistida" | "bloqueado" | "releaseDate" | "started"
+    >[] = [],
     linha: string = "",
     delayDays: number = 0
   ) => {
@@ -273,6 +293,7 @@ export const ModulosProvider: React.FC<{ children: React.ReactNode }> = ({
                   id: m.aulas[idx]?.id ?? now + idx + 1,
                   titulo: a.titulo,
                   videoUrl: a.videoUrl,
+                  descricao: a.descricao ?? m.aulas[idx]?.descricao,
                   assistida: m.aulas[idx]?.assistida ?? false,
                   bloqueado: false,
                   releaseDate,
