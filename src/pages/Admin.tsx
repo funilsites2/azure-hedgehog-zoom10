@@ -19,6 +19,7 @@ export default function Admin() {
     editarModulo,
     setAulaReleaseDays,
     duplicarModulo,
+    setModuloBloqueado,
   } = useModulos();
 
   const linhas = Array.from(
@@ -244,9 +245,8 @@ export default function Admin() {
                             </Button>
                             <Button
                               variant="secondary"
-                              onClick={() =>
-                                setAulaReleaseDays(m.id, 0, 0)
-                              }
+                              onClick={() => setModuloBloqueado(m.id, !m.bloqueado)}
+                              title="Bloquear/Desbloquear Módulo"
                             >
                               <Unlock size={16} />
                             </Button>
@@ -282,9 +282,8 @@ export default function Admin() {
                             </Button>
                             <Button
                               variant="secondary"
-                              onClick={() =>
-                                setAulaReleaseDays(m.id, 0, 0)
-                              }
+                              onClick={() => setModuloBloqueado(m.id, !m.bloqueado)}
+                              title="Bloquear/Desbloquear Módulo"
                             >
                               <Unlock size={16} />
                             </Button>
