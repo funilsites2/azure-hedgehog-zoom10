@@ -385,39 +385,45 @@ export function AulaPlayer({
             <div
               key={a.id}
               className={cn(
-                "group relative rounded-xl overflow-hidden cursor-pointer",
+                "group relative flex items-center gap-3 rounded-xl p-2 hover:bg-neutral-800/60 cursor-pointer",
                 blocked && "opacity-50 cursor-not-allowed"
               )}
               onClick={() => !blocked && onSelecionarAula(a.id)}
             >
               {blockedByDate && (
-                <div className="absolute top-0 inset-x-0 bg-yellow-500 text-black text-xs text-center py-1 z-10 rounded-t-lg">
+                <div className="absolute top-0 inset-x-0 bg-yellow-500 text-black text-[10px] text-center py-1 z-10 rounded-t-xl">
                   Liberado em {new Date(a.releaseDate!).toLocaleString()}
                 </div>
               )}
               {blockedSequential && (
-                <div className="absolute top-0 inset-x-0 bg-red-500 text-white text-xs text-center py-1 z-10 rounded-t-lg">
+                <div className="absolute top-0 inset-x-0 bg-red-500 text-white text-[10px] text-center py-1 z-10 rounded-t-xl">
                   Assista a aula anterior para desbloquear
                 </div>
               )}
-              <img
-                src={getYoutubeThumbnail(a.videoUrl)}
-                alt={a.titulo}
-                className="w-full h-20 object-cover rounded-xl transform transition-transform duration-300 ease-out scale-110 group-hover:scale-100"
-              />
-              {blocked && (
-                <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-                  <Lock size={24} className="text-white" />
-                </div>
-              )}
-              <div className="mt-2">
-                <p className="text-sm text-white px-1 truncate">{a.titulo}</p>
+
+              {/* Thumbnail menor com proporção 16:9 */}
+              <div className="relative flex-shrink-0 w-36 h-20 rounded-md overflow-hidden">
+                <img
+                  src={getYoutubeThumbnail(a.videoUrl)}
+                  alt={a.titulo}
+                  className="absolute inset-0 w-full h-full object-cover transform transition-transform duration-300 ease-out group-hover:scale-105"
+                />
+                {blocked && (
+                  <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                    <Lock size={18} className="text-white" />
+                  </div>
+                )}
+              </div>
+
+              {/* Conteúdo ao lado da miniatura */}
+              <div className="min-w-0 flex-1">
+                <p className="text-sm text-white truncate">{a.titulo}</p>
                 {savedPct > 0 && (
-                  <div className="mt-2 flex items-center gap-2">
+                  <div className="mt-1 flex items-center gap-2">
                     <div className="flex-1">
                       <SimpleProgress value={savedPct} />
                     </div>
-                    <span className="text-xs text-neutral-300 w-10 text-right">{savedPct}%</span>
+                    <span className="text-[11px] text-neutral-300 w-8 text-right">{savedPct}%</span>
                   </div>
                 )}
               </div>
