@@ -12,7 +12,12 @@ import {
 } from "@/components/ui/select";
 import { Plus, Trash2, Edit } from "lucide-react";
 
-type AulaInput = { titulo: string; videoUrl: string };
+type AulaInput = {
+  id?: number;
+  titulo: string;
+  videoUrl: string;
+  releaseDate?: number;
+};
 
 interface ModuleFormProps {
   initialNome?: string;
@@ -58,13 +63,17 @@ export const ModuleForm: React.FC<ModuleFormProps> = ({
   const handleAddAula = () => {
     if (!novaAula.titulo.trim() || !novaAula.videoUrl.trim()) return;
     if (editingIndex !== null) {
+      // Preserve id and releaseDate from the existing aula when updating
       setAulas((prev) =>
-        prev.map((a, i) => (i === editingIndex ? novaAula : a))
+        prev.map((a, i) =>
+          i === editingIndex ? { ...a, ...novaAula } : a
+        )
       );
       setEditingIndex(null);
     } else {
       setAulas((prev) => [...prev, novaAula]);
     }
+    // Clear novaAula but remove any id/releaseDate to avoid accidental reuse
     setNovaAula({ titulo: "", videoUrl: "" });
   };
 

@@ -171,10 +171,8 @@ export default function Admin() {
                       initialNome={m.nome}
                       initialCapa={m.capa}
                       initialLinha={m.linha}
-                      initialAulas={m.aulas.map((a) => ({
-                        titulo: a.titulo,
-                        videoUrl: a.videoUrl,
-                      }))}
+                      // Pass the full aula objects so ids and releaseDate are preserved
+                      initialAulas={m.aulas}
                       initialDelayDays={m.releaseDate
                         ? Math.max(
                             0,
