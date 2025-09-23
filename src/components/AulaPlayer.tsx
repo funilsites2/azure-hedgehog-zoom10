@@ -291,7 +291,8 @@ export function AulaPlayer({
             <div
               key={a.id}
               className={cn(
-                "relative rounded-xl overflow-hidden cursor-pointer",
+                // added "group" so child img can respond to hover via group-hover
+                "group relative rounded-xl overflow-hidden cursor-pointer",
                 blocked && "opacity-50 cursor-not-allowed"
               )}
               onClick={() => !blocked && onSelecionarAula(a.id)}
@@ -309,7 +310,8 @@ export function AulaPlayer({
               <img
                 src={getYoutubeThumbnail(a.videoUrl)}
                 alt={a.titulo}
-                className="w-full h-20 object-cover rounded-xl"
+                // default slightly zoomed-in (scale-110) then smoothly zooms out to scale-100 on hover
+                className="w-full h-20 object-cover rounded-xl transform transition-transform duration-300 ease-out scale-110 group-hover:scale-100"
               />
               {blocked && (
                 <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
