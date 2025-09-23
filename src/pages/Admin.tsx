@@ -48,6 +48,19 @@ export default function Admin() {
     delayDays: number
   ) => {
     if (editandoId !== null) {
+      // Diagnostic logging to help find why edits aren't persisting
+      console.log("[Admin] Edit submit payload:", {
+        editandoId,
+        nome,
+        capa,
+        aulas,
+        linha,
+        delayDays,
+      });
+
+      // Show a short toast so the user sees that the payload was received by the admin handler
+      showSuccess(`Enviando edição: ${aulas.length} aula(s) — verifique o console para detalhes.`);
+
       editarModulo(editandoId, nome, capa, aulas, linha, delayDays);
       // Fechar editor e notificar usuário
       setEditandoId(null);
