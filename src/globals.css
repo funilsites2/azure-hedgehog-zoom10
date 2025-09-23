@@ -12,3 +12,12 @@
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
+/* Force rounded corners on embedded video iframes */
+.video-rounded,
+.video-rounded iframe,
+.video-frame,
+.video-frame iframe {
+  border-radius: 0.5rem; /* ~ rounded-lg */
+  overflow: hidden;
+}
