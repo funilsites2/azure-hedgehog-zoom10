@@ -124,7 +124,7 @@ export default function Aluno() {
       }
       return (
         <>
-          <div className="flex items-center gap-2 mb-6 mt-8 ml-4">
+          <div className="flex items-center gap-2 mb-6 mt-8 ml-4 md:mt-8">
             <button
               className="flex items-center gap-2 text-neutral-300 hover:text-white transition"
               onClick={() => setModuloSelecionado(null)}
@@ -320,6 +320,30 @@ export default function Aluno() {
     </aside>
   );
 
+  // Header móvel com burger e logo centralizada
+  const MobileHeader = (
+    <header className="md:hidden fixed top-0 left-0 right-0 h-14 bg-neutral-950 border-b border-neutral-800 z-30 flex items-center px-4">
+      <button
+        className="rounded-full p-2 border border-neutral-800 bg-neutral-900/80 shadow"
+        onClick={() => setMobileMenuOpen(true)}
+        aria-label="Abrir menu"
+      >
+        <Menu size={24} className="text-green-500" />
+      </button>
+      <div className="absolute left-1/2 -translate-x-1/2 flex items-center justify-center">
+        {logoUrl ? (
+          <img
+            src={logoUrl}
+            alt="Logo"
+            className="h-8 w-auto object-contain"
+          />
+        ) : (
+          <span className="text-sm font-semibold">Área de Membros</span>
+        )}
+      </div>
+    </header>
+  );
+
   const MobileFooter = (
     <nav className="fixed bottom-0 left-0 right-0 z-30 flex md:hidden bg-neutral-950 border-t border-neutral-800 h-16">
       {MENU_ITEMS.map((item) => (
@@ -351,15 +375,10 @@ export default function Aluno() {
 
   return (
     <div className="min-h-screen w-screen flex flex-col md:flex-row bg-neutral-900 text-white relative">
-      <button
-        className="md:hidden fixed top-4 left-4 z-20 bg-neutral-950 rounded-full p-2 border border-neutral-800 shadow-lg"
-        onClick={() => setMobileMenuOpen(true)}
-      >
-        <Menu size={28} className="text-green-500" />
-      </button>
       {MobileDrawer}
       {DesktopSidebar}
-      <div className="flex-1 flex flex-col pt-12 md:pt-0 md:ml-64">
+      {MobileHeader}
+      <div className="flex-1 flex flex-col pt-14 md:pt-0 md:ml-64">
         {bannerUrl && moduloSelecionado === null && (
           <div className="mx-4 my-4 flex justify-center">
             <div className="relative w-full max-w-[1600px] h=[400px] md:h-[400px] h-[400px] overflow-hidden rounded-lg">
