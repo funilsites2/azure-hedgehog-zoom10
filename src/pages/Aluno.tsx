@@ -72,6 +72,11 @@ export default function Aluno() {
     : 0;
   const modulo = modulos.find((m) => m.id === moduloSelecionado);
 
+  // Aula atual e descrição (se existir)
+  const selectedAulaId = aulaSelecionada ?? (modulo?.aulas[0]?.id ?? null);
+  const aulaAtual = modulo ? modulo.aulas.find((a) => a.id === selectedAulaId) : null;
+  const descricaoAula = (aulaAtual && (aulaAtual as any).descricao) as string | undefined;
+
   const handleMarcar = (aulaId: number) => {
     if (!modulo) return;
     marcarAulaAssistida(modulo.id, aulaId);
@@ -127,7 +132,7 @@ export default function Aluno() {
             >
               <ArrowLeft size={20} /> Voltar
             </button>
-            <h1 className="text-2xl font-bold">{modulo.nome}</h1>
+            {/* Título movido para abaixo do vídeo */}
           </div>
           <div className="flex-1 flex overflow-hidden">
             <AulaPlayer
@@ -136,6 +141,15 @@ export default function Aluno() {
               onSelecionarAula={setAulaSelecionada}
               onMarcarAssistida={handleMarcar}
             />
+          </div>
+          {/* Título do módulo e descrição da aula abaixo do vídeo */}
+          <div className="px-4 md:px-6 mt-4">
+            <h1 className="text-2xl font-bold">{modulo.nome}</h1>
+            {descricaoAula ? (
+              <p className="text-sm md:text-base text-neutral-300 mt-2">
+                {descricaoAula}
+              </p>
+            ) : null}
           </div>
         </>
       );
