@@ -255,8 +255,8 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
           if (!open) setBlockedModulo(null);
         }}
       >
-        <DialogContent className="sm:max-w-md bg-white text-black">
-          <DialogHeader>
+        <DialogContent className="sm:max-w-md bg-white text-black rounded-xl text-center">
+          <DialogHeader className="text-center">
             <DialogTitle>Módulo bloqueado temporariamente</DialogTitle>
             <DialogDescription className="text-black">
               {blockedModulo?.releaseDate
