@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/select";
 import { Plus, Trash2, Edit } from "lucide-react";
 
-type AulaInput = {
+export type AulaInput = {
   id?: number;
   titulo: string;
   videoUrl: string;
@@ -34,6 +34,7 @@ interface ModuleFormProps {
   ) => void;
   onCancel?: () => void;
   submitLabel?: string;
+  onAulasChange?: (aulas: AulaInput[]) => void; // new prop to notify parent when aulas change
 }
 
 export const ModuleForm: React.FC<ModuleFormProps> = ({
@@ -45,6 +46,7 @@ export const ModuleForm: React.FC<ModuleFormProps> = ({
   onSubmit,
   onCancel,
   submitLabel = "Salvar",
+  onAulasChange,
 }) => {
   const { modulos } = useModulos();
   const existingLinhas = Array.from(
@@ -60,25 +62,41 @@ export const ModuleForm: React.FC<ModuleFormProps> = ({
   const [isCreatingNewLinha, setIsCreatingNewLinha] = useState(false);
   const [delayDays, setDelayDays] = useState<number>(initialDelayDays);
 
+  const notifyAulasChange = (nextAulas: AulaInput[]) => {
+    try {
+      onAulasChange?.(nextAulas);
+    } catch {
+      //
+    }
+  };
+
   const handleAddAula = () => {
     if (!novaAula.titulo.trim() || !novaAula.videoUrl.trim()) return;
     if (editingIndex !== null) {
       // Preserve id and releaseDate from the existing aula when updating
-      setAulas((prev) =>
-        prev.map((a, i) =>
-          i === editingIndex ? { ...a, ...novaAula } : a
-        )
-      );
+      setAulas((prev) => {
+        const next = prev.map((a, i) => (i === editingIndex ? { ...a, ...novaAula } : a));
+        notifyAulasChange(next);
+        return next;
+      });
       setEditingIndex(null);
     } else {
-      setAulas((prev) => [...prev, novaAula]);
+      setAulas((prev) => {
+        const next = [...prev, novaAula];
+        notifyAulasChange(next);
+        return next;
+      });
     }
     // Clear novaAula but remove any id/releaseDate to avoid accidental reuse
     setNovaAula({ titulo: "", videoUrl: "" });
   };
 
   const removeAula = (idx: number) => {
-    setAulas((prev) => prev.filter((_, i) => i !== idx));
+    setAulas((prev) => {
+      const next = prev.filter((_, i) => i !== idx);
+      notifyAulasChange(next);
+      return next;
+    });
     if (editingIndex === idx) {
       setEditingIndex(null);
       setNovaAula({ titulo: "", videoUrl: "" });
@@ -101,6 +119,7 @@ export const ModuleForm: React.FC<ModuleFormProps> = ({
     setIsCreatingNewLinha(false);
     setEditingIndex(null);
     setNovaAula({ titulo: "", videoUrl: "" });
+    notifyAulasChange([]);
   };
 
   return (

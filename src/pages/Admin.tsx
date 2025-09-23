@@ -7,7 +7,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useModulos } from "@/context/ModulosContext";
-import { ModuleForm } from "@/components/ModuleForm";
+import { ModuleForm, AulaInput } from "@/components/ModuleForm";
 import { BannerSettings } from "@/components/BannerSettings";
 import { LogoSettings } from "@/components/LogoSettings";
 import { Footer } from "@/components/Footer";
@@ -80,7 +80,7 @@ export default function Admin() {
             <h3 className="font-semibold mb-2">Novo Módulo</h3>
             <ModuleForm
               onSubmit={(nome, capa, aulas, linha, delayDays) =>
-                adicionarModulo(nome, capa, aulas, linha, delayDays)
+                adicionarModulo(nome, kapaPlaceholder(capa), aulas, linha, delayDays)
               }
               submitLabel="Adicionar Módulo"
             />
@@ -165,6 +165,15 @@ export default function Admin() {
               {(() => {
                 const m = modulos.find((mod) => mod.id === editandoId);
                 if (!m) return null;
+
+                // compute delayDays to use when persisting onAulasChange
+                const computedDelayDays = m.releaseDate
+                  ? Math.max(
+                      0,
+                      Math.round((m.releaseDate - Date.now()) / (1000 * 60 * 60 * 24))
+                    )
+                  : 0;
+
                 return (
                   <>
                     <ModuleForm
@@ -173,17 +182,18 @@ export default function Admin() {
                       initialLinha={m.linha}
                       // Pass the full aula objects so ids and releaseDate are preserved
                       initialAulas={m.aulas}
-                      initialDelayDays={m.releaseDate
-                        ? Math.max(
-                            0,
-                            Math.round(
-                              (m.releaseDate - Date.now()) /
-                                (1000 * 60 * 60 * 24)
-                            )
-                          )
-                        : 0}
+                      initialDelayDays={computedDelayDays}
                       onSubmit={handleEditSubmit}
                       submitLabel="Atualizar Módulo"
+                      onAulasChange={(newAulas: AulaInput[]) => {
+                        // Persist aula-only changes immediately using editarModulo with current module metadata
+                        try {
+                          editarModulo(m.id, m.nome, m.capa, newAulas, m.linha, computedDelayDays);
+                          showSuccess("Aulas atualizadas");
+                        } catch (err) {
+                          console.error("Erro ao salvar aulas:", err);
+                        }
+                      }}
                     />
                     <div className="mt-6">
                       <h3 className="font-semibold mb-2">Dias para liberar cada aula</h3>
@@ -223,7 +233,7 @@ export default function Admin() {
                     </div>
                     <div className="mt-4">
                       <Button className="w-full" onClick={cancelarEdicao}>
-                        Salvar Tudo
+                        Fechar Editor
                       </Button>
                     </div>
                   </>
@@ -318,4 +328,9 @@ export default function Admin() {
       <Footer />
     </>
   );
+}
+
+// small helper to avoid accidental variable typo in earlier edit
+function kapaPlaceholder(v: string) {
+  return v;
 }
