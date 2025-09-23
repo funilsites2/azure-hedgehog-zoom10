@@ -388,14 +388,15 @@ export function AulaPlayer({
                 </div>
               )}
 
-              <div className="relative flex-shrink-0 w-36 h-20 rounded-lg overflow-hidden">
+              {/* Contêiner da miniatura com recorte e raio */}
+              <div className="relative flex-shrink-0 w-36 h-20 rounded-xl overflow-hidden">
                 <img
                   src={getYoutubeThumbnail(a.videoUrl)}
                   alt={a.titulo}
-                  className="absolute inset-0 w-full h-full object-cover rounded-lg transform transition-transform duration-300 ease-out group-hover:scale-105"
+                  className="absolute inset-0 w-full h-full object-cover transform transition-transform duration-300 ease-out group-hover:scale-105"
                 />
                 {blocked && (
-                  <div className="absolute inset-0 bg-black/50 flex items-center justify-center rounded-lg overflow-hidden">
+                  <div className="absolute inset-0 bg-black/50 flex items-center justify-center rounded-xl overflow-hidden">
                     <Lock size={18} className="text-white" />
                   </div>
                 )}
