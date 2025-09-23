@@ -255,9 +255,9 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
           if (!open) setBlockedModulo(null);
         }}
       >
-        <DialogContent className="sm:max-w-md bg-white text-black rounded-xl text-center">
+        <DialogContent className="sm:max-w-md bg-white text-black rounded-2xl p-6">
           <DialogHeader className="text-center">
-            <DialogTitle>Módulo bloqueado temporariamente</DialogTitle>
+            <DialogTitle className="text-black">Módulo bloqueado temporariamente</DialogTitle>
             <DialogDescription className="text-black">
               {blockedModulo?.releaseDate
                 ? `Este módulo será liberado em ${new Date(
@@ -266,13 +266,15 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
                 : "Este módulo está temporariamente indisponível."}
             </DialogDescription>
           </DialogHeader>
-          <div className="text-sm text-black">
+          <div className="text-sm text-black text-center mt-2">
             Assim que a data for atingida, o conteúdo ficará disponível
             automaticamente para você.
           </div>
-          <div className="mt-4 flex justify-end">
+          <div className="mt-6 flex justify-center">
             <DialogClose asChild>
-              <Button variant="secondary">Fechar</Button>
+              <Button variant="outline" className="border-neutral-200 text-black hover:bg-neutral-100">
+                Fechar
+              </Button>
             </DialogClose>
           </div>
         </DialogContent>
