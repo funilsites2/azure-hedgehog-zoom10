@@ -368,8 +368,8 @@ export default function Aluno() {
             <h2 className="text-2xl font-semibold mb-2 text-white">
               Continuar Assistindo
             </h2>
-            <div className="h-[10vh] min-h-[96px]">
-              <div className="overflow-x-auto overflow-y-hidden no-scrollbar snap-x snap-mandatory flex gap-4 pb-2 h-full">
+            <div>
+              <div className="overflow-x-auto overflow-y-hidden no-scrollbar snap-x snap-mandatory flex gap-4 pb-2">
                 {partialAulas.map(({ modulo: m, aula }) => {
                   let savedPct = 0;
                   try {
@@ -385,13 +385,13 @@ export default function Aluno() {
                   return (
                     <div
                       key={aula.id}
-                      className="group snap-start flex-shrink-0 w-1/2 md:w-1/5 rounded-lg cursor-pointer transition h-full flex flex-col"
+                      className="group snap-start flex-shrink-0 w-[260px] md:w-[300px] rounded-lg cursor-pointer transition flex flex-col"
                       onClick={() => {
                         setModuloSelecionado(m.id);
                         setAulaSelecionada(aula.id);
                       }}
                     >
-                      <div className="relative w-full flex-1 rounded-lg overflow-hidden transition-transform duration-300 ease-out group-hover:scale-95">
+                      <div className="relative w-full h-[160px] md:h-[200px] rounded-lg overflow-hidden transition-transform duration-300 ease-out group-hover:scale-95">
                         <img
                           src={getYoutubeThumbnail(aula.videoUrl)}
                           alt={aula.titulo}
@@ -417,7 +417,7 @@ export default function Aluno() {
                       </div>
 
                       {savedPct > 0 ? (
-                        <div className="mt-1">
+                        <div className="mt-2">
                           <div className="flex items-center gap-2">
                             <div className="flex-1">
                               <SimpleProgress value={savedPct} />
@@ -428,7 +428,7 @@ export default function Aluno() {
                           </div>
                         </div>
                       ) : (
-                        <div className="mt-1">
+                        <div className="mt-2">
                           <p className="text-xs text-neutral-300 truncate">
                             {aula.titulo}
                           </p>
