@@ -287,9 +287,10 @@ export function AulaPlayer({
           )}
           <div className="flex items-center gap-3">
             <div className="w-36">
-              <SimpleProgress value={displayPercent} />
+              {/* Mostrar sempre o progresso do módulo aqui */}
+              <SimpleProgress value={progressoModulo} />
             </div>
-            <span className="text-xs text-neutral-300">{displayPercent}%</span>
+            <span className="text-xs text-neutral-300">{progressoModulo}%</span>
           </div>
         </div>
         {isLockedCurrent ? (
