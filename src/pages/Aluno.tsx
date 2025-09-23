@@ -385,7 +385,7 @@ export default function Aluno() {
                   return (
                     <div
                       key={aula.id}
-                      className="group snap-start flex-shrink-0 w-[260px] md:w-[300px] rounded-lg cursor-pointer transition flex flex-col"
+                      className="group snap-start flex-shrink-0 w-[260px] md:w-[300px] rounded-lg overflow-hidden cursor-pointer transition flex flex-col"
                       onClick={() => {
                         setModuloSelecionado(m.id);
                         setAulaSelecionada(aula.id);
@@ -418,7 +418,7 @@ export default function Aluno() {
                       </div>
 
                       {savedPct > 0 ? (
-                        <div className="mt-2">
+                        <div className="mt-2 px-1 pb-1">
                           <div className="flex items-center gap-2">
                             <div className="flex-1">
                               <SimpleProgress value={savedPct} />
@@ -429,7 +429,7 @@ export default function Aluno() {
                           </div>
                         </div>
                       ) : (
-                        <div className="mt-2">
+                        <div className="mt-2 px-2 pb-2">
                           <p className="text-xs text-neutral-300 truncate">
                             {aula.titulo}
                           </p>
