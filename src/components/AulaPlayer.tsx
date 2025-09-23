@@ -330,14 +330,14 @@ export function AulaPlayer({
           <>
             <div className="aspect-video bg-black rounded-lg overflow-hidden mb-3 shadow-lg flex items-stretch">
               {getYoutubeId(aula.videoUrl) ? (
-                <div ref={playerContainerRef} className="w-full h-full" />
+                <div ref={playerContainerRef} className="w-full h-full rounded-lg overflow-hidden" />
               ) : (
                 <iframe
                   src={aula.videoUrl}
                   title={aula.titulo}
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                   allowFullScreen
-                  className="w-full h-full"
+                  className="w-full h-full rounded-lg overflow-hidden"
                 />
               )}
             </div>
@@ -384,11 +384,11 @@ export function AulaPlayer({
                 </div>
               )}
 
-              <div className="relative flex-shrink-0 w-36 h-20 rounded-md overflow-hidden">
+              <div className="relative flex-shrink-0 w-36 h-20 rounded-lg overflow-hidden">
                 <img
                   src={getYoutubeThumbnail(a.videoUrl)}
                   alt={a.titulo}
-                  className="absolute inset-0 w-full h-full object-cover transform transition-transform duration-300 ease-out group-hover:scale-105"
+                  className="absolute inset-0 w-full h-full object-cover rounded-lg transform transition-transform duration-300 ease-out group-hover:scale-105"
                 />
                 {blocked && (
                   <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
