@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { CheckCircle, Lock } from "lucide-react";
-import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 import { useUser } from "@/context/UserContext";
 import { useModulos } from "@/context/ModulosContext";
+import SimpleProgress from "@/components/SimpleProgress";
 
 type Aula = {
   id: number;
@@ -30,11 +30,18 @@ interface AulaPlayerProps {
   onMarcarAssistida: (aulaId: number) => void;
 }
 
+function getYoutubeId(url: string): string | null {
+  const m =
+    url.match(
+      /(?:youtube\.com\/(?:embed\/|watch\?v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/
+    ) ||
+    url.match(/(?:v=|\/v\/|\/embed\/)([a-zA-Z0-9_-]{11})/);
+  return m ? m[1] : null;
+}
+
 function getYoutubeThumbnail(url: string): string {
-  const match = url.match(
-    /(?:youtube\.com\/(?:embed\/|watch\?v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/
-  );
-  return match ? `https://img.youtube.com/vi/${match[1]}/hqdefault.jpg` : "/placeholder.svg";
+  const id = getYoutubeId(url);
+  return id ? `https://img.youtube.com/vi/${id}/hqdefault.jpg` : "/placeholder.svg";
 }
 
 export function AulaPlayer({
@@ -49,6 +56,14 @@ export function AulaPlayer({
   const now = Date.now();
   const timerRef = useRef<number | null>(null);
 
+  // Video progress percent (0 - 100)
+  const [videoProgress, setVideoProgress] = useState<number>(0);
+
+  // refs for player
+  const playerRef = useRef<any | null>(null);
+  const playerContainerRef = useRef<HTMLDivElement | null>(null);
+  const pollIntervalRef = useRef<number | null>(null);
+
   if (!aulas || aulas.length === 0) {
     return (
       <div className="flex items-center justify-center h-full">
@@ -62,23 +77,20 @@ export function AulaPlayer({
 
   const total = aulas.length;
   const done = aulas.filter((a) => a.assistida).length;
-  const progresso = total ? Math.round((done / total) * 100) : 0;
+  const progressoModulo = total ? Math.round((done / total) * 100) : 0;
 
   const isLockedCurrent =
     aula.bloqueado === true || (aula.releaseDate ? now < aula.releaseDate : false);
 
   // Start a 5s timer when the aula is shown; if it completes, mark aula as started
   useEffect(() => {
-    // if aula already started or assistida, don't repeat
     if (!aula || aula.started || aula.assistida) return;
 
-    // clear any previous timer
     if (timerRef.current) {
       window.clearTimeout(timerRef.current);
       timerRef.current = null;
     }
 
-    // Start timer
     timerRef.current = window.setTimeout(() => {
       marcarAulaIniciada(modulo.id, aula.id);
       timerRef.current = null;
@@ -91,6 +103,132 @@ export function AulaPlayer({
       }
     };
   }, [aula?.id, aula?.started, aula?.assistida, marcarAulaIniciada, modulo.id]);
+
+  // Manage video progress tracking (YouTube IFrame API if possible, otherwise try <video> - fallback)
+  useEffect(() => {
+    // reset progress when switching aulas
+    setVideoProgress(0);
+
+    // Clear existing player/poll
+    if (pollIntervalRef.current) {
+      window.clearInterval(pollIntervalRef.current);
+      pollIntervalRef.current = null;
+    }
+    if (playerRef.current && typeof playerRef.current.destroy === "function") {
+      try {
+        playerRef.current.destroy();
+      } catch {}
+      playerRef.current = null;
+    }
+
+    const ytId = getYoutubeId(aula.videoUrl);
+    if (ytId && playerContainerRef.current) {
+      // load YouTube api if needed
+      const ensureYouTubeAPI = () =>
+        new Promise<void>((resolve) => {
+          if ((window as any).YT && (window as any).YT.Player) {
+            resolve();
+            return;
+          }
+          const existing = document.getElementById("youtube-api");
+          if (existing) {
+            existing.addEventListener("load", () => resolve(), { once: true });
+            // If already loaded, resolve immediately
+            if ((window as any).YT && (window as any).YT.Player) resolve();
+            return;
+          }
+          const tag = document.createElement("script");
+          tag.src = "https://www.youtube.com/iframe_api";
+          tag.id = "youtube-api";
+          tag.async = true;
+          tag.onload = () => {
+            // sometimes YT global isn't ready immediately; wait a tick
+            setTimeout(() => resolve(), 50);
+          };
+          document.body.appendChild(tag);
+        });
+
+      let mounted = true;
+
+      ensureYouTubeAPI().then(() => {
+        if (!mounted) return;
+        const YT = (window as any).YT;
+        // create player
+        try {
+          playerRef.current = new YT.Player(playerContainerRef.current, {
+            videoId: ytId,
+            playerVars: {
+              modestbranding: 1,
+              rel: 0,
+              origin: window.location.origin,
+              enablejsapi: 1,
+            },
+            events: {
+              onReady: () => {
+                // start polling current time/duration
+                if (pollIntervalRef.current) {
+                  window.clearInterval(pollIntervalRef.current);
+                  pollIntervalRef.current = null;
+                }
+                pollIntervalRef.current = window.setInterval(() => {
+                  try {
+                    const player = playerRef.current;
+                    if (!player || typeof player.getCurrentTime !== "function") return;
+                    const cur = player.getCurrentTime();
+                    const dur = player.getDuration();
+                    if (!dur || dur === 0 || !isFinite(dur)) {
+                      setVideoProgress(0);
+                      return;
+                    }
+                    const pct = Math.min(100, Math.max(0, Math.round((cur / dur) * 100)));
+                    setVideoProgress(pct);
+                  } catch {
+                    // ignore polling errors
+                  }
+                }, 500) as unknown as number;
+              },
+            },
+          });
+        } catch {
+          // fallback: do nothing, keep progress at 0
+        }
+      });
+
+      return () => {
+        mounted = false;
+        if (pollIntervalRef.current) {
+          window.clearInterval(pollIntervalRef.current);
+          pollIntervalRef.current = null;
+        }
+        if (playerRef.current && typeof playerRef.current.destroy === "function") {
+          try {
+            playerRef.current.destroy();
+          } catch {}
+          playerRef.current = null;
+        }
+      };
+    } else {
+      // Not a YouTube video: if it's a direct video src we could render <video>, but we must not change markup broadly.
+      // Keep fallback: no access to progress for cross-origin iframe; leave at 0.
+      return () => {
+        if (pollIntervalRef.current) {
+          window.clearInterval(pollIntervalRef.current);
+          pollIntervalRef.current = null;
+        }
+      };
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [aula.id, aula.videoUrl]);
+
+  // When aula is marked assistida set progress to 100
+  useEffect(() => {
+    if (aula.assistida) setVideoProgress(100);
+  }, [aula.assistida]);
+
+  // Decide which percent to show: if the current aula is playable and we have a videoProgress > 0 (or started), show videoProgress,
+  // otherwise fall back to module progress.
+  const displayPercent =
+    !isLockedCurrent && (aula.started || videoProgress > 0) ? videoProgress : progressoModulo;
 
   return (
     <div className="flex flex-col md:flex-row gap-6 w-full h-full">
@@ -109,7 +247,12 @@ export function AulaPlayer({
               <CheckCircle size={16} /> Concluída
             </span>
           )}
-          <span className="text-xs text-neutral-300">{progresso}% concluído</span>
+          <div className="flex items-center gap-3">
+            <div className="w-36">
+              <SimpleProgress value={displayPercent} />
+            </div>
+            <span className="text-xs text-neutral-300">{displayPercent}%</span>
+          </div>
         </div>
         {isLockedCurrent ? (
           <div className="flex flex-col items-center justify-center h-full text-neutral-300">
@@ -121,14 +264,19 @@ export function AulaPlayer({
             </p>
           </div>
         ) : (
-          <div className="aspect-video bg-black rounded-lg overflow-hidden mb-4 shadow-lg">
-            <iframe
-              src={aula.videoUrl}
-              title={aula.titulo}
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-              className="w-full h-full"
-            />
+          <div className="aspect-video bg-black rounded-lg overflow-hidden mb-4 shadow-lg flex items-stretch">
+            {/* If it's a YouTube video we render the player container so the YT API can control it; otherwise keep iframe */}
+            {getYoutubeId(aula.videoUrl) ? (
+              <div ref={playerContainerRef} className="w-full h-full" />
+            ) : (
+              <iframe
+                src={aula.videoUrl}
+                title={aula.titulo}
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+                className="w-full h-full"
+              />
+            )}
           </div>
         )}
       </div>
