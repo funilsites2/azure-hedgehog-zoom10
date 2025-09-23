@@ -255,10 +255,12 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
           if (!open) setBlockedModulo(null);
         }}
       >
-        <DialogContent className="sm:max-w-md bg-white text-black rounded-2xl p-6">
-          <DialogHeader className="text-center">
-            <DialogTitle className="text-black">Módulo bloqueado temporariamente</DialogTitle>
-            <DialogDescription className="text-black">
+        <DialogContent className="sm:max-w-md rounded-3xl p-6 md:p-8 text-center border border-white/15 bg-gradient-to-b from-neutral-900/90 to-neutral-800/80 backdrop-blur-xl shadow-[0_10px_40px_rgba(0,0,0,0.45)]">
+          <DialogHeader className="text-center space-y-1">
+            <DialogTitle className="text-white text-xl md:text-2xl font-semibold">
+              Módulo bloqueado temporariamente
+            </DialogTitle>
+            <DialogDescription className="text-neutral-300">
               {blockedModulo?.releaseDate
                 ? `Este módulo será liberado em ${new Date(
                     blockedModulo.releaseDate
@@ -266,13 +268,12 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
                 : "Este módulo está temporariamente indisponível."}
             </DialogDescription>
           </DialogHeader>
-          <div className="text-sm text-black text-center mt-2">
-            Assim que a data for atingida, o conteúdo ficará disponível
-            automaticamente para você.
+          <div className="text-sm text-neutral-400 text-center mt-3">
+            Assim que a data for atingida, o conteúdo ficará disponível automaticamente para você.
           </div>
           <div className="mt-6 flex justify-center">
             <DialogClose asChild>
-              <Button variant="outline" className="border-neutral-200 text-black hover:bg-neutral-100">
+              <Button className="rounded-full border border-white/20 bg-white/10 text-white hover:bg-white/20 hover:border-white/30 transition-colors px-6">
                 Fechar
               </Button>
             </DialogClose>
