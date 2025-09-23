@@ -6,7 +6,8 @@ type Aula = {
   videoUrl: string;
   assistida?: boolean;
   bloqueado?: boolean;
-  releaseDate?: number;
+  releaseDate?: number; // calculado dinamicamente a partir da matrícula + offset
+  releaseOffsetDays?: number; // dias após a matrícula
   started?: boolean;
   descricao?: string;
 };
@@ -18,7 +19,8 @@ type Modulo = {
   linha: string;
   aulas: Aula[];
   bloqueado?: boolean;
-  releaseDate?: number; // timestamp de liberação do módulo
+  releaseDate?: number; // calculado dinamicamente a partir da matrícula + offset
+  releaseOffsetDays?: number; // dias após a matrícula
 };
 
 type ModulosContextType = {
@@ -28,7 +30,7 @@ type ModulosContextType = {
     capa: string,
     aulas?: Omit<
       Aula,
-      "id" | "assistida" | "bloqueado" | "releaseDate" | "started"
+      "id" | "assistida" | "bloqueado" | "releaseDate" | "releaseOffsetDays" | "started"
     >[],
     linha?: string,
     delayDays?: number
@@ -48,7 +50,7 @@ type ModulosContextType = {
     novaCapa: string,
     novasAulas: Omit<
       Aula,
-      "id" | "assistida" | "bloqueado" | "releaseDate" | "started"
+      "id" | "assistida" | "bloqueado" | "releaseDate" | "releaseOffsetDays" | "started"
     >[],
     linha?: string,
     delayDays?: number
@@ -68,6 +70,25 @@ type ModulosContextType = {
 };
 
 const STORAGE_KEY = "modulos_area_membros";
+const ENROLLMENT_KEY = "aluno_enrollment_date";
+const MS_DAY = 24 * 60 * 60 * 1000;
+
+function getEnrollmentDate(): number {
+  try {
+    const raw = localStorage.getItem(ENROLLMENT_KEY);
+    if (!raw) {
+      const now = Date.now();
+      localStorage.setItem(ENROLLMENT_KEY, JSON.stringify(now));
+      return now;
+    }
+    const val = JSON.parse(raw);
+    return typeof val === "number" && isFinite(val) ? val : Date.now();
+  } catch {
+    const now = Date.now();
+    localStorage.setItem(ENROLLMENT_KEY, JSON.stringify(now));
+    return now;
+  }
+}
 
 const getInitialModulos = (): Modulo[] => {
   const data = localStorage.getItem(STORAGE_KEY);
@@ -76,13 +97,14 @@ const getInitialModulos = (): Modulo[] => {
       return JSON.parse(data);
     } catch {}
   }
-  const now = Date.now();
+  // Seed inicial: offsets 0 (liberado no dia da matrícula)
   return [
     {
       id: 1,
       nome: "Módulo 1",
       capa: "https://placehold.co/400x200/222/fff?text=Módulo+1",
       linha: "Linha A",
+      releaseOffsetDays: 0,
       aulas: [
         {
           id: 1,
@@ -90,7 +112,7 @@ const getInitialModulos = (): Modulo[] => {
           videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
           assistida: true,
           bloqueado: false,
-          releaseDate: now,
+          releaseOffsetDays: 0,
           started: false,
           descricao: "Introdução ao módulo 1 e visão geral.",
         },
@@ -100,18 +122,18 @@ const getInitialModulos = (): Modulo[] => {
           videoUrl: "https://www.youtube.com/embed/ysz5S6PUM-U",
           assistida: false,
           bloqueado: false,
-          releaseDate: now,
+          releaseOffsetDays: 0,
           started: false,
           descricao: "Conceitos fundamentais para continuar.",
         },
       ],
-      releaseDate: now,
     },
     {
       id: 2,
       nome: "Módulo 2",
       capa: "https://placehold.co/400x200/333/fff?text=Módulo+2",
       linha: "Linha B",
+      releaseOffsetDays: 0,
       aulas: [
         {
           id: 3,
@@ -119,39 +141,95 @@ const getInitialModulos = (): Modulo[] => {
           videoUrl: "https://www.youtube.com/embed/ScMzIvxBSi4",
           assistida: false,
           bloqueado: false,
-          releaseDate: now,
+          releaseOffsetDays: 0,
           started: false,
           descricao: "Iniciando o módulo 2 com práticas.",
         },
       ],
-      releaseDate: now,
     },
   ];
 };
 
+// Ajusta bloqueios com base na matrícula + offset; migra dados antigos com releaseDate absoluto para offset.
 const initializeBlocks = (mods: Modulo[]): Modulo[] => {
   const now = Date.now();
-  return mods.map((m) => {
-    // Ajuste: bloqueia o módulo se estiver explicitamente bloqueado OU se a releaseDate estiver no futuro
-    const moduleBlocked =
-      (m.bloqueado ?? false) || (m.releaseDate ? now < m.releaseDate : false);
+  const enrollment = getEnrollmentDate();
 
+  return mods.map((m) => {
+    // Migrar/normalizar offset do módulo
+    let moduleOffset =
+      typeof m.releaseOffsetDays === "number" && isFinite(m.releaseOffsetDays)
+        ? Math.max(0, Math.round(m.releaseOffsetDays))
+        : undefined;
+
+    if (moduleOffset === undefined && m.releaseDate) {
+      const diff = Math.max(0, Math.round((m.releaseDate - enrollment) / MS_DAY));
+      moduleOffset = diff;
+    }
+    if (moduleOffset === undefined) moduleOffset = 0;
+
+    const moduleEffectiveRelease = enrollment + moduleOffset * MS_DAY;
+    const moduleBlocked =
+      (m.bloqueado ?? false) || moduleEffectiveRelease > now;
+
+    // Normaliza aulas
     const aulas = m.aulas.map((a, i, arr) => {
+      let aulaOffset =
+        typeof a.releaseOffsetDays === "number" && isFinite(a.releaseOffsetDays)
+          ? Math.max(0, Math.round(a.releaseOffsetDays))
+          : undefined;
+
+      if (aulaOffset === undefined && a.releaseDate) {
+        const diff = Math.max(0, Math.round((a.releaseDate - enrollment) / MS_DAY));
+        aulaOffset = diff;
+      }
+      if (aulaOffset === undefined) {
+        // fallback: herda offset do módulo
+        aulaOffset = moduleOffset!;
+      }
+
+      const effectiveRelease = enrollment + aulaOffset * MS_DAY;
       const alreadyStarted = a.started ?? false;
-      if (a.bloqueado) {
-        return { ...a, started: alreadyStarted };
+
+      // Regra de bloqueio: por data OU sequencial
+      if (effectiveRelease > now) {
+        return {
+          ...a,
+          releaseOffsetDays: aulaOffset,
+          releaseDate: effectiveRelease,
+          bloqueado: true,
+          started: alreadyStarted,
+        };
       }
-      if (a.releaseDate && now < a.releaseDate) {
-        return { ...a, bloqueado: true, started: alreadyStarted };
-      }
+
       if (i === 0) {
-        return { ...a, bloqueado: false, started: alreadyStarted };
+        return {
+          ...a,
+          releaseOffsetDays: aulaOffset,
+          releaseDate: effectiveRelease,
+          bloqueado: false,
+          started: alreadyStarted,
+        };
       }
+
       const prev = arr[i - 1];
-      return { ...a, bloqueado: !prev.assistida, started: alreadyStarted };
+      const prevAssistida = !!prev.assistida;
+      return {
+        ...a,
+        releaseOffsetDays: aulaOffset,
+        releaseDate: effectiveRelease,
+        bloqueado: !prevAssistida,
+        started: alreadyStarted,
+      };
     });
 
-    return { ...m, bloqueado: moduleBlocked, aulas };
+    return {
+      ...m,
+      releaseOffsetDays: moduleOffset,
+      releaseDate: moduleEffectiveRelease,
+      bloqueado: moduleBlocked,
+      aulas,
+    };
   });
 };
 
@@ -173,13 +251,12 @@ export const ModulosProvider: React.FC<{ children: React.ReactNode }> = ({
     capa: string,
     aulas: Omit<
       Aula,
-      "id" | "assistida" | "bloqueado" | "releaseDate" | "started"
+      "id" | "assistida" | "bloqueado" | "releaseDate" | "releaseOffsetDays" | "started"
     >[] = [],
     linha: string = "",
     delayDays: number = 0
   ) => {
     const now = Date.now();
-    const releaseDate = now + delayDays * 24 * 60 * 60 * 1000;
     setModulos((prev) =>
       initializeBlocks([
         ...prev,
@@ -188,17 +265,17 @@ export const ModulosProvider: React.FC<{ children: React.ReactNode }> = ({
           nome,
           capa,
           linha,
+          releaseOffsetDays: Math.max(0, Math.round(delayDays)),
           aulas: aulas.map((a, i) => ({
             id: now + i + 1,
             titulo: a.titulo,
             videoUrl: a.videoUrl,
             descricao: a.descricao,
             assistida: false,
-            bloqueado: i !== 0,
-            releaseDate,
+            bloqueado: i !== 0, // sequencial
+            releaseOffsetDays: Math.max(0, Math.round(delayDays)),
             started: false,
           })),
-          releaseDate,
         },
       ])
     );
@@ -212,46 +289,49 @@ export const ModulosProvider: React.FC<{ children: React.ReactNode }> = ({
     descricao: string = ""
   ) => {
     const now = Date.now();
-    const releaseDate = now + delayDays * 24 * 60 * 60 * 1000;
     setModulos((prev) =>
-      prev.map((m) =>
-        m.id === moduloId
-          ? {
-              ...m,
-              aulas: [
-                ...m.aulas,
-                {
-                  id: now,
-                  titulo,
-                  videoUrl,
-                  descricao,
-                  assistida: false,
-                  bloqueado: true,
-                  releaseDate,
-                  started: false,
-                },
-              ],
-            }
-          : m
+      initializeBlocks(
+        prev.map((m) =>
+          m.id === moduloId
+            ? {
+                ...m,
+                aulas: [
+                  ...m.aulas,
+                  {
+                    id: now,
+                    titulo,
+                    videoUrl,
+                    descricao,
+                    assistida: false,
+                    bloqueado: true, // só desbloqueia quando chegar a vez + data
+                    releaseOffsetDays: Math.max(0, Math.round(delayDays)),
+                    started: false,
+                  },
+                ],
+              }
+            : m
+        )
       )
     );
   };
 
   const marcarAulaAssistida = (moduloId: number, aulaId: number) => {
     setModulos((prev) =>
-      prev.map((m) => {
-        if (m.id !== moduloId) return m;
-        const novasAulas = m.aulas.map((a, i, arr) => {
-          if (a.id === aulaId) {
-            return { ...a, assistida: true, bloqueado: false };
-          }
-          if (i > 0 && arr[i - 1].id === aulaId) {
-            return { ...a, bloqueado: false };
-          }
-          return a;
-        });
-        return { ...m, aulas: novasAulas };
-      })
+      initializeBlocks(
+        prev.map((m) => {
+          if (m.id !== moduloId) return m;
+          const novasAulas = m.aulas.map((a, i, arr) => {
+            if (a.id === aulaId) {
+              return { ...a, assistida: true, bloqueado: false };
+            }
+            if (i > 0 && arr[i - 1].id === aulaId) {
+              return { ...a, bloqueado: false };
+            }
+            return a;
+          });
+          return { ...m, aulas: novasAulas };
+        })
+      )
     );
   };
 
@@ -276,19 +356,18 @@ export const ModulosProvider: React.FC<{ children: React.ReactNode }> = ({
     novaCapa: string,
     novasAulas: Omit<
       Aula,
-      "id" | "assistida" | "bloqueado" | "releaseDate" | "started"
+      "id" | "assistida" | "bloqueado" | "releaseDate" | "releaseOffsetDays" | "started"
     >[] = [],
     linha: string = "",
     delayDays: number = 0
   ) => {
     const now = Date.now();
-    const releaseDate = now + delayDays * 24 * 60 * 60 * 1000;
+    const offset = Math.max(0, Math.round(delayDays));
     setModulos((prev) =>
       initializeBlocks(
         prev.map((m) => {
           if (m.id !== moduloId) return m;
 
-          // Se novasAulas vier vazio, só atualiza releaseDate e mantém aulas existentes
           const aulasAtualizadas: Aula[] =
             novasAulas && novasAulas.length > 0
               ? novasAulas.map((a, idx) => ({
@@ -298,12 +377,12 @@ export const ModulosProvider: React.FC<{ children: React.ReactNode }> = ({
                   descricao: a.descricao ?? m.aulas[idx]?.descricao,
                   assistida: m.aulas[idx]?.assistida ?? false,
                   bloqueado: false,
-                  releaseDate,
+                  releaseOffsetDays: offset,
                   started: m.aulas[idx]?.started ?? false,
                 }))
               : m.aulas.map((aExistente) => ({
                   ...aExistente,
-                  releaseDate,
+                  releaseOffsetDays: offset,
                 }));
 
           return {
@@ -311,7 +390,7 @@ export const ModulosProvider: React.FC<{ children: React.ReactNode }> = ({
             nome: novoNome,
             capa: novaCapa,
             linha,
-            releaseDate,
+            releaseOffsetDays: offset,
             aulas: aulasAtualizadas,
           };
         })
@@ -353,8 +432,7 @@ export const ModulosProvider: React.FC<{ children: React.ReactNode }> = ({
     aulaId: number,
     delayDays: number
   ) => {
-    const now = Date.now();
-    const releaseDate = now + delayDays * 24 * 60 * 60 * 1000;
+    const offset = Math.max(0, Math.round(delayDays));
     setModulos((prev) =>
       initializeBlocks(
         prev.map((m) =>
@@ -362,7 +440,7 @@ export const ModulosProvider: React.FC<{ children: React.ReactNode }> = ({
             ? {
                 ...m,
                 aulas: m.aulas.map((a) =>
-                  a.id === aulaId ? { ...a, releaseDate } : a
+                  a.id === aulaId ? { ...a, releaseOffsetDays: offset } : a
                 ),
               }
             : m
@@ -379,16 +457,16 @@ export const ModulosProvider: React.FC<{ children: React.ReactNode }> = ({
       ...a,
       id: now + idx + 1,
       assistida: false,
-      bloqueado: a.bloqueado,
-      releaseDate: a.releaseDate,
       started: false,
+      // mantém offset para cada aula
+      releaseOffsetDays: a.releaseOffsetDays,
     }));
     const cloned: Modulo = {
       ...original,
       id: now + 1,
       nome: `${original.nome} (Cópia)`,
       aulas: clonedAulas,
-      releaseDate: original.releaseDate,
+      releaseOffsetDays: original.releaseOffsetDays,
     };
     setModulos((prev) => initializeBlocks([...prev, cloned]));
   };

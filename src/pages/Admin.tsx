@@ -138,7 +138,7 @@ export default function Admin() {
                 type="number"
                 min={0}
                 className="w-full p-2 rounded bg-neutral-800 text-white"
-                placeholder="Dias para liberar"
+                placeholder="Dias para liberar (após matrícula)"
                 value={novaAulaExistente.delayDays}
                 onChange={(e) =>
                   setNovaAulaExistente((v) => ({
@@ -182,12 +182,18 @@ export default function Admin() {
                 const m = modulos.find((mod) => mod.id === editandoId);
                 if (!m) return null;
 
-                const computedDelayDays = m.releaseDate
-                  ? Math.max(
-                      0,
-                      Math.round((m.releaseDate - Date.now()) / (1000 * 60 * 60 * 24))
-                    )
-                  : 0;
+                // Usa o offset salvo (dias após matrícula). Fallback: calcula pelos dados antigos.
+                const computedDelayDays =
+                  typeof m.releaseOffsetDays === "number"
+                    ? m.releaseOffsetDays
+                    : m.releaseDate
+                    ? Math.max(
+                        0,
+                        Math.round(
+                          (m.releaseDate - Date.now()) / (1000 * 60 * 60 * 24)
+                        )
+                      )
+                    : 0;
 
                 return (
                   <>
@@ -209,17 +215,20 @@ export default function Admin() {
                       }}
                     />
                     <div className="mt-6">
-                      <h3 className="font-semibold mb-2">Dias para liberar cada aula</h3>
+                      <h3 className="font-semibold mb-2">Dias (após matrícula) para liberar cada aula</h3>
                       {m.aulas.map((a) => {
-                        const currentDelay = a.releaseDate
-                          ? Math.max(
-                              0,
-                              Math.ceil(
-                                (a.releaseDate - Date.now()) /
-                                  (1000 * 60 * 60 * 24)
+                        const currentDelay =
+                          typeof a.releaseOffsetDays === "number"
+                            ? a.releaseOffsetDays
+                            : a.releaseDate
+                            ? Math.max(
+                                0,
+                                Math.ceil(
+                                  (a.releaseDate - Date.now()) /
+                                    (1000 * 60 * 60 * 24)
+                                )
                               )
-                            )
-                          : 0;
+                            : 0;
                         return (
                           <div
                             key={a.id}
@@ -229,7 +238,7 @@ export default function Admin() {
                             <input
                               type="number"
                               min={0}
-                              className="w-16 p-1 rounded bg-neutral-800 text-white"
+                              className="w-20 p-1 rounded bg-neutral-800 text-white text-center"
                               value={currentDelay}
                               onChange={(e) =>
                                 setAulaReleaseDays(
@@ -239,7 +248,7 @@ export default function Admin() {
                                 )
                               }
                             />
-                            <span className="ml-1">dias</span>
+                            <span className="ml-2">dias</span>
                           </div>
                         );
                       })}
