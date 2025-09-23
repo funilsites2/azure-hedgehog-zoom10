@@ -66,6 +66,9 @@ export function AulaPlayer({
   const lastSavedTimeRef = useRef<number>(0);
   const lastSavedPctRef = useRef<number>(0);
 
+  // Prevent duplicate auto-marking/advancing
+  const assistedTriggeredRef = useRef<boolean>(false);
+
   if (!aulas || aulas.length === 0) {
     return (
       <div className="flex items-center justify-center h-full">
@@ -86,6 +89,11 @@ export function AulaPlayer({
 
   const timeKey = (id: number) => `aula_progress_time_${id}`;
   const pctKey = (id: number) => `aula_progress_pct_${id}`;
+
+  // Reset assisted-trigger when switching aulas
+  useEffect(() => {
+    assistedTriggeredRef.current = false;
+  }, [aula.id]);
 
   // Start a 5s timer when the aula is shown; if it completes, mark aula as started
   useEffect(() => {
@@ -109,12 +117,42 @@ export function AulaPlayer({
     };
   }, [aula?.id, aula?.started, aula?.assistida, marcarAulaIniciada, modulo.id]);
 
+  // Helper to mark current aula as assistida and advance to next unlocked aula
+  const markAssistidaAndAdvance = (currentAulaId: number) => {
+    if (assistedTriggeredRef.current) return;
+    assistedTriggeredRef.current = true;
+
+    try {
+      onMarcarAssistida(currentAulaId);
+    } catch {
+      // allow errors to bubble elsewhere
+    }
+
+    // Advance to next unlocked aula if available
+    const idx = aulas.findIndex((x) => x.id === currentAulaId);
+    const next = aulas[idx + 1];
+    if (next) {
+      const nowTs = Date.now();
+      const nextLocked =
+        next.bloqueado === true || (next.releaseDate ? nowTs < next.releaseDate : false);
+      if (!nextLocked) {
+        // small timeout so UI state (assistida) can settle before switching
+        setTimeout(() => {
+          try {
+            onSelecionarAula(next.id);
+          } catch {}
+        }, 250);
+      }
+    }
+  };
+
   // Manage video progress tracking (YouTube IFrame API if possible, otherwise try <video> - fallback)
   useEffect(() => {
     // reset progress when switching aulas
     setVideoProgress(0);
     lastSavedTimeRef.current = 0;
     lastSavedPctRef.current = 0;
+    assistedTriggeredRef.current = false;
 
     // Clear existing player/poll
     if (pollIntervalRef.current) {
@@ -213,10 +251,24 @@ export function AulaPlayer({
                         // ignore storage errors
                       }
                     }
+
+                    // If pct reached 100% (end) and aula not yet marked, mark and advance
+                    if (pct >= 100 && !aula.assistida && !assistedTriggeredRef.current) {
+                      markAssistidaAndAdvance(aula.id);
+                    }
                   } catch {
                     // ignore polling errors
                   }
                 }, 500) as unknown as number;
+              },
+              onStateChange: (e: any) => {
+                // YT player state ended -> mark assistida and advance
+                const YTStates = (window as any).YT?.PlayerState;
+                if (e?.data === (YTStates?.ENDED ?? 0)) {
+                  if (!aula.assistida && !assistedTriggeredRef.current) {
+                    markAssistidaAndAdvance(aula.id);
+                  }
+                }
               },
             },
           });
@@ -251,14 +303,12 @@ export function AulaPlayer({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [aula.id, aula.videoUrl]);
 
-  // When aula is marked assistida set progress to 100 and clear saved progress
+  // When aula is marked assistida set progress to 100 and keep saved progress so card stays filled
   useEffect(() => {
     if (aula.assistida) {
       setVideoProgress(100);
-      try {
-        localStorage.removeItem(timeKey(aula.id));
-        localStorage.removeItem(pctKey(aula.id));
-      } catch {}
+      // Do NOT remove saved localStorage progress so the thumbnail and "continuar" cards keep showing 100%
+      assistedTriggeredRef.current = true;
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [aula.assistida]);
@@ -276,7 +326,27 @@ export function AulaPlayer({
           {!aula.assistida ? (
             <button
               className="text-xs bg-green-600 px-3 py-1 rounded hover:bg-green-700 text-white"
-              onClick={() => onMarcarAssistida(aula.id)}
+              onClick={() => {
+                // If user manually marks as concluded, keep saved progress and advance
+                try {
+                  onMarcarAssistida(aula.id);
+                } catch {}
+                assistedTriggeredRef.current = true;
+                const next = aulas[aulaIndex + 1];
+                if (next) {
+                  const nowTs = Date.now();
+                  const nextLocked =
+                    next.bloqueado === true ||
+                    (next.releaseDate ? nowTs < next.releaseDate : false);
+                  if (!nextLocked) {
+                    setTimeout(() => {
+                      try {
+                        onSelecionarAula(next.id);
+                      } catch {}
+                    }, 250);
+                  }
+                }
+              }}
             >
               Concluir Aula
             </button>
