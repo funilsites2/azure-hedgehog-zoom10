@@ -1,6 +1,6 @@
 import React from "react";
 import useEmblaCarousel from "embla-carousel-react";
-import { ChevronLeft, ChevronRight, Lock, Clock } from "lucide-react";
+import { ChevronLeft, ChevronRight, Lock, Clock, X } from "lucide-react";
 import SimpleProgress from "@/components/SimpleProgress";
 import {
   Dialog,
@@ -255,9 +255,20 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
           if (!open) setBlockedModulo(null);
         }}
       >
-        {/* Deixa o Content transparente e aplica o arredondado no wrapper interno */}
+        {/* Content transparente, wrapper com rounded e X verde */}
         <DialogContent className="sm:max-w-md w-[92vw] md:w-auto bg-transparent p-0 border-0 shadow-none">
-          <div className="rounded-xl overflow-hidden border border-white/15 bg-gradient-to-b from-neutral-900/80 to-neutral-800/70 backdrop-blur-2xl shadow-[0_15px_60px_rgba(0,0,0,0.6)]">
+          <div className="relative rounded-xl overflow-hidden border border-white/15 bg-gradient-to-b from-neutral-900/80 to-neutral-800/70 backdrop-blur-2xl shadow-[0_15px_60px_rgba(0,0,0,0.6)]">
+            {/* X verde no canto */}
+            <DialogClose asChild>
+              <Button
+                variant="ghost"
+                className="absolute top-2 right-2 h-9 w-9 p-0 rounded-full bg-emerald-500 hover:bg-emerald-600 text-white"
+                aria-label="Fechar"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </DialogClose>
+
             <div className="p-6 md:p-8 text-center">
               <DialogHeader className="text-center space-y-1">
                 <DialogTitle className="text-white text-xl md:text-2xl font-semibold">
@@ -276,7 +287,7 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
               </div>
               <div className="mt-6 flex justify-center">
                 <DialogClose asChild>
-                  <Button className="rounded-full border border-white/20 bg-white/10 text-white hover:bg-white/20 hover:border-white/30 transition-colors px-6">
+                  <Button className="rounded-full border border-emerald-500/30 bg-emerald-500 text-white hover:bg-emerald-600 hover:border-emerald-500/50 transition-colors px-6">
                     Fechar
                   </Button>
                 </DialogClose>
