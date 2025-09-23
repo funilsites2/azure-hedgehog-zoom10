@@ -3,6 +3,7 @@ import {
   Layers,
   Edit,
   Unlock,
+  Lock,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useModulos } from "@/context/ModulosContext";
@@ -10,6 +11,7 @@ import { ModuleForm } from "@/components/ModuleForm";
 import { BannerSettings } from "@/components/BannerSettings";
 import { LogoSettings } from "@/components/LogoSettings";
 import { Footer } from "@/components/Footer";
+import UserMenu from "@/components/UserMenu";
 
 export default function Admin() {
   const {
@@ -53,6 +55,7 @@ export default function Admin() {
     <>
       <div className="min-h-screen bg-neutral-900 text-white flex">
         <aside className="w-80 bg-neutral-950 p-6 flex-shrink-0 space-y-6">
+          <UserMenu name="Aluno" email="aluno@exemplo.com" />
           <LogoSettings />
           <BannerSettings />
 
@@ -244,11 +247,11 @@ export default function Admin() {
                               <Layers size={16} />
                             </Button>
                             <Button
-                              variant="secondary"
+                              variant={m.bloqueado ? "destructive" : "secondary"}
                               onClick={() => setModuloBloqueado(m.id, !m.bloqueado)}
-                              title="Bloquear/Desbloquear Módulo"
+                              title={m.bloqueado ? "Desbloquear Módulo" : "Bloquear Módulo"}
                             >
-                              <Unlock size={16} />
+                              {m.bloqueado ? <Lock size={16} /> : <Unlock size={16} />}
                             </Button>
                           </div>
                         </div>
@@ -281,11 +284,11 @@ export default function Admin() {
                               <Layers size={16} />
                             </Button>
                             <Button
-                              variant="secondary"
+                              variant={m.bloqueado ? "destructive" : "secondary"}
                               onClick={() => setModuloBloqueado(m.id, !m.bloqueado)}
-                              title="Bloquear/Desbloquear Módulo"
+                              title={m.bloqueado ? "Desbloquear Módulo" : "Bloquear Módulo"}
                             >
-                              <Unlock size={16} />
+                              {m.bloqueado ? <Lock size={16} /> : <Unlock size={16} />}
                             </Button>
                           </div>
                         </div>
