@@ -238,7 +238,7 @@ export const ModuleForm: React.FC<ModuleFormProps> = ({
       </div>
 
       <div className="flex gap-2">
-        <Button onClick={handleSubmit}>{submitLabel}</Button>
+        <Button type="button" onClick={handleSubmit}>{submitLabel}</Button>
         {onCancel && (
           <Button variant="secondary" onClick={onCancel}>
             Cancelar
