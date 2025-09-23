@@ -255,7 +255,7 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
           if (!open) setBlockedModulo(null);
         }}
       >
-        <DialogContent className="sm:max-w-md w-[92vw] md:w-auto rounded-[28px] md:rounded-[36px] overflow-hidden p-0 border border-white/15 bg-gradient-to-b from-neutral-900/80 to-neutral-800/70 backdrop-blur-2xl shadow-[0_15px_60px_rgba(0,0,0,0.6)]">
+        <DialogContent className="sm:max-w-md w-[92vw] md:w-auto rounded-2xl overflow-hidden p-0 border border-white/15 bg-gradient-to-b from-neutral-900/80 to-neutral-800/70 backdrop-blur-2xl shadow-[0_15px_60px_rgba(0,0,0,0.6)]">
           <div className="p-6 md:p-8 text-center">
             <DialogHeader className="text-center space-y-1">
               <DialogTitle className="text-white text-xl md:text-2xl font-semibold">
