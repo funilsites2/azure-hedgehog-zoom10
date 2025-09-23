@@ -2,6 +2,13 @@ import React from "react";
 import useEmblaCarousel from "embla-carousel-react";
 import { ChevronLeft, ChevronRight, Lock } from "lucide-react";
 import SimpleProgress from "@/components/SimpleProgress";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 
 type Aula = {
   id: number;
@@ -64,6 +71,8 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
     return () => emblaApi.off("select", onSelect);
   }, [emblaApi]);
 
+  const [blockedModulo, setBlockedModulo] = React.useState<Modulo | null>(null);
+
   const mobileCardWidth = alunoLayout
     ? "w-[60vw] max-w-[280px] min-w-[180px]"
     : "min-w-1/2 max-w-[90vw]";
@@ -79,6 +88,7 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
                 const total = modulo.aulas.length;
                 const concluido = modulo.aulas.filter((a) => a.assistida).length;
                 const progresso = total ? Math.round((concluido / total) * 100) : 0;
+                const blockedByDate = !!(modulo.releaseDate && now < modulo.releaseDate);
                 return (
                   <div
                     key={modulo.id}
@@ -86,18 +96,18 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
                     style={alunoLayout ? { flex: "0 0 60%", marginRight: "2vw" } : undefined}
                   >
                     <div
-                      className={`group bg-neutral-800 rounded-xl overflow-hidden p-4 shadow-lg flex flex-col h-full cursor-pointer relative hover:z-10 ${
-                        modulo.bloqueado ? "grayscale opacity-70" : ""
-                      }`}
+                      className={`group bg-neutral-800 rounded-xl overflow-hidden p-4 shadow-lg flex flex-col h-full relative hover:z-10 ${
+                        modulo.bloqueado || blockedByDate ? "grayscale" : ""
+                      } ${blockedByDate ? "cursor-not-allowed" : "cursor-pointer"}`}
                       onClick={
                         !modulo.bloqueado && onModuloClick
                           ? () => onModuloClick(modulo)
                           : undefined
                       }
                     >
-                      {modulo.releaseDate && now < modulo.releaseDate && (
-                        <div className="absolute top-0 inset-x-0 bg-yellow-500 text-black text-xs text-center py-1 rounded-t-xl">
-                          Liberado em {new Date(modulo.releaseDate).toLocaleDateString()}
+                      {blockedByDate && (
+                        <div className="absolute top-0 inset-x-0 bg-red-600 text-white text-xs text-center py-1 rounded-t-xl">
+                          Bloqueado até {new Date(modulo.releaseDate!).toLocaleDateString()}
                         </div>
                       )}
                       {modulo.bloqueado && (
@@ -161,21 +171,25 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
           const total = modulo.aulas.length;
           const concluido = modulo.aulas.filter((a) => a.assistida).length;
           const progresso = total ? Math.round((concluido / total) * 100) : 0;
+          const blockedByDate = !!(modulo.releaseDate && now < modulo.releaseDate);
           return (
             <div
               key={modulo.id}
-              className={`group relative snap-start flex-shrink-0 w-[20%] rounded-xl shadow-lg overflow-hidden cursor-pointer hover:z-10 ${
-                modulo.bloqueado ? "grayscale opacity-70" : ""
-              }`}
+              className={`group relative snap-start flex-shrink-0 w-[20%] rounded-xl shadow-lg overflow-hidden hover:z-10 ${
+                modulo.bloqueado || blockedByDate ? "grayscale" : ""
+              } ${blockedByDate ? "cursor-not-allowed" : "cursor-pointer"}`}
               onClick={
                 !modulo.bloqueado && onModuloClick
                   ? () => onModuloClick(modulo)
                   : undefined
               }
+              onMouseEnter={() => {
+                if (blockedByDate) setBlockedModulo(modulo);
+              }}
             >
-              {modulo.releaseDate && now < modulo.releaseDate && (
-                <div className="absolute top-0 inset-x-0 bg-yellow-500 text-black text-xs text-center py-1 rounded-t-xl">
-                  Liberado em {new Date(modulo.releaseDate).toLocaleDateString()}
+              {blockedByDate && (
+                <div className="absolute top-0 inset-x-0 bg-red-600 text-white text-xs text-center py-1 z-20 rounded-t-xl">
+                  Bloqueado até {new Date(modulo.releaseDate!).toLocaleDateString()}
                 </div>
               )}
               {modulo.bloqueado && (
@@ -210,6 +224,31 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
           );
         })}
       </div>
+
+      {/* Modal informando bloqueio por dias */}
+      <Dialog
+        open={!!blockedModulo}
+        onOpenChange={(open) => {
+          if (!open) setBlockedModulo(null);
+        }}
+      >
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Módulo bloqueado temporariamente</DialogTitle>
+            <DialogDescription>
+              {blockedModulo?.releaseDate
+                ? `Este módulo será liberado em ${new Date(
+                    blockedModulo.releaseDate
+                  ).toLocaleString()}.`
+                : "Este módulo está temporariamente indisponível."}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="text-sm text-neutral-300">
+            Assim que a data for atingida, o conteúdo ficará disponível
+            automaticamente para você.
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
