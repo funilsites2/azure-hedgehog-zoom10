@@ -86,7 +86,7 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
                     style={alunoLayout ? { flex: "0 0 60%", marginRight: "2vw" } : undefined}
                   >
                     <div
-                      className={`bg-neutral-800 rounded-xl overflow-hidden p-4 shadow-lg flex flex-col h-full cursor-pointer relative transition-transform transform hover:scale-105 ${
+                      className={`group bg-neutral-800 rounded-xl overflow-hidden p-4 shadow-lg flex flex-col h-full cursor-pointer relative hover:z-10 ${
                         modulo.bloqueado ? "grayscale opacity-70" : ""
                       }`}
                       onClick={
@@ -110,7 +110,7 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
                         <img
                           src={modulo.capa}
                           alt={modulo.nome}
-                          className="w-full aspect-[3/4] object-cover rounded-xl mb-2"
+                          className="w-full aspect-[3/4] object-cover rounded-xl mb-2 transition-transform duration-300 ease-out group-hover:scale-105"
                           onError={(e) =>
                             (e.currentTarget.src =
                               "https://placehold.co/300x400?text=Sem+Capa")
@@ -159,7 +159,7 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
           return (
             <div
               key={modulo.id}
-              className={`snap-start flex-shrink-0 w-[20%] rounded-xl shadow-lg overflow-hidden cursor-pointer relative transition-transform transform hover:scale-105 ${
+              className={`group relative snap-start flex-shrink-0 w-[20%] rounded-xl shadow-lg overflow-hidden cursor-pointer hover:z-10 ${
                 modulo.bloqueado ? "grayscale opacity-70" : ""
               }`}
               onClick={
@@ -182,7 +182,7 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
               <img
                 src={modulo.capa}
                 alt={modulo.nome}
-                className="w-full aspect-[3/4] object-cover rounded-xl"
+                className="w-full aspect-[3/4] object-cover rounded-xl transition-transform duration-300 ease-out group-hover:scale-105"
                 onError={(e) =>
                   (e.currentTarget.src =
                     "https://placehold.co/300x400?text=Sem+Capa")
