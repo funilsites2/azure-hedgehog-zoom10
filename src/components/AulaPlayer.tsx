@@ -1,11 +1,20 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { CheckCircle, Lock } from "lucide-react";
+import { CheckCircle, Lock, Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useUser } from "@/context/UserContext";
 import { useModulos } from "@/context/ModulosContext";
 import SimpleProgress from "@/components/SimpleProgress";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 
 type Aula = {
   id: number;
@@ -68,6 +77,10 @@ export function AulaPlayer({
   const lastSavedPctRef = useRef<number>(0);
 
   const assistedTriggeredRef = useRef<boolean>(false);
+
+  // Modal para bloqueio por data
+  const [blockedInfoOpen, setBlockedInfoOpen] = useState(false);
+  const [blockedInfoDate, setBlockedInfoDate] = useState<string>("");
 
   if (!aulas || aulas.length === 0) {
     return (
@@ -363,7 +376,7 @@ export function AulaPlayer({
       <div className="w-full md:w-1/3 overflow-auto space-y-4 pr-4">
         {aulas.map((a) => {
           const blockedByDate = a.releaseDate ? now < a.releaseDate : false;
-        const blockedSequential = a.bloqueado === true && !blockedByDate;
+          const blockedSequential = a.bloqueado === true && !blockedByDate;
           const blocked = blockedByDate || blockedSequential;
 
           let savedPct = 0;
@@ -375,18 +388,32 @@ export function AulaPlayer({
             savedPct = 0;
           }
 
+          const handleThumbClick = () => {
+            if (blockedByDate) {
+              const dateStr = a.releaseDate
+                ? new Date(a.releaseDate).toLocaleDateString("pt-BR")
+                : "24/09/2025";
+              setBlockedInfoDate(dateStr);
+              setBlockedInfoOpen(true);
+              return;
+            }
+            if (!blocked) {
+              onSelecionarAula(a.id);
+            }
+          };
+
           return (
             <div
               key={a.id}
               className={cn(
                 "group relative flex items-center gap-3 rounded-xl p-2 hover:bg-neutral-800/60 cursor-pointer",
-                blocked && "opacity-50 cursor-not-allowed"
+                blockedSequential && "opacity-50 cursor-not-allowed"
               )}
-              onClick={() => !blocked && onSelecionarAula(a.id)}
+              onClick={handleThumbClick}
             >
               {blockedByDate && (
                 <div className="absolute top-0 inset-x-0 bg-yellow-500 text-black text-[10px] text-center py-1 z-10 rounded-t-xl">
-                  Liberado em {new Date(a.releaseDate!).toLocaleString()}
+                  Liberado em {a.releaseDate ? new Date(a.releaseDate).toLocaleString() : ""}
                 </div>
               )}
               {blockedSequential && (
@@ -401,9 +428,13 @@ export function AulaPlayer({
                   alt={a.titulo}
                   className="absolute inset-0 w-full h-full object-cover transform transition-transform duration-300 ease-out group-hover:scale-105"
                 />
-                {blocked && (
+                {(blockedByDate || blockedSequential) && (
                   <div className="absolute inset-0 bg-black/50 flex items-center justify-center rounded-xl overflow-hidden">
-                    <Lock size={18} className="text-white" />
+                    {blockedByDate ? (
+                      <Clock size={18} className="text-white" />
+                    ) : (
+                      <Lock size={18} className="text-white" />
+                    )}
                   </div>
                 )}
               </div>
@@ -434,6 +465,23 @@ export function AulaPlayer({
           );
         })}
       </div>
+
+      {/* Modal para bloqueio por data */}
+      <Dialog open={blockedInfoOpen} onOpenChange={setBlockedInfoOpen}>
+        <DialogContent className="bg-neutral-950 border border-neutral-800 text-white">
+          <DialogHeader>
+            <DialogTitle>Conteúdo indisponível</DialogTitle>
+            <DialogDescription className="text-neutral-300">
+              Olá {name}, esse conteudo estara disponivel em breve.
+              <br />
+              Aguarde até: {blockedInfoDate || "24/09/2025"}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button onClick={() => setBlockedInfoOpen(false)}>Ok</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
