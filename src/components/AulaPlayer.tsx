@@ -63,6 +63,8 @@ export function AulaPlayer({
   const playerRef = useRef<any | null>(null);
   const playerContainerRef = useRef<HTMLDivElement | null>(null);
   const pollIntervalRef = useRef<number | null>(null);
+  const lastSavedTimeRef = useRef<number>(0);
+  const lastSavedPctRef = useRef<number>(0);
 
   if (!aulas || aulas.length === 0) {
     return (
@@ -81,6 +83,9 @@ export function AulaPlayer({
 
   const isLockedCurrent =
     aula.bloqueado === true || (aula.releaseDate ? now < aula.releaseDate : false);
+
+  const timeKey = (id: number) => `aula_progress_time_${id}`;
+  const pctKey = (id: number) => `aula_progress_pct_${id}`;
 
   // Start a 5s timer when the aula is shown; if it completes, mark aula as started
   useEffect(() => {
@@ -108,6 +113,8 @@ export function AulaPlayer({
   useEffect(() => {
     // reset progress when switching aulas
     setVideoProgress(0);
+    lastSavedTimeRef.current = 0;
+    lastSavedPctRef.current = 0;
 
     // Clear existing player/poll
     if (pollIntervalRef.current) {
@@ -133,7 +140,6 @@ export function AulaPlayer({
           const existing = document.getElementById("youtube-api");
           if (existing) {
             existing.addEventListener("load", () => resolve(), { once: true });
-            // If already loaded, resolve immediately
             if ((window as any).YT && (window as any).YT.Player) resolve();
             return;
           }
@@ -164,7 +170,18 @@ export function AulaPlayer({
               enablejsapi: 1,
             },
             events: {
-              onReady: () => {
+              onReady: (event: any) => {
+                // Try to resume from saved time (if exists)
+                try {
+                  const saved = parseFloat(localStorage.getItem(timeKey(aula.id)) || "0");
+                  if (saved && !isNaN(saved) && saved > 0) {
+                    // seek to saved position (slightly offset to avoid instant re-trigger)
+                    event.target.seekTo(saved, true);
+                  }
+                } catch {
+                  // ignore storage issues
+                }
+
                 // start polling current time/duration
                 if (pollIntervalRef.current) {
                   window.clearInterval(pollIntervalRef.current);
@@ -182,6 +199,20 @@ export function AulaPlayer({
                     }
                     const pct = Math.min(100, Math.max(0, Math.round((cur / dur) * 100)));
                     setVideoProgress(pct);
+
+                    // Persist progress/time but throttle saves to every ~2s change or when pct changes >=1%
+                    const lastSaved = lastSavedTimeRef.current || 0;
+                    const lastPct = lastSavedPctRef.current || 0;
+                    if (Math.abs(cur - lastSaved) > 2 || Math.abs(pct - lastPct) >= 1) {
+                      lastSavedTimeRef.current = cur;
+                      lastSavedPctRef.current = pct;
+                      try {
+                        localStorage.setItem(timeKey(aula.id), String(cur));
+                        localStorage.setItem(pctKey(aula.id), String(pct));
+                      } catch {
+                        // ignore storage errors
+                      }
+                    }
                   } catch {
                     // ignore polling errors
                   }
@@ -220,9 +251,16 @@ export function AulaPlayer({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [aula.id, aula.videoUrl]);
 
-  // When aula is marked assistida set progress to 100
+  // When aula is marked assistida set progress to 100 and clear saved progress
   useEffect(() => {
-    if (aula.assistida) setVideoProgress(100);
+    if (aula.assistida) {
+      setVideoProgress(100);
+      try {
+        localStorage.removeItem(timeKey(aula.id));
+        localStorage.removeItem(pctKey(aula.id));
+      } catch {}
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [aula.assistida]);
 
   // Decide which percent to show: if the current aula is playable and we have a videoProgress > 0 (or started), show videoProgress,
@@ -287,11 +325,21 @@ export function AulaPlayer({
           const blockedByDate = a.releaseDate ? now < a.releaseDate : false;
           const blockedSequential = a.bloqueado === true && !blockedByDate;
           const blocked = blockedByDate || blockedSequential;
+
+          // read saved percent for UI cards (fallback 0)
+          let savedPct = 0;
+          try {
+            savedPct = Number(localStorage.getItem(pctKey(a.id)) || "0");
+            if (!isFinite(savedPct) || savedPct < 0) savedPct = 0;
+            if (savedPct > 100) savedPct = 100;
+          } catch {
+            savedPct = 0;
+          }
+
           return (
             <div
               key={a.id}
               className={cn(
-                // added "group" so child img can respond to hover via group-hover
                 "group relative rounded-xl overflow-hidden cursor-pointer",
                 blocked && "opacity-50 cursor-not-allowed"
               )}
@@ -318,7 +366,18 @@ export function AulaPlayer({
                   <Lock size={24} className="text-white" />
                 </div>
               )}
-              <p className="text-sm text-white mt-1 px-1 truncate">{a.titulo}</p>
+              <div className="mt-2">
+                <p className="text-sm text-white px-1 truncate">{a.titulo}</p>
+                {/* show per-aula saved progress */}
+                {savedPct > 0 && (
+                  <div className="mt-2 flex items-center gap-2">
+                    <div className="flex-1">
+                      <SimpleProgress value={savedPct} />
+                    </div>
+                    <span className="text-xs text-neutral-300 w-10 text-right">{savedPct}%</span>
+                  </div>
+                )}
+              </div>
             </div>
           );
         })}

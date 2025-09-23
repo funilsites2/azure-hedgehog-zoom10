@@ -96,43 +96,77 @@ export default function Aluno() {
                   Continuar Assistindo
                 </h2>
                 <div className="overflow-x-auto overflow-y-hidden no-scrollbar snap-x snap-mandatory flex gap-4 pb-4">
-                  {partialAulas.map(({ modulo: m, aula }) => (
-                    <div
-                      key={aula.id}
-                      className="group snap-start flex-shrink-0 w-1/2 md:w-1/5 rounded-lg cursor-pointer transition"
-                      onClick={() => {
-                        setModuloSelecionado(m.id);
-                        setAulaSelecionada(aula.id);
-                      }}
-                    >
-                      <div className="relative w-full h-32 rounded-lg overflow-hidden transition-transform duration-300 ease-out group-hover:scale-95">
-                        <img
-                          src={getYoutubeThumbnail(aula.videoUrl)}
-                          alt={aula.titulo}
-                          className="w-full h-full object-cover rounded-lg"
-                        />
-                        {/* Ícone de Play no hover */}
-                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                          <div className="opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 transition-all duration-300">
-                            <div className="bg-black/50 rounded-full p-2 ring-1 ring-white/20">
-                              <Play size={28} className="text-white" />
+                  {partialAulas.map(({ modulo: m, aula }) => {
+                    // read saved percent for UI cards (fallback 0)
+                    let savedPct = 0;
+                    try {
+                      savedPct = Number(
+                        localStorage.getItem(`aula_progress_pct_${aula.id}`) || "0"
+                      );
+                      if (!isFinite(savedPct) || savedPct < 0) savedPct = 0;
+                      if (savedPct > 100) savedPct = 100;
+                    } catch {
+                      savedPct = 0;
+                    }
+
+                    return (
+                      <div
+                        key={aula.id}
+                        className="group snap-start flex-shrink-0 w-1/2 md:w-1/5 rounded-lg cursor-pointer transition"
+                        onClick={() => {
+                          setModuloSelecionado(m.id);
+                          setAulaSelecionada(aula.id);
+                        }}
+                      >
+                        <div className="relative w-full h-32 rounded-lg overflow-hidden transition-transform duration-300 ease-out group-hover:scale-95">
+                          <img
+                            src={getYoutubeThumbnail(aula.videoUrl)}
+                            alt={aula.titulo}
+                            className="w-full h-full object-cover rounded-lg"
+                          />
+                          {/* Ícone de Play no hover */}
+                          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                            <div className="opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 transition-all duration-300">
+                              <div className="bg-black/50 rounded-full p-2 ring-1 ring-white/20">
+                                <Play size={28} className="text-white" />
+                              </div>
+                            </div>
+                          </div>
+                          {/* Overlay de título e módulo no hover */}
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
+                            <div className="absolute bottom-0 left-0 right-0 p-2">
+                              <p className="text-white text-sm font-medium truncate">
+                                {aula.titulo}
+                              </p>
+                              <p className="text-neutral-200 text-xs truncate">
+                                {m.nome}
+                              </p>
                             </div>
                           </div>
                         </div>
-                        {/* Overlay de título e módulo no hover */}
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
-                          <div className="absolute bottom-0 left-0 right-0 p-2">
-                            <p className="text-white text-sm font-medium truncate">
+
+                        {/* Progress indicator for continue-watching */}
+                        {savedPct > 0 ? (
+                          <div className="mt-2">
+                            <div className="flex items-center gap-2">
+                              <div className="flex-1">
+                                <SimpleProgress value={savedPct} />
+                              </div>
+                              <span className="text-xs text-neutral-300 w-10 text-right">
+                                {savedPct}%
+                              </span>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="mt-2">
+                            <p className="text-sm text-neutral-300 truncate">
                               {aula.titulo}
                             </p>
-                            <p className="text-neutral-200 text-xs truncate">
-                              {m.nome}
-                            </p>
                           </div>
-                        </div>
+                        )}
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             )}
