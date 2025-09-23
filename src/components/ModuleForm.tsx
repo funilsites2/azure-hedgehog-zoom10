@@ -116,6 +116,8 @@ export const ModuleForm: React.FC<ModuleFormProps> = ({
   const handleSubmit = () => {
     if (!nome.trim() || !capa.trim() || !linha.trim()) return;
     onSubmit(nome, capa, aulas, linha, delayDays);
+    // Limpa somente o estado local do formulário; não notifica mudança de aulas aqui
+    // para não sobrescrever o delay salvo com um valor antigo.
     setNome("");
     setCapa("");
     setLinha("");
@@ -124,7 +126,6 @@ export const ModuleForm: React.FC<ModuleFormProps> = ({
     setIsCreatingNewLinha(false);
     setEditingIndex(null);
     setNovaAula({ titulo: "", videoUrl: "", descricao: "" });
-    notifyAulasChange([]);
   };
 
   return (
