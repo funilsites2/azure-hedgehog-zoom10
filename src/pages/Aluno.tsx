@@ -23,6 +23,7 @@ import { useUser } from "@/context/UserContext";
 import { Footer } from "@/components/Footer";
 import { showSuccess } from "@/utils/toast";
 import "@/styles/no-scrollbar.css";
+import GamificationMap from "@/components/GamificationMap";
 
 function getYoutubeThumbnail(url: string): string {
   const match = url.match(
@@ -56,7 +57,6 @@ export default function Aluno() {
 
   const now = Date.now();
 
-  // Now only consider aulas that have been started (in-progress) and not yet assistida
   const partialAulas = modulos
     .flatMap((m) => m.aulas.map((a) => ({ modulo: m, aula: a })))
     .filter(({ aula }) => !aula.assistida && !!aula.started);
@@ -157,30 +157,36 @@ export default function Aluno() {
           <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
             <Award size={24} className="text-yellow-400" /> Conquistas
           </h2>
-          <ul className="text-base">
-            <li className="mb-2">
-              {aulasAssistidas >= 1 ? (
-                <CheckCircle
-                  className="inline text-green-400 mr-1"
-                  size={18}
-                />
-              ) : (
-                <span className="inline-block w-5" />
-              )}
-              Primeira aula assistida
-            </li>
-            <li>
-              {progresso === 100 ? (
-                <CheckCircle
-                  className="inline text-green-400 mr-1"
-                  size={18}
-                />
-              ) : (
-                <span className="inline-block w-5" />
-              )}
-              Curso completo!
-            </li>
-          </ul>
+
+          {/* Mapa Gamificado */}
+          <GamificationMap
+            progresso={progresso}
+            totalAulas={totalAulas}
+            aulasAssistidas={aulasAssistidas}
+          />
+
+          {/* Conquistas simples (mantidas) */}
+          <div className="mt-8">
+            <h3 className="text-lg font-semibold mb-3">Conquistas</h3>
+            <ul className="text-base">
+              <li className="mb-2">
+                {aulasAssistidas >= 1 ? (
+                  <CheckCircle className="inline text-green-400 mr-1" size={18} />
+                ) : (
+                  <span className="inline-block w-5" />
+                )}
+                Primeira aula assistida
+              </li>
+              <li>
+                {progresso === 100 ? (
+                  <CheckCircle className="inline text-green-400 mr-1" size={18} />
+                ) : (
+                  <span className="inline-block w-5" />
+                )}
+                Curso completo!
+              </li>
+            </ul>
+          </div>
         </div>
       );
     }
@@ -343,7 +349,6 @@ export default function Aluno() {
       {MobileDrawer}
       {DesktopSidebar}
       <div className="flex-1 flex flex-col pt-12 md:pt-0 md:ml-64">
-        {/* Continuar Assistindo - agora acima do banner e ocupando 10vh */}
         {moduloSelecionado === null && partialAulas.length > 0 && (
           <div className="mx-4 mt-4">
             <h2 className="text-2xl font-semibold mb-2 text-white">
@@ -378,7 +383,6 @@ export default function Aluno() {
                           alt={aula.titulo}
                           className="w-full h-full object-cover rounded-lg"
                         />
-                        {/* Ícone de Play no hover */}
                         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                           <div className="opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 transition-all duration-300">
                             <div className="bg-black/50 rounded-full p-2 ring-1 ring-white/20">
@@ -386,7 +390,6 @@ export default function Aluno() {
                             </div>
                           </div>
                         </div>
-                        {/* Overlay de título e módulo no hover */}
                         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
                           <div className="absolute bottom-0 left-0 right-0 p-2">
                             <p className="text-white text-sm font-medium truncate">
@@ -399,7 +402,6 @@ export default function Aluno() {
                         </div>
                       </div>
 
-                      {/* Progress indicator for continue-watching */}
                       {savedPct > 0 ? (
                         <div className="mt-1">
                           <div className="flex items-center gap-2">
@@ -428,7 +430,7 @@ export default function Aluno() {
 
         {bannerUrl && moduloSelecionado === null && (
           <div className="mx-4 my-4 flex justify-center">
-            <div className="relative w-full max-w-[1600px] h-[400px] overflow-hidden rounded-lg">
+            <div className="relative w-full max-w-[1600px] h=[400px] md:h-[400px] h-[400px] overflow-hidden rounded-lg">
               <img
                 src={bannerUrl}
                 alt="Banner Aluno"
