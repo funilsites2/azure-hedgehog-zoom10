@@ -391,7 +391,8 @@ export default function Aluno() {
                         setAulaSelecionada(aula.id);
                       }}
                     >
-                      <div className="relative w-full h-[160px] md:h-[200px] rounded-lg overflow-hidden transition-transform duration-300 ease-out group-hover:scale-95">
+                      {/* Altura reduzida para cortar as faixas pretas */}
+                      <div className="relative w-full h-[140px] md:h-[180px] rounded-lg overflow-hidden transition-transform duration-300 ease-out group-hover:scale-95">
                         <img
                           src={getYoutubeThumbnail(aula.videoUrl)}
                           alt={aula.titulo}
