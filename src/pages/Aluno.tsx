@@ -56,9 +56,10 @@ export default function Aluno() {
 
   const now = Date.now();
 
+  // Now only consider aulas that have been started (in-progress) and not yet assistida
   const partialAulas = modulos
     .flatMap((m) => m.aulas.map((a) => ({ modulo: m, aula: a })))
-    .filter(({ aula }) => !aula.assistida);
+    .filter(({ aula }) => !aula.assistida && !!aula.started);
 
   const linhas = Array.from(new Set(modulos.map((m) => m.linha)));
   const totalAulas = modulos.reduce((sum, m) => sum + m.aulas.length, 0);

@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef } from "react";
 import { CheckCircle, Lock } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 import { useUser } from "@/context/UserContext";
+import { useModulos } from "@/context/ModulosContext";
 
 type Aula = {
   id: number;
@@ -13,6 +14,7 @@ type Aula = {
   assistida?: boolean;
   bloqueado?: boolean;
   releaseDate?: number;
+  started?: boolean;
 };
 
 type Modulo = {
@@ -42,8 +44,10 @@ export function AulaPlayer({
   onMarcarAssistida,
 }: AulaPlayerProps) {
   const { name } = useUser();
+  const { marcarAulaIniciada } = useModulos();
   const aulas = modulo.aulas;
   const now = Date.now();
+  const timerRef = useRef<number | null>(null);
 
   if (!aulas || aulas.length === 0) {
     return (
@@ -62,6 +66,31 @@ export function AulaPlayer({
 
   const isLockedCurrent =
     aula.bloqueado === true || (aula.releaseDate ? now < aula.releaseDate : false);
+
+  // Start a 5s timer when the aula is shown; if it completes, mark aula as started
+  useEffect(() => {
+    // if aula already started or assistida, don't repeat
+    if (!aula || aula.started || aula.assistida) return;
+
+    // clear any previous timer
+    if (timerRef.current) {
+      window.clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
+
+    // Start timer
+    timerRef.current = window.setTimeout(() => {
+      marcarAulaIniciada(modulo.id, aula.id);
+      timerRef.current = null;
+    }, 5000);
+
+    return () => {
+      if (timerRef.current) {
+        window.clearTimeout(timerRef.current);
+        timerRef.current = null;
+      }
+    };
+  }, [aula?.id, aula?.started, aula?.assistida, marcarAulaIniciada, modulo.id]);
 
   return (
     <div className="flex flex-col md:flex-row gap-6 w-full h-full">

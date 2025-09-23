@@ -7,6 +7,7 @@ type Aula = {
   assistida?: boolean;
   bloqueado?: boolean;
   releaseDate?: number;
+  started?: boolean;
 };
 
 type Modulo = {
@@ -24,7 +25,7 @@ type ModulosContextType = {
   adicionarModulo: (
     nome: string,
     capa: string,
-    aulas?: Omit<Aula, "id" | "assistida" | "bloqueado" | "releaseDate">[],
+    aulas?: Omit<Aula, "id" | "assistida" | "bloqueado" | "releaseDate" | "started">[],
     linha?: string,
     delayDays?: number
   ) => void;
@@ -35,11 +36,12 @@ type ModulosContextType = {
     delayDays?: number
   ) => void;
   marcarAulaAssistida: (moduloId: number, aulaId: number) => void;
+  marcarAulaIniciada: (moduloId: number, aulaId: number) => void;
   editarModulo: (
     moduloId: number,
     novoNome: string,
     novaCapa: string,
-    novasAulas: Omit<Aula, "id" | "assistida" | "bloqueado" | "releaseDate">[],
+    novasAulas: Omit<Aula, "id" | "assistida" | "bloqueado" | "releaseDate" | "started">[],
     linha?: string,
     delayDays?: number
   ) => void;
@@ -81,6 +83,7 @@ const getInitialModulos = (): Modulo[] => {
           assistida: true,
           bloqueado: false,
           releaseDate: now,
+          started: false,
         },
         {
           id: 2,
@@ -89,6 +92,7 @@ const getInitialModulos = (): Modulo[] => {
           assistida: false,
           bloqueado: false,
           releaseDate: now,
+          started: false,
         },
       ],
       releaseDate: now,
@@ -106,6 +110,7 @@ const getInitialModulos = (): Modulo[] => {
           assistida: false,
           bloqueado: false,
           releaseDate: now,
+          started: false,
         },
       ],
       releaseDate: now,
@@ -118,17 +123,18 @@ const initializeBlocks = (mods: Modulo[]): Modulo[] => {
   return mods.map((m) => {
     const moduleBlocked = m.bloqueado ?? (m.releaseDate ? now < m.releaseDate : false);
     const aulas = m.aulas.map((a, i, arr) => {
+      const alreadyStarted = a.started ?? false;
       if (a.bloqueado) {
-        return a;
+        return { ...a, started: alreadyStarted };
       }
       if (a.releaseDate && now < a.releaseDate) {
-        return { ...a, bloqueado: true };
+        return { ...a, bloqueado: true, started: alreadyStarted };
       }
       if (i === 0) {
-        return { ...a, bloqueado: false };
+        return { ...a, bloqueado: false, started: alreadyStarted };
       }
       const prev = arr[i - 1];
-      return { ...a, bloqueado: !prev.assistida };
+      return { ...a, bloqueado: !prev.assistida, started: alreadyStarted };
     });
     return { ...m, bloqueado: moduleBlocked, aulas };
   });
@@ -150,7 +156,7 @@ export const ModulosProvider: React.FC<{ children: React.ReactNode }> = ({
   const adicionarModulo = (
     nome: string,
     capa: string,
-    aulas: Omit<Aula, "id" | "assistida" | "bloqueado" | "releaseDate">[] = [],
+    aulas: Omit<Aula, "id" | "assistida" | "bloqueado" | "releaseDate" | "started">[] = [],
     linha: string = "",
     delayDays: number = 0
   ) => {
@@ -171,6 +177,7 @@ export const ModulosProvider: React.FC<{ children: React.ReactNode }> = ({
             assistida: false,
             bloqueado: i !== 0,
             releaseDate,
+            started: false,
           })),
           releaseDate,
         },
@@ -200,6 +207,7 @@ export const ModulosProvider: React.FC<{ children: React.ReactNode }> = ({
                   assistida: false,
                   bloqueado: true,
                   releaseDate,
+                  started: false,
                 },
               ],
             }
@@ -226,11 +234,26 @@ export const ModulosProvider: React.FC<{ children: React.ReactNode }> = ({
     );
   };
 
+  const marcarAulaIniciada = (moduloId: number, aulaId: number) => {
+    setModulos((prev) =>
+      prev.map((m) =>
+        m.id === moduloId
+          ? {
+              ...m,
+              aulas: m.aulas.map((a) =>
+                a.id === aulaId ? { ...a, started: true } : a
+              ),
+            }
+          : m
+      )
+    );
+  };
+
   const editarModulo = (
     moduloId: number,
     novoNome: string,
     novaCapa: string,
-    novasAulas: Omit<Aula, "id" | "assistida" | "bloqueado" | "releaseDate">[] = [],
+    novasAulas: Omit<Aula, "id" | "assistida" | "bloqueado" | "releaseDate" | "started">[] = [],
     linha: string = "",
     delayDays: number = 0
   ) => {
@@ -253,6 +276,7 @@ export const ModulosProvider: React.FC<{ children: React.ReactNode }> = ({
                   assistida: m.aulas[idx]?.assistida ?? false,
                   bloqueado: false,
                   releaseDate,
+                  started: m.aulas[idx]?.started ?? false,
                 })),
               }
             : m
@@ -323,6 +347,7 @@ export const ModulosProvider: React.FC<{ children: React.ReactNode }> = ({
       assistida: false,
       bloqueado: a.bloqueado,
       releaseDate: a.releaseDate,
+      started: false,
     }));
     const cloned: Modulo = {
       ...original,
@@ -341,6 +366,7 @@ export const ModulosProvider: React.FC<{ children: React.ReactNode }> = ({
         adicionarModulo,
         adicionarAula,
         marcarAulaAssistida,
+        marcarAulaIniciada,
         editarModulo,
         setModuloBloqueado,
         setAulaBloqueada,
