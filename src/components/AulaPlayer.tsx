@@ -122,11 +122,7 @@ export function AulaPlayer({
     if (assistedTriggeredRef.current) return;
     assistedTriggeredRef.current = true;
 
-    try {
-      onMarcarAssistida(currentAulaId);
-    } catch {
-      // allow errors to bubble elsewhere
-    }
+    onMarcarAssistida(currentAulaId);
 
     // Advance to next unlocked aula if available
     const idx = aulas.findIndex((x) => x.id === currentAulaId);
@@ -138,9 +134,7 @@ export function AulaPlayer({
       if (!nextLocked) {
         // small timeout so UI state (assistida) can settle before switching
         setTimeout(() => {
-          try {
-            onSelecionarAula(next.id);
-          } catch {}
+          onSelecionarAula(next.id);
         }, 250);
       }
     }
@@ -206,19 +200,18 @@ export function AulaPlayer({
               rel: 0,
               origin: window.location.origin,
               enablejsapi: 1,
+              autoplay: 1,
+              playsinline: 1,
             },
             events: {
               onReady: (event: any) => {
                 // Try to resume from saved time (if exists)
-                try {
-                  const saved = parseFloat(localStorage.getItem(timeKey(aula.id)) || "0");
-                  if (saved && !isNaN(saved) && saved > 0) {
-                    // seek to saved position (slightly offset to avoid instant re-trigger)
-                    event.target.seekTo(saved, true);
-                  }
-                } catch {
-                  // ignore storage issues
+                const saved = parseFloat(localStorage.getItem(timeKey(aula.id)) || "0");
+                if (saved && !isNaN(saved) && saved > 0) {
+                  event.target.seekTo(saved, true);
                 }
+                // Start playing automatically when ready (useful ao avançar para a próxima aula)
+                event.target.playVideo();
 
                 // start polling current time/duration
                 if (pollIntervalRef.current) {
@@ -226,38 +219,30 @@ export function AulaPlayer({
                   pollIntervalRef.current = null;
                 }
                 pollIntervalRef.current = window.setInterval(() => {
-                  try {
-                    const player = playerRef.current;
-                    if (!player || typeof player.getCurrentTime !== "function") return;
-                    const cur = player.getCurrentTime();
-                    const dur = player.getDuration();
-                    if (!dur || dur === 0 || !isFinite(dur)) {
-                      setVideoProgress(0);
-                      return;
-                    }
-                    const pct = Math.min(100, Math.max(0, Math.round((cur / dur) * 100)));
-                    setVideoProgress(pct);
+                  const player = playerRef.current;
+                  if (!player || typeof player.getCurrentTime !== "function") return;
+                  const cur = player.getCurrentTime();
+                  const dur = player.getDuration();
+                  if (!dur || dur === 0 || !isFinite(dur)) {
+                    setVideoProgress(0);
+                    return;
+                  }
+                  const pct = Math.min(100, Math.max(0, Math.round((cur / dur) * 100)));
+                  setVideoProgress(pct);
 
-                    // Persist progress/time but throttle saves to every ~2s change or when pct changes >=1%
-                    const lastSaved = lastSavedTimeRef.current || 0;
-                    const lastPct = lastSavedPctRef.current || 0;
-                    if (Math.abs(cur - lastSaved) > 2 || Math.abs(pct - lastPct) >= 1) {
-                      lastSavedTimeRef.current = cur;
-                      lastSavedPctRef.current = pct;
-                      try {
-                        localStorage.setItem(timeKey(aula.id), String(cur));
-                        localStorage.setItem(pctKey(aula.id), String(pct));
-                      } catch {
-                        // ignore storage errors
-                      }
-                    }
+                  // Persist progress/time but throttle saves to every ~2s change or when pct changes >=1%
+                  const lastSaved = lastSavedTimeRef.current || 0;
+                  const lastPct = lastSavedPctRef.current || 0;
+                  if (Math.abs(cur - lastSaved) > 2 || Math.abs(pct - lastPct) >= 1) {
+                    lastSavedTimeRef.current = cur;
+                    lastSavedPctRef.current = pct;
+                    localStorage.setItem(timeKey(aula.id), String(cur));
+                    localStorage.setItem(pctKey(aula.id), String(pct));
+                  }
 
-                    // If pct reached 100% (end) and aula not yet marked, mark and advance
-                    if (pct >= 100 && !aula.assistida && !assistedTriggeredRef.current) {
-                      markAssistidaAndAdvance(aula.id);
-                    }
-                  } catch {
-                    // ignore polling errors
+                  // If pct reached 100% (end) and aula not yet marked, mark and advance
+                  if (pct >= 100 && !aula.assistida && !assistedTriggeredRef.current) {
+                    markAssistidaAndAdvance(aula.id);
                   }
                 }, 500) as unknown as number;
               },
@@ -291,8 +276,7 @@ export function AulaPlayer({
         }
       };
     } else {
-      // Not a YouTube video: if it's a direct video src we could render <video>, but we must not change markup broadly.
-      // Keep fallback: no access to progress for cross-origin iframe; leave at 0.
+      // Not a YouTube video: no reliable autoplay or progress; keep fallback
       return () => {
         if (pollIntervalRef.current) {
           window.clearInterval(pollIntervalRef.current);
@@ -307,14 +291,12 @@ export function AulaPlayer({
   useEffect(() => {
     if (aula.assistida) {
       setVideoProgress(100);
-      // Do NOT remove saved localStorage progress so the thumbnail and "continuar" cards keep showing 100%
       assistedTriggeredRef.current = true;
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [aula.assistida]);
 
-  // Decide which percent to show: if the current aula is playable and we have a videoProgress > 0 (or started), show videoProgress,
-  // otherwise fall back to module progress.
+  // Decide which percent to show
   const displayPercent =
     !isLockedCurrent && (aula.started || videoProgress > 0) ? videoProgress : progressoModulo;
 
@@ -327,10 +309,7 @@ export function AulaPlayer({
             <button
               className="text-xs bg-green-600 px-3 py-1 rounded hover:bg-green-700 text-white"
               onClick={() => {
-                // If user manually marks as concluded, keep saved progress and advance
-                try {
-                  onMarcarAssistida(aula.id);
-                } catch {}
+                onMarcarAssistida(aula.id);
                 assistedTriggeredRef.current = true;
                 const next = aulas[aulaIndex + 1];
                 if (next) {
@@ -340,9 +319,7 @@ export function AulaPlayer({
                     (next.releaseDate ? nowTs < next.releaseDate : false);
                   if (!nextLocked) {
                     setTimeout(() => {
-                      try {
-                        onSelecionarAula(next.id);
-                      } catch {}
+                      onSelecionarAula(next.id);
                     }, 250);
                   }
                 }
@@ -357,7 +334,6 @@ export function AulaPlayer({
           )}
           <div className="flex items-center gap-3">
             <div className="w-36">
-              {/* Mostrar sempre o progresso do módulo aqui */}
               <SimpleProgress value={progressoModulo} />
             </div>
             <span className="text-xs text-neutral-300">{progressoModulo}%</span>
@@ -374,7 +350,6 @@ export function AulaPlayer({
           </div>
         ) : (
           <div className="aspect-video bg-black rounded-lg overflow-hidden mb-4 shadow-lg flex items-stretch">
-            {/* If it's a YouTube video we render the player container so the YT API can control it; otherwise keep iframe */}
             {getYoutubeId(aula.videoUrl) ? (
               <div ref={playerContainerRef} className="w-full h-full" />
             ) : (
@@ -397,7 +372,6 @@ export function AulaPlayer({
           const blockedSequential = a.bloqueado === true && !blockedByDate;
           const blocked = blockedByDate || blockedSequential;
 
-          // read saved percent for UI cards (fallback 0)
           let savedPct = 0;
           try {
             savedPct = Number(localStorage.getItem(pctKey(a.id)) || "0");
@@ -429,7 +403,6 @@ export function AulaPlayer({
               <img
                 src={getYoutubeThumbnail(a.videoUrl)}
                 alt={a.titulo}
-                // default slightly zoomed-in (scale-110) then smoothly zooms out to scale-100 on hover
                 className="w-full h-20 object-cover rounded-xl transform transition-transform duration-300 ease-out scale-110 group-hover:scale-100"
               />
               {blocked && (
@@ -439,7 +412,6 @@ export function AulaPlayer({
               )}
               <div className="mt-2">
                 <p className="text-sm text-white px-1 truncate">{a.titulo}</p>
-                {/* show per-aula saved progress */}
                 {savedPct > 0 && (
                   <div className="mt-2 flex items-center gap-2">
                     <div className="flex-1">
