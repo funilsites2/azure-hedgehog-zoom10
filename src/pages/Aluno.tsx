@@ -349,6 +349,20 @@ export default function Aluno() {
       {MobileDrawer}
       {DesktopSidebar}
       <div className="flex-1 flex flex-col pt-12 md:pt-0 md:ml-64">
+        {/* Banner acima dos cards de Continuar Assistindo */}
+        {bannerUrl && moduloSelecionado === null && (
+          <div className="mx-4 my-4 flex justify-center">
+            <div className="relative w-full max-w-[1600px] h=[400px] md:h-[400px] h-[400px] overflow-hidden rounded-lg">
+              <img
+                src={bannerUrl}
+                alt="Banner Aluno"
+                className="w-full h-full object-cover object-left"
+              />
+            </div>
+          </div>
+        )}
+
+        {/* Continuar Assistindo - abaixo do banner */}
         {moduloSelecionado === null && partialAulas.length > 0 && (
           <div className="mx-4 mt-4">
             <h2 className="text-2xl font-semibold mb-2 text-white">
@@ -424,18 +438,6 @@ export default function Aluno() {
                   );
                 })}
               </div>
-            </div>
-          </div>
-        )}
-
-        {bannerUrl && moduloSelecionado === null && (
-          <div className="mx-4 my-4 flex justify-center">
-            <div className="relative w-full max-w-[1600px] h=[400px] md:h-[400px] h-[400px] overflow-hidden rounded-lg">
-              <img
-                src={bannerUrl}
-                alt="Banner Aluno"
-                className="w-full h-full object-cover object-left"
-              />
             </div>
           </div>
         )}
