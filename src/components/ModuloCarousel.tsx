@@ -1,6 +1,6 @@
 import React from "react";
 import useEmblaCarousel from "embla-carousel-react";
-import { ChevronLeft, ChevronRight, Lock } from "lucide-react";
+import { ChevronLeft, ChevronRight, Lock, Clock } from "lucide-react";
 import SimpleProgress from "@/components/SimpleProgress";
 import {
   Dialog,
@@ -106,9 +106,17 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
                       }
                     >
                       {blockedByDate && (
-                        <div className="absolute top-0 inset-x-0 bg-red-600 text-white text-xs text-center py-1 rounded-t-xl">
-                          Bloqueado até {new Date(modulo.releaseDate!).toLocaleDateString()}
-                        </div>
+                        <>
+                          <div className="absolute top-0 inset-x-0 bg-red-600 text-white text-xs text-center py-1 rounded-t-xl">
+                            Bloqueado até {new Date(modulo.releaseDate!).toLocaleDateString()}
+                          </div>
+                          <div
+                            className="absolute top-2 right-2 left-auto z-20 transition-all duration-300 ease-out transform group-hover:top-1/2 group-hover:right-auto group-hover:left-1/2 group-hover:-translate-x-1/2 group-hover:-translate-y-1/2"
+                            aria-hidden
+                          >
+                            <Clock size={28} className="text-yellow-400 bg-neutral-900 rounded-full p-1" />
+                          </div>
+                        </>
                       )}
                       {modulo.bloqueado && (
                         <div
@@ -188,9 +196,17 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
               }}
             >
               {blockedByDate && (
-                <div className="absolute top-0 inset-x-0 bg-red-600 text-white text-xs text-center py-1 z-20 rounded-t-xl">
-                  Bloqueado até {new Date(modulo.releaseDate!).toLocaleDateString()}
-                </div>
+                <>
+                  <div className="absolute top-0 inset-x-0 bg-red-600 text-white text-xs text-center py-1 z-20 rounded-t-xl">
+                    Bloqueado até {new Date(modulo.releaseDate!).toLocaleDateString()}
+                  </div>
+                  <div
+                    className="absolute top-2 right-2 left-auto z-20 transition-all duration-300 ease-out transform group-hover:top-1/2 group-hover:right-auto group-hover:left-1/2 group-hover:-translate-x-1/2 group-hover:-translate-y-1/2"
+                    aria-hidden
+                  >
+                    <Clock size={28} className="text-yellow-400 bg-neutral-900 rounded-full p-1" />
+                  </div>
+                </>
               )}
               {modulo.bloqueado && (
                 <div
