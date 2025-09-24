@@ -294,7 +294,7 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
                   <DialogTitle className="text-white text-xl md:text-2xl font-semibold">
                     Módulo bloqueado temporariamente
                   </DialogTitle>
-                  <DialogDescription className="text-neutral-300">
+                  <DialogDescription className="text-neutral-300 text-center">
                     {blockedModulo?.releaseDate
                       ? `Este módulo será liberado em ${new Date(
                           blockedModulo.releaseDate
@@ -343,7 +343,7 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
                   <DialogTitle className="text-white text-xl md:text-2xl font-semibold">
                     Curso não adquirido
                   </DialogTitle>
-                  <DialogDescription className="text-neutral-300">
+                  <DialogDescription className="text-neutral-300 text-center">
                     Este curso pode ser adquirido à parte
                   </DialogDescription>
                 </DialogHeader>
