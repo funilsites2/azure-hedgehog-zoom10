@@ -20,7 +20,6 @@ type Aula = {
   bloqueado?: boolean;
   assistida?: boolean;
 };
-
 type Modulo = {
   id: number;
   nome: string;
@@ -29,7 +28,6 @@ type Modulo = {
   bloqueado?: boolean;
   releaseDate?: number;
   externalUrl?: string;
-  trailerUrl?: string; // novo: URL do trailer (YouTube, Vimeo ou arquivo de vídeo)
 };
 
 interface ModuloCarouselProps {
@@ -80,53 +78,6 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
   const [blockedModulo, setBlockedModulo] = React.useState<Modulo | null>(null);
   const [purchaseModulo, setPurchaseModulo] = React.useState<Modulo | null>(null);
 
-  // Estado do trailer
-  const [trailerModulo, setTrailerModulo] = React.useState<Modulo | null>(null);
-  const hoverTimerRef = React.useRef<number | null>(null);
-
-  const startTrailerHover = (modulo: Modulo) => {
-    // Apenas desktop e quando tiver trailer
-    if (!modulo.trailerUrl) return;
-    if (typeof window !== "undefined" && window.innerWidth < 768) return;
-    if (hoverTimerRef.current) {
-      window.clearTimeout(hoverTimerRef.current);
-      hoverTimerRef.current = null;
-    }
-    hoverTimerRef.current = window.setTimeout(() => {
-      setTrailerModulo(modulo);
-    }, 400); // pequeno atraso para evitar abrir sem querer
-  };
-
-  const cancelTrailerHover = () => {
-    if (hoverTimerRef.current) {
-      window.clearTimeout(hoverTimerRef.current);
-      hoverTimerRef.current = null;
-    }
-    setTrailerModulo(null);
-  };
-
-  const supportsVideoTag = (url: string) =>
-    /\.(mp4|webm|ogg)(\?.*)?$/i.test(url);
-
-  const getEmbedUrl = (url: string) => {
-    try {
-      const u = new URL(url);
-      // YouTube longo
-      if (u.hostname.includes("youtube.com")) {
-        const v = u.searchParams.get("v");
-        if (v) return `https://www.youtube.com/embed/${v}?autoplay=1&rel=0`;
-      }
-      // YouTube curto
-      if (u.hostname === "youtu.be") {
-        const id = u.pathname.replace("/", "");
-        if (id) return `https://www.youtube.com/embed/${id}?autoplay=1&rel=0`;
-      }
-      return url;
-    } catch {
-      return url;
-    }
-  };
-
   const mobileCardWidth = alunoLayout
     ? "w-[60vw] max-w-[280px] min-w-[180px]"
     : "min-w-1/2 max-w-[90vw]";
@@ -175,8 +126,6 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
                           onModuloClick(modulo);
                         }
                       }}
-                      onMouseEnter={() => startTrailerHover(modulo)}
-                      onMouseLeave={cancelTrailerHover}
                     >
                       {blockedByDate && (
                         <>
@@ -206,7 +155,7 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
                         <img
                           src={modulo.capa}
                           alt={modulo.nome}
-                          className={`w-full aspect-[3/4] object-cover rounded-xl transition-transform duration-300 ease-out group-hover:scale-105 ${shouldGray ? "grayscale" : ""}`}
+                          className="w-full aspect-[3/4] object-cover rounded-xl mb-2 transition-transform duration-300 ease-out group-hover:scale-105"
                           onError={(e) =>
                             (e.currentTarget.src =
                               "https://placehold.co/300x400?text=Sem+Capa")
@@ -273,8 +222,6 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
                   onModuloClick(modulo);
                 }
               }}
-              onMouseEnter={() => startTrailerHover(modulo)}
-              onMouseLeave={cancelTrailerHover}
             >
               {blockedByDate && (
                 <>
@@ -321,70 +268,6 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
           );
         })}
       </div>
-
-      {/* Modal de Trailer ao passar o mouse (desktop) */}
-      <Dialog
-        open={!!trailerModulo}
-        onOpenChange={(open) => {
-          if (!open) setTrailerModulo(null);
-        }}
-      >
-        <DialogContent className="sm:max-w-3xl w-[92vw] md:w-[900px] bg-transparent p-0 border-0 shadow-none">
-          <div className="relative rounded-2xl p-[2px] bg-gradient-to-r from-orange-600 to-orange-400 shadow-[0_15px_60px_rgba(0,0,0,0.6)]">
-            <DialogClose asChild>
-              <Button
-                variant="ghost"
-                className="absolute top-2 right-2 h-9 w-9 p-0 rounded-full bg-orange-500 hover:bg-orange-600 text-white z-20"
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </DialogClose>
-
-            <div className="rounded-2xl overflow-hidden border border-white/10 bg-neutral-900">
-              <div className="p-4 md:p-6">
-                <DialogHeader className="text-center space-y-1">
-                  <DialogTitle className="text-white text-xl md:text-2xl font-semibold text-center">
-                    {trailerModulo?.nome}
-                  </DialogTitle>
-                  <DialogDescription className="text-neutral-300 text-center">
-                    Assista ao trailer do módulo
-                  </DialogDescription>
-                </DialogHeader>
-
-                <div className="mt-4">
-                  {trailerModulo?.trailerUrl ? (
-                    supportsVideoTag(trailerModulo.trailerUrl) ? (
-                      <div className="w-full">
-                        <video
-                          src={trailerModulo.trailerUrl}
-                          className="w-full aspect-video rounded-lg"
-                          controls
-                          autoPlay
-                          playsInline
-                        />
-                      </div>
-                    ) : (
-                      <div className="w-full aspect-video">
-                        <iframe
-                          src={getEmbedUrl(trailerModulo.trailerUrl)}
-                          className="w-full h-full rounded-lg"
-                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                          allowFullScreen
-                          title={`Trailer - ${trailerModulo?.nome ?? ""}`}
-                        />
-                      </div>
-                    )
-                  ) : (
-                    <div className="text-center text-neutral-300 py-10">
-                      Este módulo não possui trailer disponível.
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
 
       {/* Modal informando bloqueio por dias */}
       <Dialog

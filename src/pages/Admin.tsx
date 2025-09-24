@@ -133,8 +133,7 @@ export default function Admin() {
     aulas: AulaInput[],
     linha: string,
     delayDays: number,
-    externalUrl?: string,
-    trailerUrl?: string
+    externalUrl?: string
   ) => {
     if (editandoId !== null) {
       console.log("[Admin] Edit submit payload:", {
@@ -145,14 +144,13 @@ export default function Admin() {
         linha,
         delayDays,
         externalUrl,
-        trailerUrl,
       });
 
       showSuccess(
         `Enviando edição: ${aulas.length} aula(s) — verifique o console para detalhes.`
       );
 
-      editarModulo(editandoId, nome, capa, aulas, linha, delayDays, externalUrl, trailerUrl);
+      editarModulo(editandoId, nome, capa, aulas, linha, delayDays, externalUrl);
       setEditandoId(null);
       showSuccess("Módulo atualizado com sucesso");
     }
@@ -169,8 +167,8 @@ export default function Admin() {
           <div>
             <h3 className="font-semibold mb-2">Novo Módulo</h3>
             <ModuleForm
-              onSubmit={(nome, capa, aulas, linha, delayDays, externalUrl, trailerUrl) =>
-                adicionarModulo(nome, kapaPlaceholder(capa), aulas, linha, delayDays, externalUrl, trailerUrl)
+              onSubmit={(nome, capa, aulas, linha, delayDays, externalUrl) =>
+                adicionarModulo(nome, kapaPlaceholder(capa), aulas, linha, delayDays, externalUrl)
               }
               submitLabel="Adicionar Módulo"
             />
@@ -296,7 +294,6 @@ export default function Admin() {
                       initialAulas={m.aulas}
                       initialDelayDays={computedDelayDays}
                       initialExternalUrl={m.externalUrl ?? ""}
-                      initialTrailerUrl={m.trailerUrl ?? ""}
                       onSubmit={handleEditSubmit}
                       submitLabel="Atualizar Módulo"
                       onAulasChange={(newAulas: AulaInput[]) => {
@@ -308,8 +305,7 @@ export default function Admin() {
                             newAulas,
                             m.linha,
                             computedDelayDays,
-                            m.externalUrl,
-                            m.trailerUrl
+                            m.externalUrl
                           );
                           showSuccess("Aulas atualizadas");
                         } catch (err) {
@@ -328,8 +324,7 @@ export default function Admin() {
                           newAulas,
                           m.linha,
                           computedDelayDays,
-                          m.externalUrl,
-                          m.trailerUrl
+                          m.externalUrl
                         );
                         showSuccess("Aulas atualizadas");
                       }}
