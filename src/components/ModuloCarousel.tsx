@@ -189,7 +189,7 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
           return (
             <div
               key={modulo.id}
-              className={`group relative snap-start flex-shrink-0 w-[20%] rounded-xl shadow-lg overflow-hidden hover:z-10 ${
+              className={`group relative snap-start flex-shrink-0 w-[18%] rounded-xl shadow-lg overflow-hidden hover:z-10 ${
                 modulo.bloqueado || blockedByDate ? "grayscale" : ""
               } ${blockedByDate ? "cursor-not-allowed" : "cursor-pointer"}`}
               onClick={() => {
