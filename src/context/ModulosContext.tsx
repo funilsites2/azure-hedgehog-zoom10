@@ -57,6 +57,8 @@ type ModulosContextType = {
   setModuloBloqueado: (moduloId: number, bloqueado: boolean) => void;
   setAulaReleaseDays: (moduloId: number, aulaId: number, delayDays: number) => void;
   reordenarModulos: (finalOrdered: Modulo[]) => void;
+  marcarAulaIniciada: (moduloId: number, aulaId: number) => void;
+  marcarAulaAssistida: (moduloId: number, aulaId: number) => void;
 };
 
 const ModulosContext = createContext<ModulosContextType | undefined>(undefined);
@@ -186,7 +188,6 @@ export const ModulosProvider: React.FC<{ children: React.ReactNode }> = ({ child
     const run = async () => {
       await fetchFromDB();
 
-      // Realtime para manter a UI atualizada
       const ch = supabase
         .channel("modules_lessons_realtime")
         .on(
@@ -230,7 +231,7 @@ export const ModulosProvider: React.FC<{ children: React.ReactNode }> = ({ child
         external_url: externalUrl ?? null,
         release_offset_days: Math.max(0, Math.round(delayDays)),
         bloqueado: false,
-        order_index: moduleId, // provisório, estabilizado pela reordenação
+        order_index: moduleId,
       });
 
       for (let i = 0; i < aulas.length; i++) {
@@ -242,7 +243,7 @@ export const ModulosProvider: React.FC<{ children: React.ReactNode }> = ({ child
           video_url: a.videoUrl,
           descricao: a.descricao ?? null,
           release_offset_days: Math.max(0, Math.round(delayDays)),
-          bloqueado: i !== 0, // sequencial simples
+          bloqueado: i !== 0,
           order_index: i,
         });
       }
@@ -304,7 +305,6 @@ export const ModulosProvider: React.FC<{ children: React.ReactNode }> = ({ child
         })
         .eq("id", moduloId);
 
-      // Recria aulas conforme lista passada (mantendo ordem)
       await supabase.from("lessons").delete().eq("module_id", moduloId);
 
       for (let i = 0; i < novasAulas.length; i++) {
@@ -362,7 +362,7 @@ export const ModulosProvider: React.FC<{ children: React.ReactNode }> = ({ child
         external_url: original.externalUrl ?? null,
         release_offset_days: original.releaseOffsetDays ?? 0,
         bloqueado: original.bloqueado ?? false,
-        order_index: now, // mantém ao final até ser reordenado
+        order_index: now,
       });
 
       for (let i = 0; i < original.aulas.length; i++) {
@@ -385,7 +385,6 @@ export const ModulosProvider: React.FC<{ children: React.ReactNode }> = ({ child
   };
 
   const reordenarModulos: ModulosContextType["reordenarModulos"] = (finalOrdered) => {
-    // Otimista no estado local
     setModulos((prev) => {
       const orderMap = new Map<number, number>(finalOrdered.map((m, i) => [m.id, i]));
       const sorted = [...prev].sort((a, b) => {
@@ -396,7 +395,6 @@ export const ModulosProvider: React.FC<{ children: React.ReactNode }> = ({ child
       return sorted.map((m) => ({ ...m, orderIndex: orderMap.get(m.id) ?? m.orderIndex }));
     });
 
-    // Persistência no BD
     const run = async () => {
       for (let i = 0; i < finalOrdered.length; i++) {
         const m = finalOrdered[i];
@@ -405,6 +403,47 @@ export const ModulosProvider: React.FC<{ children: React.ReactNode }> = ({ child
       await fetchFromDB();
     };
     void run();
+  };
+
+  const marcarAulaIniciada: ModulosContextType["marcarAulaIniciada"] = (moduloId, aulaId) => {
+    setModulos((prev) =>
+      prev.map((m) =>
+        m.id === moduloId
+          ? {
+              ...m,
+              aulas: m.aulas.map((a) =>
+                a.id === aulaId ? { ...a, started: true } : a
+              ),
+            }
+          : m
+      )
+    );
+  };
+
+  const marcarAulaAssistida: ModulosContextType["marcarAulaAssistida"] = (moduloId, aulaId) => {
+    setModulos((prev) =>
+      prev.map((m) => {
+        if (m.id !== moduloId) return m;
+        const idx = m.aulas.findIndex((a) => a.id === aulaId);
+        if (idx === -1) return m;
+
+        const nowTs = Date.now();
+        const next = m.aulas[idx + 1];
+
+        const aulasAtualizadas = m.aulas.map((a, i) => {
+          if (a.id === aulaId) {
+            return { ...a, assistida: true, started: true };
+          }
+          if (i === idx + 1) {
+            const blockedByDate = a.releaseDate ? nowTs < a.releaseDate : false;
+            return { ...a, bloqueado: blockedByDate ? true : false };
+          }
+          return a;
+        });
+
+        return { ...m, aulas: aulasAtualizadas };
+      })
+    );
   };
 
   return (
@@ -418,6 +457,8 @@ export const ModulosProvider: React.FC<{ children: React.ReactNode }> = ({ child
         setModuloBloqueado,
         setAulaReleaseDays,
         reordenarModulos,
+        marcarAulaIniciada,
+        marcarAulaAssistida,
       }}
     >
       {children}
