@@ -223,66 +223,6 @@ export const ModuleForm: React.FC<ModuleFormProps> = ({
         </Button>
       </div>
 
-      <div className="space-y-2">
-        <h3 className="font-semibold text-lg">Aulas</h3>
-        <input
-          className="w-full p-2 rounded bg-neutral-800 text-white"
-          placeholder="Título da aula"
-          value={novaAula.titulo}
-          onChange={(e) =>
-            setNovaAula((v) => ({ ...v, titulo: e.target.value }))
-          }
-        />
-        <input
-          className="w-full p-2 rounded bg-neutral-800 text-white"
-          placeholder="URL do vídeo"
-          value={novaAula.videoUrl}
-          onChange={(e) =>
-            setNovaAula((v) => ({ ...v, videoUrl: e.target.value }))
-          }
-        />
-        <input
-          className="w-full p-2 rounded bg-neutral-800 text-white"
-          placeholder="Descrição da aula"
-          value={novaAula.descricao ?? ""}
-          onChange={(e) =>
-            setNovaAula((v) => ({ ...v, descricao: e.target.value }))
-          }
-        />
-        <div className="flex gap-2">
-          <Button
-            type="button"
-            onClick={handleAddAula}
-            className={
-              isAddingLesson
-                ? "gap-2 rounded-full border border-emerald-500/30 bg-emerald-600 text-white hover:bg-emerald-700 hover:border-emerald-500/50 shadow-sm"
-                : undefined
-            }
-          >
-            <Plus size={16} />
-            {editingIndex !== null ? "Atualizar Aula" : "Adicionar Aula"}
-          </Button>
-        </div>
-        <ul className="space-y-1">
-          {aulas.map((a, idx) => (
-            <li
-              key={idx}
-              className="flex items-center justify-between bg-neutral-800 p-2 rounded"
-            >
-              <span className="truncate">{a.titulo}</span>
-              <div className="flex items-center gap-2">
-                <button onClick={() => editAula(idx)}>
-                  <Edit className="text-blue-400" size={16} />
-                </button>
-                <button onClick={() => removeAula(idx)}>
-                  <Trash2 className="text-red-400" size={16} />
-                </button>
-              </div>
-            </li>
-          ))}
-        </ul>
-      </div>
-
       {onCancel && (
         <div className="flex gap-2">
           <Button variant="secondary" onClick={onCancel}>
