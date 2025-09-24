@@ -11,6 +11,7 @@ import {
   DialogClose,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { showSuccess } from "@/utils/toast";
 
 type Aula = {
   id: number;
@@ -74,6 +75,7 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
   }, [emblaApi]);
 
   const [blockedModulo, setBlockedModulo] = React.useState<Modulo | null>(null);
+  const [purchaseModulo, setPurchaseModulo] = React.useState<Modulo | null>(null);
 
   const mobileCardWidth = alunoLayout
     ? "w-[60vw] max-w-[280px] min-w-[180px]"
@@ -107,7 +109,11 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
                           setBlockedModulo(modulo);
                           return;
                         }
-                        if (!modulo.bloqueado && onModuloClick) {
+                        if (modulo.bloqueado) {
+                          setPurchaseModulo(modulo);
+                          return;
+                        }
+                        if (onModuloClick) {
                           onModuloClick(modulo);
                         }
                       }}
@@ -199,7 +205,11 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
                   setBlockedModulo(modulo);
                   return;
                 }
-                if (!modulo.bloqueado && onModuloClick) {
+                if (modulo.bloqueado) {
+                  setPurchaseModulo(modulo);
+                  return;
+                }
+                if (onModuloClick) {
                   onModuloClick(modulo);
                 }
               }}
@@ -257,10 +267,8 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
           if (!open) setBlockedModulo(null);
         }}
       >
-        {/* Content transparente, wrapper com rounded e borda em degradê laranja */}
         <DialogContent className="sm:max-w-md w-[92vw] md:w-auto bg-transparent p-0 border-0 shadow-none">
           <div className="relative rounded-2xl p-[2px] bg-gradient-to-r from-orange-600 to-orange-400 shadow-[0_15px_60px_rgba(0,0,0,0.6)]">
-            {/* X alaranjado no canto */}
             <DialogClose asChild>
               <Button
                 variant="ghost"
@@ -271,7 +279,6 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
               </Button>
             </DialogClose>
 
-            {/* Container interno do modal */}
             <div className="rounded-2xl overflow-hidden border border-white/10 bg-gradient-to-b from-neutral-900/80 to-neutral-800/70 backdrop-blur-2xl">
               <div className="p-6 md:p-8 text-center">
                 <DialogHeader className="text-center space-y-1">
@@ -293,6 +300,54 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
                   <DialogClose asChild>
                     <Button className="rounded-full border border-orange-400/50 bg-orange-500 text-white hover:bg-orange-600 hover:border-orange-500/60 transition-colors px-6">
                       Fechar
+                    </Button>
+                  </DialogClose>
+                </div>
+              </div>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Modal de compra quando bloqueado por acesso (cadeado) */}
+      <Dialog
+        open={!!purchaseModulo}
+        onOpenChange={(open) => {
+          if (!open) setPurchaseModulo(null);
+        }}
+      >
+        <DialogContent className="sm:max-w-md w-[92vw] md:w-auto bg-transparent p-0 border-0 shadow-none">
+          <div className="relative rounded-2xl p-[2px] bg-gradient-to-r from-orange-600 to-orange-400 shadow-[0_15px_60px_rgba(0,0,0,0.6)]">
+            <DialogClose asChild>
+              <Button
+                variant="ghost"
+                className="absolute top-2 right-2 h-9 w-9 p-0 rounded-full bg-orange-500 hover:bg-orange-600 text-white"
+                aria-label="Fechar"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </DialogClose>
+
+            <div className="rounded-2xl overflow-hidden border border-white/10 bg-gradient-to-b from-neutral-900/80 to-neutral-800/70 backdrop-blur-2xl">
+              <div className="p-6 md:p-8 text-center">
+                <DialogHeader className="text-center space-y-1">
+                  <DialogTitle className="text-white text-xl md:text-2xl font-semibold">
+                    Curso não adquirido
+                  </DialogTitle>
+                  <DialogDescription className="text-neutral-300">
+                    Este curso pode ser adquirido à parte
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="text-sm text-neutral-400 text-center mt-3">
+                  Deseja comprar esse curso? clique no botão abaixo.
+                </div>
+                <div className="mt-6 flex justify-center">
+                  <DialogClose asChild>
+                    <Button
+                      className="rounded-full border border-orange-400/50 bg-orange-500 text-white hover:bg-orange-600 hover:border-orange-500/60 transition-colors px-6"
+                      onClick={() => showSuccess("Redirecionando para compra...")}
+                    >
+                      Comprar curso
                     </Button>
                   </DialogClose>
                 </div>
