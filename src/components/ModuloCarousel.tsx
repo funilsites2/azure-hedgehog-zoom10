@@ -291,7 +291,7 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
             <div className="rounded-2xl overflow-hidden border border-white/10 bg-gradient-to-b from-neutral-900/80 to-neutral-800/70 backdrop-blur-2xl">
               <div className="p-6 md:p-8 text-center">
                 <DialogHeader className="text-center space-y-1">
-                  <DialogTitle className="text-white text-xl md:text-2xl font-semibold">
+                  <DialogTitle className="text-white text-xl md:text-2xl font-semibold text-center">
                     Módulo bloqueado temporariamente
                   </DialogTitle>
                   <DialogDescription className="text-neutral-300 text-center">
@@ -340,7 +340,7 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
             <div className="rounded-2xl overflow-hidden border border-white/10 bg-gradient-to-b from-neutral-900/80 to-neutral-800/70 backdrop-blur-2xl">
               <div className="p-6 md:p-8 text-center">
                 <DialogHeader className="text-center space-y-1">
-                  <DialogTitle className="text-white text-xl md:text-2xl font-semibold">
+                  <DialogTitle className="text-white text-xl md:text-2xl font-semibold text-center">
                     Curso não adquirido
                   </DialogTitle>
                   <DialogDescription className="text-neutral-300 text-center">
