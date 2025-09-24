@@ -58,7 +58,6 @@ type ModulosContextType = {
   setAulaReleaseDays: (moduloId: number, aulaId: number, delayDays: number) => void;
   reordenarModulos: (finalOrdered: Modulo[]) => void;
 
-  // Novas APIs de progresso por usuário
   marcarAulaIniciada: (moduloId: number, aulaId: number) => void;
   updateAulaProgresso: (aulaId: number, seconds: number, pct: number) => void;
   marcarAulaAssistida: (moduloId: number, aulaId: number) => void;
@@ -67,28 +66,30 @@ type ModulosContextType = {
 const ModulosContext = createContext<ModulosContextType | undefined>(undefined);
 
 const MS_DAY = 24 * 60 * 60 * 1000;
-const ENROLLMENT_KEY = "aluno_enrollment_date";
 
-function getEnrollmentDate(): number {
-  try {
-    const raw = localStorage.getItem(ENROLLMENT_KEY);
-    if (!raw) {
-      const now = Date.now();
-      localStorage.setItem(ENROLLMENT_KEY, JSON.stringify(now));
-      return now;
-    }
-    const val = JSON.parse(raw);
-    return typeof val === "number" && isFinite(val) ? val : Date.now();
-  } catch {
-    const now = Date.now();
-    localStorage.setItem(ENROLLMENT_KEY, JSON.stringify(now));
-    return now;
+async function getOrCreateEnrollmentDate(): Promise<number> {
+  const { data: { user } } = await supabase.auth.getUser();
+  const now = Date.now();
+  if (!user) return now;
+  const { data } = await supabase
+    .from("enrollments")
+    .select("enrolled_at")
+    .eq("user_id", user.id)
+    .maybeSingle();
+  if (data?.enrolled_at) {
+    return new Date(data.enrolled_at).getTime();
   }
+  await supabase.from("enrollments").insert({ user_id: user.id, enrolled_at: new Date().toISOString() });
+  return now;
 }
 
-function initializeBlocks(mods: Modulo[], progresoPorAula: Map<number, { pct: number; completed: boolean }>): Modulo[] {
+function initializeBlocks(
+  mods: Modulo[],
+  progresoPorAula: Map<number, { pct: number; completed: boolean }>,
+  enrollment: number
+): Modulo[] {
   const now = Date.now();
-  const enrollment = getEnrollmentDate();
+  const enrollmentTs = enrollment ?? now;
 
   return mods.map((m) => {
     const moduleOffset =
@@ -96,7 +97,7 @@ function initializeBlocks(mods: Modulo[], progresoPorAula: Map<number, { pct: nu
         ? Math.max(0, Math.round(m.releaseOffsetDays))
         : 0;
 
-    const moduleEffectiveRelease = enrollment + moduleOffset * MS_DAY;
+    const moduleEffectiveRelease = enrollmentTs + moduleOffset * MS_DAY;
     const moduleBlocked = (m.bloqueado ?? false) || moduleEffectiveRelease > now;
 
     const aulas = (m.aulas ?? []).map((a, i, arr) => {
@@ -105,9 +106,8 @@ function initializeBlocks(mods: Modulo[], progresoPorAula: Map<number, { pct: nu
           ? Math.max(0, Math.round(a.releaseOffsetDays))
           : moduleOffset;
 
-      const effectiveRelease = enrollment + aulaOffset * MS_DAY;
+      const effectiveRelease = enrollmentTs + aulaOffset * MS_DAY;
 
-      // overlay do progresso do usuário
       const prog = progresoPorAula.get(a.id);
       const assistidaFromUser = !!prog?.completed || (!!prog && prog.pct >= 100);
       const startedFromUser = !!prog && prog.pct > 0 && prog.pct < 100;
@@ -135,7 +135,10 @@ function initializeBlocks(mods: Modulo[], progresoPorAula: Map<number, { pct: nu
       }
 
       const prev = arr[i - 1];
-      const prevAssistida = !!(progresoPorAula.get(prev.id)?.completed || (progresoPorAula.get(prev.id)?.pct ?? 0) >= 100 || prev.assistida);
+      const prevAssistida =
+        !!(progresoPorAula.get(prev.id)?.completed ||
+        (progresoPorAula.get(prev.id)?.pct ?? 0) >= 100 ||
+        prev.assistida);
       return {
         ...a,
         releaseOffsetDays: aulaOffset,
@@ -195,7 +198,6 @@ export const ModulosProvider: React.FC<{ children: React.ReactNode }> = ({ child
           })),
       })) ?? [];
 
-    // carrega progresso do usuário e sobrepõe
     const { data: { user } } = await supabase.auth.getUser();
     let progressMap = new Map<number, { pct: number; completed: boolean }>();
     if (user) {
@@ -212,7 +214,9 @@ export const ModulosProvider: React.FC<{ children: React.ReactNode }> = ({ child
       });
     }
 
-    setModulos(initializeBlocks(mapped, progressMap));
+    const enrollment = await getOrCreateEnrollmentDate();
+
+    setModulos(initializeBlocks(mapped, progressMap, enrollment));
   }
 
   useEffect(() => {
@@ -436,7 +440,7 @@ export const ModulosProvider: React.FC<{ children: React.ReactNode }> = ({ child
     void run();
   };
 
-  // ====== PROGRESSO DO ALUNO ======
+  // ====== PROGRESSO + CONQUISTAS ======
   const marcarAulaIniciada: ModulosContextType["marcarAulaIniciada"] = (_moduloId, aulaId) => {
     const run = async () => {
       const { data: { user } } = await supabase.auth.getUser();
@@ -472,10 +476,20 @@ export const ModulosProvider: React.FC<{ children: React.ReactNode }> = ({ child
     void run();
   };
 
-  const marcarAulaAssistida: ModulosContextType["marcarAulaAssistida"] = (_moduloId, aulaId) => {
+  async function grantAchievement(userId: string, key: string, moduleId?: number | null) {
+    await supabase
+      .from("user_achievements")
+      .upsert(
+        { user_id: userId, achievement_key: key, module_id: moduleId ?? null, created_at: new Date().toISOString() },
+        { onConflict: "user_id,achievement_key,module_id" }
+      );
+  }
+
+  const marcarAulaAssistida: ModulosContextType["marcarAulaAssistida"] = (moduloId, aulaId) => {
     const run = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
+
       await supabase
         .from("lesson_progress")
         .upsert({
@@ -485,7 +499,30 @@ export const ModulosProvider: React.FC<{ children: React.ReactNode }> = ({ child
           completed: true,
           updated_at: new Date().toISOString(),
         }, { onConflict: "user_id,lesson_id" });
-      // atualizar UI reprocessando bloqueios
+
+      // Conquista: primeira aula assistida
+      await grantAchievement(user.id, "first_lesson_watched", null);
+
+      // Conquista: módulo concluído (se todas as aulas concluídas)
+      const { data: lessons } = await supabase
+        .from("lessons")
+        .select("id")
+        .eq("module_id", moduloId);
+
+      const lessonIds = (lessons ?? []).map((l: any) => Number(l.id));
+      if (lessonIds.length > 0) {
+        const { data: completedRows } = await supabase
+          .from("lesson_progress")
+          .select("lesson_id")
+          .eq("user_id", user.id)
+          .in("lesson_id", lessonIds)
+          .eq("completed", true);
+
+        if ((completedRows ?? []).length === lessonIds.length) {
+          await grantAchievement(user.id, "module_completed", moduloId);
+        }
+      }
+
       await fetchFromDB();
     };
     void run();
