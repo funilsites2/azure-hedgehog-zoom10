@@ -21,6 +21,7 @@ type Modulo = {
   bloqueado?: boolean;
   releaseDate?: number; // calculado dinamicamente a partir da matrícula + offset
   releaseOffsetDays?: number; // dias após a matrícula
+  externalUrl?: string; // URL externa de compra (opcional)
 };
 
 type ModulosContextType = {
@@ -33,7 +34,8 @@ type ModulosContextType = {
       "id" | "assistida" | "bloqueado" | "releaseDate" | "releaseOffsetDays" | "started"
     >[],
     linha?: string,
-    delayDays?: number
+    delayDays?: number,
+    externalUrl?: string
   ) => void;
   adicionarAula: (
     moduloId: number,
@@ -53,7 +55,8 @@ type ModulosContextType = {
       "id" | "assistida" | "bloqueado" | "releaseDate" | "releaseOffsetDays" | "started"
     >[],
     linha?: string,
-    delayDays?: number
+    delayDays?: number,
+    externalUrl?: string
   ) => void;
   setModuloBloqueado: (moduloId: number, bloqueado: boolean) => void;
   setAulaBloqueada: (
@@ -162,8 +165,8 @@ const initializeBlocks = (mods: Modulo[]): Modulo[] => {
         ? Math.max(0, Math.round(m.releaseOffsetDays))
         : undefined;
 
-    if (moduleOffset === undefined && m.releaseDate) {
-      const diff = Math.max(0, Math.round((m.releaseDate - enrollment) / MS_DAY));
+    if (moduleOffset === undefined && (m as any).releaseDate) {
+      const diff = Math.max(0, Math.round(((m as any).releaseDate - enrollment) / MS_DAY));
       moduleOffset = diff;
     }
     if (moduleOffset === undefined) moduleOffset = 0;
@@ -254,7 +257,8 @@ export const ModulosProvider: React.FC<{ children: React.ReactNode }> = ({
       "id" | "assistida" | "bloqueado" | "releaseDate" | "releaseOffsetDays" | "started"
     >[] = [],
     linha: string = "",
-    delayDays: number = 0
+    delayDays: number = 0,
+    externalUrl?: string
   ) => {
     const now = Date.now();
     setModulos((prev) =>
@@ -265,6 +269,7 @@ export const ModulosProvider: React.FC<{ children: React.ReactNode }> = ({
           nome,
           capa,
           linha,
+          externalUrl,
           releaseOffsetDays: Math.max(0, Math.round(delayDays)),
           aulas: aulas.map((a, i) => ({
             id: now + i + 1,
@@ -359,7 +364,8 @@ export const ModulosProvider: React.FC<{ children: React.ReactNode }> = ({
       "id" | "assistida" | "bloqueado" | "releaseDate" | "releaseOffsetDays" | "started"
     >[] = [],
     linha: string = "",
-    delayDays: number = 0
+    delayDays: number = 0,
+    externalUrl?: string
   ) => {
     const now = Date.now();
     const offset = Math.max(0, Math.round(delayDays));
@@ -390,6 +396,7 @@ export const ModulosProvider: React.FC<{ children: React.ReactNode }> = ({
             nome: novoNome,
             capa: novaCapa,
             linha,
+            externalUrl,
             releaseOffsetDays: offset,
             aulas: aulasAtualizadas,
           };
@@ -467,6 +474,7 @@ export const ModulosProvider: React.FC<{ children: React.ReactNode }> = ({
       nome: `${original.nome} (Cópia)`,
       aulas: clonedAulas,
       releaseOffsetDays: original.releaseOffsetDays,
+      externalUrl: original.externalUrl,
     };
     setModulos((prev) => initializeBlocks([...prev, cloned]));
   };

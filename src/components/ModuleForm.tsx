@@ -10,7 +10,6 @@ import {
   SelectContent,
   SelectItem,
 } from "@/components/ui/select";
-import { Plus, Trash2, Edit } from "lucide-react";
 
 export type AulaInput = {
   id?: number;
@@ -26,12 +25,14 @@ interface ModuleFormProps {
   initialLinha?: string;
   initialAulas?: AulaInput[];
   initialDelayDays?: number;
+  initialExternalUrl?: string;
   onSubmit: (
     nome: string,
     capa: string,
     aulas: AulaInput[],
     linha: string,
-    delayDays: number
+    delayDays: number,
+    externalUrl?: string
   ) => void;
   onCancel?: () => void;
   submitLabel?: string;
@@ -44,6 +45,7 @@ export const ModuleForm: React.FC<ModuleFormProps> = ({
   initialLinha = "",
   initialAulas = [],
   initialDelayDays = 0,
+  initialExternalUrl = "",
   onSubmit,
   onCancel,
   submitLabel = "Salvar",
@@ -58,20 +60,11 @@ export const ModuleForm: React.FC<ModuleFormProps> = ({
   const [capa, setCapa] = useState(initialCapa);
   const [linha, setLinha] = useState(initialLinha);
   const [aulas, setAulas] = useState<AulaInput[]>(initialAulas);
-  const [novaAula, setNovaAula] = useState<AulaInput>({
-    titulo: "",
-    videoUrl: "",
-    descricao: "",
-  });
-  const [editingIndex, setEditingIndex] = useState<number | null>(null);
+  const [delayDays, setDelayDays] = useState<number>(initialDelayDays);
+  const [externalUrl, setExternalUrl] = useState<string>(initialExternalUrl);
+
   const [isCreatingNewLinha, setIsCreatingNewLinha] = useState(false);
   const [isEditingLinha, setIsEditingLinha] = useState(false);
-  const [delayDays, setDelayDays] = useState<number>(initialDelayDays);
-
-  const isAddModuleAction = submitLabel.toLowerCase().includes("adicionar");
-  const isUpdateModuleAction = submitLabel.toLowerCase().includes("atualizar");
-  const isPrimarySubmit = isAddModuleAction || isUpdateModuleAction;
-  const isAddingLesson = editingIndex === null;
 
   const notifyAulasChange = (nextAulas: AulaInput[]) => {
     try {
@@ -81,56 +74,17 @@ export const ModuleForm: React.FC<ModuleFormProps> = ({
     }
   };
 
-  const handleAddAula = () => {
-    if (!novaAula.titulo.trim() || !novaAula.videoUrl.trim()) return;
-    if (editingIndex !== null) {
-      setAulas((prev) => {
-        const next = prev.map((a, i) =>
-          i === editingIndex ? { ...a, ...novaAula } : a
-        );
-        notifyAulasChange(next);
-        return next;
-      });
-      setEditingIndex(null);
-    } else {
-      setAulas((prev) => {
-        const next = [...prev, novaAula];
-        notifyAulasChange(next);
-        return next;
-      });
-    }
-    setNovaAula({ titulo: "", videoUrl: "", descricao: "" });
-  };
-
-  const removeAula = (idx: number) => {
-    setAulas((prev) => {
-      const next = prev.filter((_, i) => i !== idx);
-      notifyAulasChange(next);
-      return next;
-    });
-    if (editingIndex === idx) {
-      setEditingIndex(null);
-      setNovaAula({ titulo: "", videoUrl: "", descricao: "" });
-    }
-  };
-
-  const editAula = (idx: number) => {
-    setNovaAula(aulas[idx]);
-    setEditingIndex(idx);
-  };
-
   const handleSubmit = () => {
     if (!nome.trim() || !capa.trim() || !linha.trim()) return;
-    onSubmit(nome, capa, aulas, linha, delayDays);
+    onSubmit(nome, capa, aulas, linha, delayDays, externalUrl?.trim() || undefined);
     setNome("");
     setCapa("");
     setLinha("");
     setAulas([]);
     setDelayDays(0);
+    setExternalUrl("");
     setIsCreatingNewLinha(false);
     setIsEditingLinha(false);
-    setEditingIndex(null);
-    setNovaAula({ titulo: "", videoUrl: "", descricao: "" });
   };
 
   return (
@@ -147,6 +101,14 @@ export const ModuleForm: React.FC<ModuleFormProps> = ({
         value={capa}
         onChange={(e) => setCapa(e.target.value)}
       />
+
+      <input
+        className="w-full p-2 rounded bg-neutral-800 text-white"
+        placeholder="URL externa de compra (opcional)"
+        value={externalUrl}
+        onChange={(e) => setExternalUrl(e.target.value)}
+      />
+
       <Select
         onValueChange={(value) => {
           if (value === "__new") {
@@ -218,23 +180,16 @@ export const ModuleForm: React.FC<ModuleFormProps> = ({
         <Button
           type="button"
           onClick={handleSubmit}
-          className={
-            isPrimarySubmit
-              ? "rounded-full border border-emerald-500/30 bg-emerald-600 text-white hover:bg-emerald-700 hover:border-emerald-500/50 shadow-sm"
-              : undefined
-          }
+          className="rounded-full border border-emerald-500/30 bg-emerald-600 text-white hover:bg-emerald-700 hover:border-emerald-500/50 shadow-sm"
         >
           {submitLabel}
         </Button>
-      </div>
-
-      {onCancel && (
-        <div className="flex gap-2">
+        {onCancel && (
           <Button variant="secondary" onClick={onCancel}>
             Cancelar
           </Button>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 };

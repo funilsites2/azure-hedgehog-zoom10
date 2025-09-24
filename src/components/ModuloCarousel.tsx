@@ -27,6 +27,7 @@ type Modulo = {
   aulas: Aula[];
   bloqueado?: boolean;
   releaseDate?: number;
+  externalUrl?: string;
 };
 
 interface ModuloCarouselProps {
@@ -80,6 +81,14 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
   const mobileCardWidth = alunoLayout
     ? "w-[60vw] max-w-[280px] min-w-[180px]"
     : "min-w-1/2 max-w-[90vw]";
+
+  const handlePurchaseClick = () => {
+    if (purchaseModulo?.externalUrl) {
+      window.open(purchaseModulo.externalUrl, "_blank", "noopener,noreferrer");
+    } else {
+      showSuccess("Redirecionando para compra...");
+    }
+  };
 
   return (
     <div>
@@ -345,7 +354,7 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
                   <DialogClose asChild>
                     <Button
                       className="rounded-full border border-orange-400/50 bg-orange-500 text-white hover:bg-orange-600 hover:border-orange-500/60 transition-colors px-6"
-                      onClick={() => showSuccess("Redirecionando para compra...")}
+                      onClick={handlePurchaseClick}
                     >
                       Comprar curso
                     </Button>
