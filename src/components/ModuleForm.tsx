@@ -68,6 +68,8 @@ export const ModuleForm: React.FC<ModuleFormProps> = ({
   const [delayDays, setDelayDays] = useState<number>(initialDelayDays);
 
   const isAddModuleAction = submitLabel.toLowerCase().includes("adicionar");
+  const isUpdateModuleAction = submitLabel.toLowerCase().includes("atualizar");
+  const isPrimarySubmit = isAddModuleAction || isUpdateModuleAction;
   const isAddingLesson = editingIndex === null;
 
   const notifyAulasChange = (nextAulas: AulaInput[]) => {
@@ -251,7 +253,7 @@ export const ModuleForm: React.FC<ModuleFormProps> = ({
           type="button"
           onClick={handleSubmit}
           className={
-            isAddModuleAction
+            isPrimarySubmit
               ? "rounded-full border border-emerald-500/30 bg-emerald-600 text-white hover:bg-emerald-700 hover:border-emerald-500/50 shadow-sm"
               : undefined
           }

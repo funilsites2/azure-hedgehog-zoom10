@@ -254,7 +254,10 @@ export default function Admin() {
                       })}
                     </div>
                     <div className="mt-4">
-                      <Button className="w-full" onClick={cancelarEdicao}>
+                      <Button
+                        className="w-full rounded-full border border-emerald-500/30 bg-emerald-600 text-white hover:bg-emerald-700 hover:border-emerald-500/50 shadow-sm"
+                        onClick={cancelarEdicao}
+                      >
                         Fechar Editor
                       </Button>
                     </div>
