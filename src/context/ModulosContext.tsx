@@ -57,6 +57,11 @@ type ModulosContextType = {
   setModuloBloqueado: (moduloId: number, bloqueado: boolean) => void;
   setAulaReleaseDays: (moduloId: number, aulaId: number, delayDays: number) => void;
   reordenarModulos: (finalOrdered: Modulo[]) => void;
+
+  // Novas APIs de progresso por usuário
+  marcarAulaIniciada: (moduloId: number, aulaId: number) => void;
+  updateAulaProgresso: (aulaId: number, seconds: number, pct: number) => void;
+  marcarAulaAssistida: (moduloId: number, aulaId: number) => void;
 };
 
 const ModulosContext = createContext<ModulosContextType | undefined>(undefined);
@@ -81,7 +86,7 @@ function getEnrollmentDate(): number {
   }
 }
 
-function initializeBlocks(mods: Modulo[]): Modulo[] {
+function initializeBlocks(mods: Modulo[], progresoPorAula: Map<number, { pct: number; completed: boolean }>): Modulo[] {
   const now = Date.now();
   const enrollment = getEnrollmentDate();
 
@@ -102,12 +107,19 @@ function initializeBlocks(mods: Modulo[]): Modulo[] {
 
       const effectiveRelease = enrollment + aulaOffset * MS_DAY;
 
+      // overlay do progresso do usuário
+      const prog = progresoPorAula.get(a.id);
+      const assistidaFromUser = !!prog?.completed || (!!prog && prog.pct >= 100);
+      const startedFromUser = !!prog && prog.pct > 0 && prog.pct < 100;
+
       if (effectiveRelease > now) {
         return {
           ...a,
           releaseOffsetDays: aulaOffset,
           releaseDate: effectiveRelease,
           bloqueado: true,
+          assistida: assistidaFromUser,
+          started: startedFromUser,
         };
       }
 
@@ -117,16 +129,20 @@ function initializeBlocks(mods: Modulo[]): Modulo[] {
           releaseOffsetDays: aulaOffset,
           releaseDate: effectiveRelease,
           bloqueado: false,
+          assistida: assistidaFromUser,
+          started: startedFromUser,
         };
       }
 
       const prev = arr[i - 1];
-      const prevAssistida = !!prev.assistida;
+      const prevAssistida = !!(progresoPorAula.get(prev.id)?.completed || (progresoPorAula.get(prev.id)?.pct ?? 0) >= 100 || prev.assistida);
       return {
         ...a,
         releaseOffsetDays: aulaOffset,
         releaseDate: effectiveRelease,
         bloqueado: !prevAssistida || a.bloqueado === true,
+        assistida: assistidaFromUser,
+        started: startedFromUser,
       };
     });
 
@@ -179,14 +195,30 @@ export const ModulosProvider: React.FC<{ children: React.ReactNode }> = ({ child
           })),
       })) ?? [];
 
-    setModulos(initializeBlocks(mapped));
+    // carrega progresso do usuário e sobrepõe
+    const { data: { user } } = await supabase.auth.getUser();
+    let progressMap = new Map<number, { pct: number; completed: boolean }>();
+    if (user) {
+      const { data: progressRows } = await supabase
+        .from("lesson_progress")
+        .select("lesson_id, last_pct, completed")
+        .eq("user_id", user.id);
+
+      (progressRows ?? []).forEach((row: any) => {
+        progressMap.set(Number(row.lesson_id), {
+          pct: Number(row.last_pct ?? 0),
+          completed: !!row.completed,
+        });
+      });
+    }
+
+    setModulos(initializeBlocks(mapped, progressMap));
   }
 
   useEffect(() => {
     const run = async () => {
       await fetchFromDB();
 
-      // Realtime para manter a UI atualizada
       const ch = supabase
         .channel("modules_lessons_realtime")
         .on(
@@ -230,7 +262,7 @@ export const ModulosProvider: React.FC<{ children: React.ReactNode }> = ({ child
         external_url: externalUrl ?? null,
         release_offset_days: Math.max(0, Math.round(delayDays)),
         bloqueado: false,
-        order_index: moduleId, // provisório, estabilizado pela reordenação
+        order_index: moduleId,
       });
 
       for (let i = 0; i < aulas.length; i++) {
@@ -242,7 +274,7 @@ export const ModulosProvider: React.FC<{ children: React.ReactNode }> = ({ child
           video_url: a.videoUrl,
           descricao: a.descricao ?? null,
           release_offset_days: Math.max(0, Math.round(delayDays)),
-          bloqueado: i !== 0, // sequencial simples
+          bloqueado: i !== 0,
           order_index: i,
         });
       }
@@ -304,7 +336,6 @@ export const ModulosProvider: React.FC<{ children: React.ReactNode }> = ({ child
         })
         .eq("id", moduloId);
 
-      // Recria aulas conforme lista passada (mantendo ordem)
       await supabase.from("lessons").delete().eq("module_id", moduloId);
 
       for (let i = 0; i < novasAulas.length; i++) {
@@ -362,7 +393,7 @@ export const ModulosProvider: React.FC<{ children: React.ReactNode }> = ({ child
         external_url: original.externalUrl ?? null,
         release_offset_days: original.releaseOffsetDays ?? 0,
         bloqueado: original.bloqueado ?? false,
-        order_index: now, // mantém ao final até ser reordenado
+        order_index: now,
       });
 
       for (let i = 0; i < original.aulas.length; i++) {
@@ -385,7 +416,6 @@ export const ModulosProvider: React.FC<{ children: React.ReactNode }> = ({ child
   };
 
   const reordenarModulos: ModulosContextType["reordenarModulos"] = (finalOrdered) => {
-    // Otimista no estado local
     setModulos((prev) => {
       const orderMap = new Map<number, number>(finalOrdered.map((m, i) => [m.id, i]));
       const sorted = [...prev].sort((a, b) => {
@@ -396,12 +426,66 @@ export const ModulosProvider: React.FC<{ children: React.ReactNode }> = ({ child
       return sorted.map((m) => ({ ...m, orderIndex: orderMap.get(m.id) ?? m.orderIndex }));
     });
 
-    // Persistência no BD
     const run = async () => {
       for (let i = 0; i < finalOrdered.length; i++) {
         const m = finalOrdered[i];
         await supabase.from("modules").update({ order_index: i }).eq("id", m.id);
       }
+      await fetchFromDB();
+    };
+    void run();
+  };
+
+  // ====== PROGRESSO DO ALUNO ======
+  const marcarAulaIniciada: ModulosContextType["marcarAulaIniciada"] = (_moduloId, aulaId) => {
+    const run = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      await supabase
+        .from("lesson_progress")
+        .upsert({
+          user_id: user.id,
+          lesson_id: aulaId,
+          last_time_seconds: 0,
+          last_pct: 1,
+          completed: false,
+          updated_at: new Date().toISOString(),
+        }, { onConflict: "user_id,lesson_id" });
+    };
+    void run();
+  };
+
+  const updateAulaProgresso: ModulosContextType["updateAulaProgresso"] = (aulaId, seconds, pct) => {
+    const run = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      await supabase
+        .from("lesson_progress")
+        .upsert({
+          user_id: user.id,
+          lesson_id: aulaId,
+          last_time_seconds: Math.max(0, Math.round(seconds)),
+          last_pct: Math.max(0, Math.min(100, Math.round(pct))),
+          updated_at: new Date().toISOString(),
+        }, { onConflict: "user_id,lesson_id" });
+    };
+    void run();
+  };
+
+  const marcarAulaAssistida: ModulosContextType["marcarAulaAssistida"] = (_moduloId, aulaId) => {
+    const run = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      await supabase
+        .from("lesson_progress")
+        .upsert({
+          user_id: user.id,
+          lesson_id: aulaId,
+          last_pct: 100,
+          completed: true,
+          updated_at: new Date().toISOString(),
+        }, { onConflict: "user_id,lesson_id" });
+      // atualizar UI reprocessando bloqueios
       await fetchFromDB();
     };
     void run();
@@ -418,6 +502,9 @@ export const ModulosProvider: React.FC<{ children: React.ReactNode }> = ({ child
         setModuloBloqueado,
         setAulaReleaseDays,
         reordenarModulos,
+        marcarAulaIniciada,
+        updateAulaProgresso,
+        marcarAulaAssistida,
       }}
     >
       {children}

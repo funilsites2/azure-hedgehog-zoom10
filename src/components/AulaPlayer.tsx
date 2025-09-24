@@ -54,7 +54,7 @@ export function AulaPlayer({
   belowVideo,
 }: AulaPlayerProps) {
   const { name } = useUser();
-  const { marcarAulaIniciada } = useModulos();
+  const { marcarAulaIniciada, updateAulaProgresso } = useModulos();
   const aulas = modulo.aulas;
   const now = Date.now();
   const timerRef = useRef<number | null>(null);
@@ -223,6 +223,8 @@ export function AulaPlayer({
                     lastSavedPctRef.current = pct;
                     localStorage.setItem(timeKey(aula.id), String(cur));
                     localStorage.setItem(pctKey(aula.id), String(pct));
+                    // Persistência no Supabase
+                    updateAulaProgresso(aula.id, cur, pct);
                   }
 
                   if (pct >= 100 && !aula.assistida && !assistedTriggeredRef.current) {
@@ -363,7 +365,7 @@ export function AulaPlayer({
       <div className="w-full md:w-1/3 overflow-auto space-y-4 pr-4">
         {aulas.map((a) => {
           const blockedByDate = a.releaseDate ? now < a.releaseDate : false;
-        const blockedSequential = a.bloqueado === true && !blockedByDate;
+          const blockedSequential = a.bloqueado === true && !blockedByDate;
           const blocked = blockedByDate || blockedSequential;
 
           let savedPct = 0;
