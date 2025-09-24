@@ -65,6 +65,7 @@ export const ModuleForm: React.FC<ModuleFormProps> = ({
   });
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [isCreatingNewLinha, setIsCreatingNewLinha] = useState(false);
+  const [isEditingLinha, setIsEditingLinha] = useState(false);
   const [delayDays, setDelayDays] = useState<number>(initialDelayDays);
 
   const isAddModuleAction = submitLabel.toLowerCase().includes("adicionar");
@@ -127,6 +128,7 @@ export const ModuleForm: React.FC<ModuleFormProps> = ({
     setAulas([]);
     setDelayDays(0);
     setIsCreatingNewLinha(false);
+    setIsEditingLinha(false);
     setEditingIndex(null);
     setNovaAula({ titulo: "", videoUrl: "", descricao: "" });
   };
@@ -149,13 +151,18 @@ export const ModuleForm: React.FC<ModuleFormProps> = ({
         onValueChange={(value) => {
           if (value === "__new") {
             setIsCreatingNewLinha(true);
+            setIsEditingLinha(false);
             setLinha("");
+          } else if (value === "__edit") {
+            setIsCreatingNewLinha(false);
+            setIsEditingLinha(true);
           } else {
             setIsCreatingNewLinha(false);
+            setIsEditingLinha(false);
             setLinha(value);
           }
         }}
-        value={isCreatingNewLinha ? "__new" : linha}
+        value={isCreatingNewLinha ? "__new" : isEditingLinha ? "__edit" : linha}
       >
         <SelectTrigger className="w-full bg-neutral-800 text-white">
           <SelectValue placeholder="Selecionar linha" />
@@ -169,8 +176,12 @@ export const ModuleForm: React.FC<ModuleFormProps> = ({
           <SelectItem key="__new" value="__new">
             Criar nova linha
           </SelectItem>
+          <SelectItem key="__edit" value="__edit">
+            Editar nome da linha
+          </SelectItem>
         </SelectContent>
       </Select>
+
       {isCreatingNewLinha && (
         <input
           className="w-full p-2 rounded bg-neutral-800 text-white"
@@ -179,6 +190,16 @@ export const ModuleForm: React.FC<ModuleFormProps> = ({
           onChange={(e) => setLinha(e.target.value)}
         />
       )}
+
+      {isEditingLinha && !isCreatingNewLinha && (
+        <input
+          className="w-full p-2 rounded bg-neutral-800 text-white"
+          placeholder="Editar nome da linha"
+          value={linha}
+          onChange={(e) => setLinha(e.target.value)}
+        />
+      )}
+
       <input
         type="number"
         min={0}
