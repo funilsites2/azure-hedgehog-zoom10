@@ -12,7 +12,7 @@ const SimpleProgress: React.FC<SimpleProgressProps> = ({ value }) => {
   return (
     <div className="w-full bg-gray-200 h-1 rounded-full overflow-hidden">
       <div
-        className={`${isComplete ? "bg-green-500" : "bg-gradient-to-r from-green-500 to-green-900"} h-1`}
+        className={`${isComplete ? "bg-green-500" : "bg-gradient-to-r from-green-500 to-white"} h-1`}
         style={{ width: `${value}%` }}
       />
     </div>
