@@ -281,7 +281,7 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
             <DialogClose asChild>
               <Button
                 variant="ghost"
-                className="absolute top-2 right-2 h-9 w-9 p-0 rounded-full bg-orange-500 hover:bg-orange-600 text-white"
+                className="absolute top-2 right-2 h-9 w-9 p-0 rounded-full bg-orange-500 hover:bg-orange-600 text-white z-20"
                 aria-label="Fechar"
               >
                 <X className="h-4 w-4" />
@@ -330,7 +330,7 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
             <DialogClose asChild>
               <Button
                 variant="ghost"
-                className="absolute top-2 right-2 h-9 w-9 p-0 rounded-full bg-orange-500 hover:bg-orange-600 text-white"
+                className="absolute top-2 right-2 h-9 w-9 p-0 rounded-full bg-orange-500 hover:bg-orange-600 text-white z-20"
                 aria-label="Fechar"
               >
                 <X className="h-4 w-4" />
