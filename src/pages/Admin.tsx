@@ -177,7 +177,7 @@ export default function Admin() {
           <h1 className="text-3xl font-bold">Módulos</h1>
 
           {editandoId !== null ? (
-            <div className="bg-neutral-800 p-6 rounded-lg">
+            <div className="bg-neutral-800 p-6 rounded-lg [&_input]:border [&_input]:border-amber-500/40 [&_[role=combobox]]:border [&_[role=combobox]]:border-amber-500/40">
               <h2 className="text-2xl mb-4">Editando Módulo</h2>
               {(() => {
                 const m = modulos.find((mod) => mod.id === editandoId);
