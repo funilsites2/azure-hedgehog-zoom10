@@ -60,17 +60,10 @@ type ModulosContextType = {
     externalUrl?: string
   ) => void;
   setModuloBloqueado: (moduloId: number, bloqueado: boolean) => void;
-  setAulaBloqueada: (
-    moduloId: number,
-    aulaId: number,
-    bloqueado: boolean
-  ) => void;
-  setAulaReleaseDays: (
-    moduloId: number,
-    aulaId: number,
-    delayDays: number
-  ) => void;
+  setAulaBloqueada: (moduloId: number, aulaId: number, bloqueado: boolean) => void;
+  setAulaReleaseDays: (moduloId: number, aulaId: number, delayDays: number) => void;
   duplicarModulo: (moduloId: number) => void;
+  reordenarModulos: (finalOrdered: Modulo[]) => void;
 };
 
 const ENROLLMENT_KEY = "aluno_enrollment_date";
@@ -206,9 +199,7 @@ const initializeBlocks = (mods: Modulo[]): Modulo[] => {
 
 const ModulosContext = createContext<ModulosContextType | undefined>(undefined);
 
-export const ModulosProvider: React.FC<{ children: React.ReactNode }> = ({
-  children,
-}) => {
+export const ModulosProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [modulos, setModulos] = useState<Modulo[]>([]);
   const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
 
@@ -420,10 +411,7 @@ export const ModulosProvider: React.FC<{ children: React.ReactNode }> = ({
     void run();
   };
 
-  const setModuloBloqueado: ModulosContextType["setModuloBloqueado"] = (
-    moduloId,
-    bloqueado
-  ) => {
+  const setModuloBloqueado: ModulosContextType["setModuloBloqueado"] = (moduloId, bloqueado) => {
     const run = async () => {
       await supabase.from("modules").update({ bloqueado }).eq("id", moduloId);
       await fetchFromDB();
@@ -431,11 +419,7 @@ export const ModulosProvider: React.FC<{ children: React.ReactNode }> = ({
     void run();
   };
 
-  const setAulaBloqueada: ModulosContextType["setAulaBloqueada"] = (
-    moduloId,
-    aulaId,
-    bloqueado
-  ) => {
+  const setAulaBloqueada: ModulosContextType["setAulaBloqueada"] = (moduloId, aulaId, bloqueado) => {
     const run = async () => {
       await supabase
         .from("lessons")
@@ -447,11 +431,7 @@ export const ModulosProvider: React.FC<{ children: React.ReactNode }> = ({
     void run();
   };
 
-  const setAulaReleaseDays: ModulosContextType["setAulaReleaseDays"] = (
-    moduloId,
-    aulaId,
-    delayDays
-  ) => {
+  const setAulaReleaseDays: ModulosContextType["setAulaReleaseDays"] = (moduloId, aulaId, delayDays) => {
     const run = async () => {
       await supabase
         .from("lessons")
@@ -501,46 +481,27 @@ export const ModulosProvider: React.FC<{ children: React.ReactNode }> = ({
     void run();
   };
 
-  // Progresso do aluno continua local (por usuário)
-  const marcarAulaAssistida: ModulosContextType["marcarAulaAssistida"] = (
-    moduloId,
-    aulaId
-  ) => {
-    setModulos((prev) =>
-      initializeBlocks(
-        prev.map((m) => {
-          if (m.id !== moduloId) return m;
-          const novasAulas = m.aulas.map((a, i, arr) => {
-            if (a.id === aulaId) {
-              return { ...a, assistida: true, bloqueado: false };
-            }
-            if (i > 0 && arr[i - 1].id === aulaId) {
-              return { ...a, bloqueado: false };
-            }
-            return a;
-          });
-          return { ...m, aulas: novasAulas };
-        })
-      )
-    );
-  };
+  const reordenarModulos: ModulosContextType["reordenarModulos"] = (finalOrdered) => {
+    // Otimista no estado local
+    setModulos((prev) => {
+      const orderMap = new Map<number, number>(finalOrdered.map((m, i) => [m.id, i]));
+      const sorted = [...prev].sort((a, b) => {
+        const ai = orderMap.get(a.id);
+        const bi = orderMap.get(b.id);
+        return (ai ?? Number.MAX_SAFE_INTEGER) - (bi ?? Number.MAX_SAFE_INTEGER);
+      });
+      return sorted;
+    });
 
-  const marcarAulaIniciada: ModulosContextType["marcarAulaIniciada"] = (
-    moduloId,
-    aulaId
-  ) => {
-    setModulos((prev) =>
-      prev.map((m) =>
-        m.id === moduloId
-          ? {
-              ...m,
-              aulas: m.aulas.map((a) =>
-                a.id === aulaId ? { ...a, started: true } : a
-              ),
-            }
-          : m
-      )
-    );
+    // Persistência no BD
+    const run = async () => {
+      for (let i = 0; i < finalOrdered.length; i++) {
+        const m = finalOrdered[i];
+        await supabase.from("modules").update({ order_index: i }).eq("id", m.id);
+      }
+      await fetchFromDB();
+    };
+    void run();
   };
 
   return (
@@ -556,6 +517,7 @@ export const ModulosProvider: React.FC<{ children: React.ReactNode }> = ({
         setAulaBloqueada,
         setAulaReleaseDays,
         duplicarModulo,
+        reordenarModulos,
       }}
     >
       {children}
