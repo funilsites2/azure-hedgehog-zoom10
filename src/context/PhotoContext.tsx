@@ -1,7 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import React, { createContext, useContext, useState, useEffect } from "react";
 
 type PhotoContextType = {
   photoUrl: string | null;
@@ -19,27 +18,6 @@ export const PhotoProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     return stored ? JSON.parse(stored) : null;
   });
 
-  // Carrega avatar do Supabase se logado
-  useEffect(() => {
-    let active = true;
-    const run = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-      const { data } = await supabase
-        .from("profiles")
-        .select("avatar_url")
-        .eq("id", user.id)
-        .maybeSingle();
-      if (!active) return;
-      if (data && data.avatar_url) {
-        setPhotoUrl(data.avatar_url);
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(data.avatar_url));
-      }
-    };
-    run().catch(() => {});
-    return () => { active = false; };
-  }, []);
-
   useEffect(() => {
     if (photoUrl) {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(photoUrl));
@@ -48,30 +26,8 @@ export const PhotoProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   }, [photoUrl]);
 
-  const setPhoto = (url: string) => {
-    setPhotoUrl(url);
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      if (!user) return;
-      supabase
-        .from("profiles")
-        .upsert({ id: user.id, avatar_url: url, updated_at: new Date().toISOString() }, { onConflict: "id" })
-        .then(() => {})
-        .catch(() => {});
-    });
-  };
-
-  const removePhoto = () => {
-    setPhotoUrl(null);
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      if (!user) return;
-      supabase
-        .from("profiles")
-        .update({ avatar_url: null, updated_at: new Date().toISOString() })
-        .eq("id", user.id)
-        .then(() => {})
-        .catch(() => {});
-    });
-  };
+  const setPhoto = (url: string) => setPhotoUrl(url);
+  const removePhoto = () => setPhotoUrl(null);
 
   return (
     <PhotoContext.Provider value={{ photoUrl, setPhoto, removePhoto }}>

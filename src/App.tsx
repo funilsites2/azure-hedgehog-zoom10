@@ -10,7 +10,6 @@ import Aluno from "./pages/Aluno";
 import Perfil from "./pages/Perfil";
 import Login from "./pages/Login";
 import HomeLoginButton from "./components/HomeLoginButton";
-import RequireAuth from "./components/RequireAuth";
 
 const queryClient = new QueryClient();
 
@@ -24,30 +23,9 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/login" element={<Login />} />
-          <Route
-            path="/admin"
-            element={
-              <RequireAuth>
-                <Admin />
-              </RequireAuth>
-            }
-          />
-          <Route
-            path="/aluno"
-            element={
-              <RequireAuth>
-                <Aluno />
-              </RequireAuth>
-            }
-          />
-          <Route
-            path="/perfil"
-            element={
-              <RequireAuth>
-                <Perfil />
-              </RequireAuth>
-            }
-          />
+          <Route path="/admin" element={<Admin />} />
+          <Route path="/aluno" element={<Aluno />} />
+          <Route path="/perfil" element={<Perfil />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </HashRouter>
