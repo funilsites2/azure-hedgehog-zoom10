@@ -1,28 +1,30 @@
 import React, { createContext, useContext, useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
-type Aula = {
+export type Aula = {
   id: number;
   titulo: string;
   videoUrl: string;
+  descricao?: string;
   assistida?: boolean;
   bloqueado?: boolean;
-  releaseDate?: number; // calculado dinamicamente a partir da matrícula + offset
-  releaseOffsetDays?: number; // dias após a matrícula
+  releaseOffsetDays?: number;
+  releaseDate?: number;
   started?: boolean;
-  descricao?: string;
+  orderIndex?: number;
 };
 
-type Modulo = {
+export type Modulo = {
   id: number;
   nome: string;
   capa: string;
   linha: string;
   aulas: Aula[];
   bloqueado?: boolean;
-  releaseDate?: number; // calculado dinamicamente a partir da matrícula + offset
-  releaseOffsetDays?: number; // dias após a matrícula
-  externalUrl?: string; // URL externa de compra (opcional)
+  releaseOffsetDays?: number;
+  releaseDate?: number;
+  externalUrl?: string;
+  orderIndex?: number;
 };
 
 type ModulosContextType = {
@@ -30,10 +32,7 @@ type ModulosContextType = {
   adicionarModulo: (
     nome: string,
     capa: string,
-    aulas?: Omit<
-      Aula,
-      "id" | "assistida" | "bloqueado" | "releaseDate" | "releaseOffsetDays" | "started"
-    >[],
+    aulas?: Pick<Aula, "titulo" | "videoUrl" | "descricao">[],
     linha?: string,
     delayDays?: number,
     externalUrl?: string
@@ -45,36 +44,25 @@ type ModulosContextType = {
     delayDays?: number,
     descricao?: string
   ) => void;
-  marcarAulaAssistida: (moduloId: number, aulaId: number) => void;
-  marcarAulaIniciada: (moduloId: number, aulaId: number) => void;
   editarModulo: (
     moduloId: number,
     novoNome: string,
     novaCapa: string,
-    novasAulas: Omit<
-      Aula,
-      "id" | "assistida" | "bloqueado" | "releaseDate" | "releaseOffsetDays" | "started"
-    >[],
+    novasAulas: Pick<Aula, "titulo" | "videoUrl" | "descricao">[],
     linha?: string,
     delayDays?: number,
     externalUrl?: string
   ) => void;
-  setModuloBloqueado: (moduloId: number, bloqueado: boolean) => void;
-  setAulaBloqueada: (
-    moduloId: number,
-    aulaId: number,
-    bloqueado: boolean
-  ) => void;
-  setAulaReleaseDays: (
-    moduloId: number,
-    aulaId: number,
-    delayDays: number
-  ) => void;
   duplicarModulo: (moduloId: number) => void;
+  setModuloBloqueado: (moduloId: number, bloqueado: boolean) => void;
+  setAulaReleaseDays: (moduloId: number, aulaId: number, delayDays: number) => void;
+  reordenarModulos: (finalOrdered: Modulo[]) => void;
 };
 
-const ENROLLMENT_KEY = "aluno_enrollment_date";
+const ModulosContext = createContext<ModulosContextType | undefined>(undefined);
+
 const MS_DAY = 24 * 60 * 60 * 1000;
+const ENROLLMENT_KEY = "aluno_enrollment_date";
 
 function getEnrollmentDate(): number {
   try {
@@ -93,60 +81,7 @@ function getEnrollmentDate(): number {
   }
 }
 
-// Seed inicial para popular o DB vazio
-const seedDefaults = (): Modulo[] => [
-  {
-    id: 1,
-    nome: "Módulo 1",
-    capa: "https://placehold.co/400x200/222/fff?text=Módulo+1",
-    linha: "Linha A",
-    releaseOffsetDays: 0,
-    aulas: [
-      {
-        id: 1,
-        titulo: "Aula 1",
-        videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
-        assistida: true,
-        bloqueado: false,
-        releaseOffsetDays: 0,
-        started: false,
-        descricao: "Introdução ao módulo 1 e visão geral.",
-      },
-      {
-        id: 2,
-        titulo: "Aula 2",
-        videoUrl: "https://www.youtube.com/embed/ysz5S6PUM-U",
-        assistida: false,
-        bloqueado: false,
-        releaseOffsetDays: 0,
-        started: false,
-        descricao: "Conceitos fundamentais para continuar.",
-      },
-    ],
-  },
-  {
-    id: 2,
-    nome: "Módulo 2",
-    capa: "https://placehold.co/400x200/333/fff?text=Módulo+2",
-    linha: "Linha B",
-    releaseOffsetDays: 0,
-    aulas: [
-      {
-        id: 3,
-        titulo: "Aula 1",
-        videoUrl: "https://www.youtube.com/embed/ScMzIvxBSi4",
-        assistida: false,
-        bloqueado: false,
-        releaseOffsetDays: 0,
-        started: false,
-        descricao: "Iniciando o módulo 2 com práticas.",
-      },
-    ],
-  },
-];
-
-// Recalcula bloqueios com base na matrícula + offset e dependência sequencial
-const initializeBlocks = (mods: Modulo[]): Modulo[] => {
+function initializeBlocks(mods: Modulo[]): Modulo[] {
   const now = Date.now();
   const enrollment = getEnrollmentDate();
 
@@ -202,13 +137,9 @@ const initializeBlocks = (mods: Modulo[]): Modulo[] => {
       aulas,
     };
   });
-};
+}
 
-const ModulosContext = createContext<ModulosContextType | undefined>(undefined);
-
-export const ModulosProvider: React.FC<{ children: React.ReactNode }> = ({
-  children,
-}) => {
+export const ModulosProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [modulos, setModulos] = useState<Modulo[]>([]);
   const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
 
@@ -232,6 +163,7 @@ export const ModulosProvider: React.FC<{ children: React.ReactNode }> = ({
         externalUrl: m.external_url ?? undefined,
         releaseOffsetDays: m.release_offset_days ?? 0,
         bloqueado: m.bloqueado ?? false,
+        orderIndex: m.order_index ?? 0,
         aulas: (m.lessons ?? [])
           .sort((a: any, b: any) => (a.order_index ?? 0) - (b.order_index ?? 0))
           .map((a: any) => ({
@@ -243,62 +175,36 @@ export const ModulosProvider: React.FC<{ children: React.ReactNode }> = ({
             bloqueado: a.bloqueado ?? false,
             assistida: false,
             started: false,
+            orderIndex: a.order_index ?? 0,
           })),
       })) ?? [];
-
-    if (mapped.length === 0) {
-      // Seeder
-      const seed = seedDefaults();
-      for (const m of seed) {
-        await supabase.from("modules").insert({
-          id: m.id,
-          nome: m.nome,
-          capa: m.capa,
-          linha: m.linha,
-          external_url: m.externalUrl ?? null,
-          release_offset_days: m.releaseOffsetDays ?? 0,
-          bloqueado: m.bloqueado ?? false,
-          order_index: 0,
-        });
-        for (let i = 0; i < m.aulas.length; i++) {
-          const a = m.aulas[i];
-          await supabase.from("lessons").insert({
-            id: a.id,
-            module_id: m.id,
-            titulo: a.titulo,
-            video_url: a.videoUrl,
-            descricao: a.descricao ?? null,
-            release_offset_days: a.releaseOffsetDays ?? 0,
-            bloqueado: a.bloqueado ?? false,
-            order_index: i,
-          });
-        }
-      }
-      return fetchFromDB();
-    }
 
     setModulos(initializeBlocks(mapped));
   }
 
   useEffect(() => {
-    fetchFromDB();
+    const run = async () => {
+      await fetchFromDB();
 
-    // Realtime: escuta alterações em modules e lessons
-    const ch = supabase
-      .channel("modules_lessons_realtime")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "modules" },
-        () => fetchFromDB()
-      )
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "lessons" },
-        () => fetchFromDB()
-      )
-      .subscribe();
+      // Realtime para manter a UI atualizada
+      const ch = supabase
+        .channel("modules_lessons_realtime")
+        .on(
+          "postgres_changes",
+          { event: "*", schema: "public", table: "modules" },
+          () => fetchFromDB()
+        )
+        .on(
+          "postgres_changes",
+          { event: "*", schema: "public", table: "lessons" },
+          () => fetchFromDB()
+        )
+        .subscribe();
 
-    channelRef.current = ch;
+      channelRef.current = ch;
+    };
+    void run();
+
     return () => {
       if (channelRef.current) supabase.removeChannel(channelRef.current);
     };
@@ -324,7 +230,7 @@ export const ModulosProvider: React.FC<{ children: React.ReactNode }> = ({
         external_url: externalUrl ?? null,
         release_offset_days: Math.max(0, Math.round(delayDays)),
         bloqueado: false,
-        order_index: 0,
+        order_index: moduleId, // provisório, estabilizado pela reordenação
       });
 
       for (let i = 0; i < aulas.length; i++) {
@@ -336,7 +242,7 @@ export const ModulosProvider: React.FC<{ children: React.ReactNode }> = ({
           video_url: a.videoUrl,
           descricao: a.descricao ?? null,
           release_offset_days: Math.max(0, Math.round(delayDays)),
-          bloqueado: i !== 0, // sequencial
+          bloqueado: i !== 0, // sequencial simples
           order_index: i,
         });
       }
@@ -420,10 +326,7 @@ export const ModulosProvider: React.FC<{ children: React.ReactNode }> = ({
     void run();
   };
 
-  const setModuloBloqueado: ModulosContextType["setModuloBloqueado"] = (
-    moduloId,
-    bloqueado
-  ) => {
+  const setModuloBloqueado: ModulosContextType["setModuloBloqueado"] = (moduloId, bloqueado) => {
     const run = async () => {
       await supabase.from("modules").update({ bloqueado }).eq("id", moduloId);
       await fetchFromDB();
@@ -431,27 +334,7 @@ export const ModulosProvider: React.FC<{ children: React.ReactNode }> = ({
     void run();
   };
 
-  const setAulaBloqueada: ModulosContextType["setAulaBloqueada"] = (
-    moduloId,
-    aulaId,
-    bloqueado
-  ) => {
-    const run = async () => {
-      await supabase
-        .from("lessons")
-        .update({ bloqueado })
-        .eq("id", aulaId)
-        .eq("module_id", moduloId);
-      await fetchFromDB();
-    };
-    void run();
-  };
-
-  const setAulaReleaseDays: ModulosContextType["setAulaReleaseDays"] = (
-    moduloId,
-    aulaId,
-    delayDays
-  ) => {
+  const setAulaReleaseDays: ModulosContextType["setAulaReleaseDays"] = (moduloId, aulaId, delayDays) => {
     const run = async () => {
       await supabase
         .from("lessons")
@@ -479,7 +362,7 @@ export const ModulosProvider: React.FC<{ children: React.ReactNode }> = ({
         external_url: original.externalUrl ?? null,
         release_offset_days: original.releaseOffsetDays ?? 0,
         bloqueado: original.bloqueado ?? false,
-        order_index: 0,
+        order_index: now, // mantém ao final até ser reordenado
       });
 
       for (let i = 0; i < original.aulas.length; i++) {
@@ -501,46 +384,27 @@ export const ModulosProvider: React.FC<{ children: React.ReactNode }> = ({
     void run();
   };
 
-  // Progresso do aluno continua local (por usuário)
-  const marcarAulaAssistida: ModulosContextType["marcarAulaAssistida"] = (
-    moduloId,
-    aulaId
-  ) => {
-    setModulos((prev) =>
-      initializeBlocks(
-        prev.map((m) => {
-          if (m.id !== moduloId) return m;
-          const novasAulas = m.aulas.map((a, i, arr) => {
-            if (a.id === aulaId) {
-              return { ...a, assistida: true, bloqueado: false };
-            }
-            if (i > 0 && arr[i - 1].id === aulaId) {
-              return { ...a, bloqueado: false };
-            }
-            return a;
-          });
-          return { ...m, aulas: novasAulas };
-        })
-      )
-    );
-  };
+  const reordenarModulos: ModulosContextType["reordenarModulos"] = (finalOrdered) => {
+    // Otimista no estado local
+    setModulos((prev) => {
+      const orderMap = new Map<number, number>(finalOrdered.map((m, i) => [m.id, i]));
+      const sorted = [...prev].sort((a, b) => {
+        const ai = orderMap.get(a.id);
+        const bi = orderMap.get(b.id);
+        return (ai ?? Number.MAX_SAFE_INTEGER) - (bi ?? Number.MAX_SAFE_INTEGER);
+      });
+      return sorted.map((m) => ({ ...m, orderIndex: orderMap.get(m.id) ?? m.orderIndex }));
+    });
 
-  const marcarAulaIniciada: ModulosContextType["marcarAulaIniciada"] = (
-    moduloId,
-    aulaId
-  ) => {
-    setModulos((prev) =>
-      prev.map((m) =>
-        m.id === moduloId
-          ? {
-              ...m,
-              aulas: m.aulas.map((a) =>
-                a.id === aulaId ? { ...a, started: true } : a
-              ),
-            }
-          : m
-      )
-    );
+    // Persistência no BD
+    const run = async () => {
+      for (let i = 0; i < finalOrdered.length; i++) {
+        const m = finalOrdered[i];
+        await supabase.from("modules").update({ order_index: i }).eq("id", m.id);
+      }
+      await fetchFromDB();
+    };
+    void run();
   };
 
   return (
@@ -549,13 +413,11 @@ export const ModulosProvider: React.FC<{ children: React.ReactNode }> = ({
         modulos,
         adicionarModulo,
         adicionarAula,
-        marcarAulaAssistida,
-        marcarAulaIniciada,
         editarModulo,
-        setModuloBloqueado,
-        setAulaBloqueada,
-        setAulaReleaseDays,
         duplicarModulo,
+        setModuloBloqueado,
+        setAulaReleaseDays,
+        reordenarModulos,
       }}
     >
       {children}
