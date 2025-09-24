@@ -84,17 +84,32 @@ export default function Admin() {
   };
 
   const salvarOrdem = () => {
-    // monta lista completa ordenada por linhas mantendo a ordem de 'linhas'
-    const orderedAll = linhas.flatMap((linha) => getModulosOrdenados(linha));
-    // tenta persistir no contexto, se houver suporte
+    // ordena todos os módulos respeitando a ordem por linha e mantém os sem linha no final
+    const orderedByLines = linhas.flatMap((linha) => getModulosOrdenados(linha));
+    const semLinha = modulos.filter((m) => !m.linha || m.linha.trim() === "");
+    const finalOrdered = [...orderedByLines, ...semLinha];
+
+    // tenta persistir no contexto com as APIs usuais
     const anyCtx = modulosCtx as any;
+    if (typeof anyCtx.reordenarModulos === "function") {
+      anyCtx.reordenarModulos(finalOrdered);
+      showSuccess("Ordem salva");
+      return;
+    }
     if (typeof anyCtx.setModulos === "function") {
-      anyCtx.setModulos(orderedAll);
+      anyCtx.setModulos(finalOrdered);
       showSuccess("Ordem salva");
-    } else if (typeof anyCtx.reordenarModulos === "function") {
-      anyCtx.reordenarModulos(ordemPorLinha);
-      showSuccess("Ordem salva");
-    } else {
+      return;
+    }
+
+    // fallback: salva ids no localStorage para área do aluno consumir
+    try {
+      const ids = finalOrdered.map((m) => m.id);
+      localStorage.setItem("modulos-ordem-ids", JSON.stringify(ids));
+      showSuccess("Ordem salva localmente");
+      // opcional: emite evento para outras páginas ouvirem
+      window.dispatchEvent(new CustomEvent("modulos-ordem-atualizada", { detail: ids }));
+    } catch {
       showSuccess("Ordem aplicada aqui; para refletir para alunos, habilite persistência no contexto.");
     }
   };
