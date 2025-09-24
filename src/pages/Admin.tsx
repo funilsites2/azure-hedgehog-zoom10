@@ -1,9 +1,13 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Layers,
   Edit,
   Unlock,
   Lock,
+  ArrowLeft,
+  ArrowRight,
+  ArrowUp,
+  ArrowDown,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useModulos } from "@/context/ModulosContext";
@@ -15,6 +19,7 @@ import UserMenu from "@/components/UserMenu";
 import { showSuccess } from "@/utils/toast";
 
 export default function Admin() {
+  const modulosCtx = useModulos();
   const {
     modulos,
     adicionarModulo,
@@ -23,11 +28,76 @@ export default function Admin() {
     setAulaReleaseDays,
     duplicarModulo,
     setModuloBloqueado,
-  } = useModulos();
+  } = modulosCtx;
 
   const linhas = Array.from(
     new Set(modulos.map((m) => m.linha).filter((l) => l.trim() !== ""))
   );
+
+  // estado local de ordem por linha (apenas ids)
+  const [ordemPorLinha, setOrdemPorLinha] = useState<Record<string, number[]>>(
+    {}
+  );
+
+  // sincroniza a ordem local com os módulos atuais
+  useEffect(() => {
+    setOrdemPorLinha((prev) => {
+      const next: Record<string, number[]> = { ...prev };
+      const linhasAtuais = Array.from(
+        new Set(modulos.map((m) => m.linha).filter((l) => l.trim() !== ""))
+      );
+      for (const linha of linhasAtuais) {
+        const idsLinha = modulos.filter((m) => m.linha === linha).map((m) => m.id);
+        const atual = next[linha] ?? idsLinha;
+        // mantém ordem existente quando possível; remove ids inexistentes e inclui novos ao final
+        const filtrado = atual.filter((id) => idsLinha.includes(id));
+        const faltantes = idsLinha.filter((id) => !filtrado.includes(id));
+        next[linha] = [...filtrado, ...faltantes];
+      }
+      // remove linhas que não existem mais
+      Object.keys(next).forEach((l) => {
+        if (!linhasAtuais.includes(l)) delete next[l];
+      });
+      return next;
+    });
+  }, [modulos]);
+
+  const getModulosOrdenados = (linha: string) => {
+    const ordem = ordemPorLinha[linha];
+    const mapa = new Map(modulos.filter((m) => m.linha === linha).map((m) => [m.id, m]));
+    if (!ordem) return modulos.filter((m) => m.linha === linha);
+    return ordem.map((id) => mapa.get(id)).filter(Boolean) as typeof modulos;
+  };
+
+  const moverModulo = (linha: string, id: number, delta: number) => {
+    setOrdemPorLinha((prev) => {
+      const atual = prev[linha] ?? [];
+      const idx = atual.indexOf(id);
+      if (idx === -1) return prev;
+      const novoIdx = Math.max(0, Math.min(atual.length - 1, idx + delta));
+      if (novoIdx === idx) return prev;
+      const novo = [...atual];
+      const [item] = novo.splice(idx, 1);
+      novo.splice(novoIdx, 0, item);
+      return { ...prev, [linha]: novo };
+    });
+  };
+
+  const salvarOrdem = () => {
+    // monta lista completa ordenada por linhas mantendo a ordem de 'linhas'
+    const orderedAll = linhas.flatMap((linha) => getModulosOrdenados(linha));
+    // tenta persistir no contexto, se houver suporte
+    const anyCtx = modulosCtx as any;
+    if (typeof anyCtx.setModulos === "function") {
+      anyCtx.setModulos(orderedAll);
+      showSuccess("Ordem salva");
+    } else if (typeof anyCtx.reordenarModulos === "function") {
+      anyCtx.reordenarModulos(ordemPorLinha);
+      showSuccess("Ordem salva");
+    } else {
+      showSuccess("Ordem aplicada aqui; para refletir para alunos, habilite persistência no contexto.");
+    }
+  };
 
   const [novaAulaExistente, setNovaAulaExistente] = useState<{
     moduloId: number | "";
@@ -58,7 +128,9 @@ export default function Admin() {
         delayDays,
       });
 
-      showSuccess(`Enviando edição: ${aulas.length} aula(s) — verifique o console para detalhes.`);
+      showSuccess(
+        `Enviando edição: ${aulas.length} aula(s) — verifique o console para detalhes.`
+      );
 
       editarModulo(editandoId, nome, capa, aulas, linha, delayDays);
       setEditandoId(null);
@@ -207,7 +279,14 @@ export default function Admin() {
                       submitLabel="Atualizar Módulo"
                       onAulasChange={(newAulas: AulaInput[]) => {
                         try {
-                          editarModulo(m.id, m.nome, m.capa, newAulas, m.linha, computedDelayDays);
+                          editarModulo(
+                            m.id,
+                            m.nome,
+                            m.capa,
+                            newAulas,
+                            m.linha,
+                            computedDelayDays
+                          );
                           showSuccess("Aulas atualizadas");
                         } catch (err) {
                           console.error("Erro ao salvar aulas:", err);
@@ -215,7 +294,9 @@ export default function Admin() {
                       }}
                     />
                     <div className="mt-6">
-                      <h3 className="font-semibold mb-2">Dias (após matrícula) para liberar cada aula</h3>
+                      <h3 className="font-semibold mb-2">
+                        Dias (após matrícula) para liberar cada aula
+                      </h3>
                       {m.aulas.map((a) => {
                         const currentDelay =
                           typeof a.releaseOffsetDays === "number"
@@ -269,78 +350,135 @@ export default function Admin() {
             <>
               {linhas.map((linha) => (
                 <div key={linha}>
-                  <h2 className="text-2xl font-semibold mt-8 mb-4">{linha}</h2>
-                  <div className="grid grid-cols-1 gap-4 md:hidden">
-                    {modulos
-                      .filter((m) => m.linha === linha)
-                      .map((m) => (
-                        <div
-                          key={m.id}
-                          className="bg-neutral-800 p-4 rounded-lg flex flex-col"
-                        >
-                          <img
-                            src={m.capa}
-                            alt={m.nome}
-                            className="w-full h-32 object-cover rounded mb-2"
-                          />
-                          <h3 className="font-semibold mb-2">{m.nome}</h3>
-                          <div className="mt-auto flex gap-2">
-                            <Button onClick={() => iniciarEdicao(m.id)}>
-                              <Edit size={16} />
-                            </Button>
-                            <Button
-                              variant="secondary"
-                              onClick={() => duplicarModulo(m.id)}
-                              title="Duplicar Módulo"
-                            >
-                              <Layers size={16} />
-                            </Button>
-                            <Button
-                              variant={m.bloqueado ? "destructive" : "secondary"}
-                              onClick={() => setModuloBloqueado(m.id, !m.bloqueado)}
-                              title={m.bloqueado ? "Desbloquear Módulo" : "Bloquear Módulo"}
-                            >
-                              {m.bloqueado ? <Lock size={16} /> : <Unlock size={16} />}
-                            </Button>
-                          </div>
-                        </div>
-                      ))}
+                  <div className="flex items-center justify-between mt-8 mb-4">
+                    <h2 className="text-2xl font-semibold">{linha}</h2>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        onClick={salvarOrdem}
+                        className="rounded-full"
+                        title="Salvar ordem dessa linha (e demais)"
+                      >
+                        Salvar ordem
+                      </Button>
+                    </div>
                   </div>
-                  <div className="hidden md:flex overflow-x-auto gap-4 snap-x snap-mandatory px-2">
-                    {modulos
-                      .filter((m) => m.linha === linha)
-                      .map((m) => (
-                        <div
-                          key={m.id}
-                          className="snap-start flex-shrink-0 w-[20%] bg-neutral-800 p-4 rounded-lg flex flex-col"
-                        >
-                          <img
-                            src={m.capa}
-                            alt={m.nome}
-                            className="w-full h-32 object-cover rounded mb-2"
-                          />
-                          <h3 className="font-semibold mb-2">{m.nome}</h3>
-                          <div className="mt-auto flex gap-2">
-                            <Button onClick={() => iniciarEdicao(m.id)}>
-                              <Edit size={16} />
-                            </Button>
-                            <Button
-                              variant="secondary"
-                              onClick={() => duplicarModulo(m.id)}
-                              title="Duplicar Módulo"
-                            >
-                              <Layers size={16} />
-                            </Button>
-                            <Button
-                              variant={m.bloqueado ? "destructive" : "secondary"}
-                              onClick={() => setModuloBloqueado(m.id, !m.bloqueado)}
-                              title={m.bloqueado ? "Desbloquear Módulo" : "Bloquear Módulo"}
-                            >
-                              {m.bloqueado ? <Lock size={16} /> : <Unlock size={16} />}
-                            </Button>
-                          </div>
+
+                  {/* Mobile (empilhado) */}
+                  <div className="grid grid-cols-1 gap-4 md:hidden">
+                    {getModulosOrdenados(linha).map((m) => (
+                      <div
+                        key={m.id}
+                        className="bg-neutral-800 p-4 rounded-lg flex flex-col"
+                      >
+                        <img
+                          src={m.capa}
+                          alt={m.nome}
+                          className="w-full h-32 object-cover rounded mb-2"
+                        />
+                        <h3 className="font-semibold mb-2">{m.nome}</h3>
+                        <div className="mt-auto flex gap-2 flex-wrap">
+                          <Button onClick={() => iniciarEdicao(m.id)}>
+                            <Edit size={16} />
+                          </Button>
+                          <Button
+                            variant="secondary"
+                            onClick={() => duplicarModulo(m.id)}
+                            title="Duplicar Módulo"
+                          >
+                            <Layers size={16} />
+                          </Button>
+                          <Button
+                            variant={m.bloqueado ? "destructive" : "secondary"}
+                            onClick={() =>
+                              setModuloBloqueado(m.id, !m.bloqueado)
+                            }
+                            title={
+                              m.bloqueado
+                                ? "Desbloquear Módulo"
+                                : "Bloquear Módulo"
+                            }
+                          >
+                            {m.bloqueado ? <Lock size={16} /> : <Unlock size={16} />}
+                          </Button>
+
+                          {/* Controles de ordem (mobile) */}
+                          <Button
+                            variant="secondary"
+                            onClick={() => moverModulo(linha, m.id, -1)}
+                            title="Mover para cima"
+                          >
+                            <ArrowUp size={16} />
+                          </Button>
+                          <Button
+                            variant="secondary"
+                            onClick={() => moverModulo(linha, m.id, 1)}
+                            title="Mover para baixo"
+                          >
+                            <ArrowDown size={16} />
+                          </Button>
                         </div>
-                      ))}
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Desktop (carrossel horizontal) */}
+                  <div className="hidden md:flex overflow-x-auto gap-4 snap-x snap-mandatory px-2">
+                    {getModulosOrdenados(linha).map((m) => (
+                      <div
+                        key={m.id}
+                        className="snap-start flex-shrink-0 w-[20%] bg-neutral-800 p-4 rounded-lg flex flex-col"
+                      >
+                        <img
+                          src={m.capa}
+                          alt={m.nome}
+                          className="w-full h-32 object-cover rounded mb-2"
+                        />
+                        <h3 className="font-semibold mb-2">{m.nome}</h3>
+                        <div className="mt-auto flex gap-2 flex-wrap">
+                          <Button onClick={() => iniciarEdicao(m.id)}>
+                            <Edit size={16} />
+                          </Button>
+                          <Button
+                            variant="secondary"
+                            onClick={() => duplicarModulo(m.id)}
+                            title="Duplicar Módulo"
+                          >
+                            <Layers size={16} />
+                          </Button>
+                          <Button
+                            variant={m.bloqueado ? "destructive" : "secondary"}
+                            onClick={() =>
+                              setModuloBloqueado(m.id, !m.bloqueado)
+                            }
+                            title={
+                              m.bloqueado
+                                ? "Desbloquear Módulo"
+                                : "Bloquear Módulo"
+                            }
+                          >
+                            {m.bloqueado ? <Lock size={16} /> : <Unlock size={16} />}
+                          </Button>
+
+                          {/* Controles de ordem (desktop) */}
+                          <Button
+                            variant="secondary"
+                            onClick={() => moverModulo(linha, m.id, -1)}
+                            title="Mover para a esquerda"
+                          >
+                            <ArrowLeft size={16} />
+                          </Button>
+                          <Button
+                            variant="secondary"
+                            onClick={() => moverModulo(linha, m.id, 1)}
+                            title="Mover para a direita"
+                          >
+                            <ArrowRight size={16} />
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
               ))}
