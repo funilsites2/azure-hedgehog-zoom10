@@ -223,6 +223,8 @@ export const ModulosProvider: React.FC<{ children: React.ReactNode }> = ({ child
     const run = async () => {
       await fetchFromDB();
 
+      const { data: { user } } = await supabase.auth.getUser();
+
       const ch = supabase
         .channel("modules_lessons_realtime")
         .on(
@@ -234,9 +236,18 @@ export const ModulosProvider: React.FC<{ children: React.ReactNode }> = ({ child
           "postgres_changes",
           { event: "*", schema: "public", table: "lessons" },
           () => fetchFromDB()
-        )
-        .subscribe();
+        );
 
+      // Escuta as mudanças de progresso do usuário atual (para refletir 'Continuar assistindo')
+      if (user?.id) {
+        ch.on(
+          "postgres_changes",
+          { event: "*", schema: "public", table: "lesson_progress", filter: `user_id=eq.${user.id}` },
+          () => fetchFromDB()
+        );
+      }
+
+      ch.subscribe();
       channelRef.current = ch;
     };
     void run();
@@ -441,37 +452,62 @@ export const ModulosProvider: React.FC<{ children: React.ReactNode }> = ({ child
   };
 
   // ====== PROGRESSO + CONQUISTAS ======
-  const marcarAulaIniciada: ModulosContextType["marcarAulaIniciada"] = (_moduloId, aulaId) => {
+  const marcarAulaIniciada: ModulosContextType["marcarAulaIniciada"] = (moduloId, aulaId) => {
+    // Atualização otimista: marcar started localmente
+    setModulos((prev) =>
+      prev.map((m) =>
+        m.id === moduloId
+          ? { ...m, aulas: m.aulas.map((a) => (a.id === aulaId ? { ...a, started: true } : a)) }
+          : m
+      )
+    );
+
     const run = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
       await supabase
         .from("lesson_progress")
-        .upsert({
-          user_id: user.id,
-          lesson_id: aulaId,
-          last_time_seconds: 0,
-          last_pct: 1,
-          completed: false,
-          updated_at: new Date().toISOString(),
-        }, { onConflict: "user_id,lesson_id" });
+        .upsert(
+          {
+            user_id: user.id,
+            lesson_id: aulaId,
+            last_time_seconds: 0,
+            last_pct: 1,
+            completed: false,
+            updated_at: new Date().toISOString(),
+          },
+          { onConflict: "user_id,lesson_id" }
+        );
     };
     void run();
   };
 
   const updateAulaProgresso: ModulosContextType["updateAulaProgresso"] = (aulaId, seconds, pct) => {
+    // Atualização otimista: started quando pct entre 1 e 99; completed só via marcarAulaAssistida
+    if (pct > 0 && pct < 100) {
+      setModulos((prev) =>
+        prev.map((m) => ({
+          ...m,
+          aulas: m.aulas.map((a) => (a.id === aulaId ? { ...a, started: true } : a)),
+        }))
+      );
+    }
+
     const run = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
       await supabase
         .from("lesson_progress")
-        .upsert({
-          user_id: user.id,
-          lesson_id: aulaId,
-          last_time_seconds: Math.max(0, Math.round(seconds)),
-          last_pct: Math.max(0, Math.min(100, Math.round(pct))),
-          updated_at: new Date().toISOString(),
-        }, { onConflict: "user_id,lesson_id" });
+        .upsert(
+          {
+            user_id: user.id,
+            lesson_id: aulaId,
+            last_time_seconds: Math.max(0, Math.round(seconds)),
+            last_pct: Math.max(0, Math.min(100, Math.round(pct))),
+            updated_at: new Date().toISOString(),
+          },
+          { onConflict: "user_id,lesson_id" }
+        );
     };
     void run();
   };
@@ -492,13 +528,16 @@ export const ModulosProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
       await supabase
         .from("lesson_progress")
-        .upsert({
-          user_id: user.id,
-          lesson_id: aulaId,
-          last_pct: 100,
-          completed: true,
-          updated_at: new Date().toISOString(),
-        }, { onConflict: "user_id,lesson_id" });
+        .upsert(
+          {
+            user_id: user.id,
+            lesson_id: aulaId,
+            last_pct: 100,
+            completed: true,
+            updated_at: new Date().toISOString(),
+          },
+          { onConflict: "user_id,lesson_id" }
+        );
 
       // Conquista: primeira aula assistida
       await grantAchievement(user.id, "first_lesson_watched", null);
