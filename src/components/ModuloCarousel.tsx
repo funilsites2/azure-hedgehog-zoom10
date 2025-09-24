@@ -91,6 +91,7 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
                 const concluido = modulo.aulas.filter((a) => a.assistida).length;
                 const progresso = total ? Math.round((concluido / total) * 100) : 0;
                 const blockedByDate = !!(modulo.releaseDate && now < modulo.releaseDate);
+                const shouldGray = modulo.bloqueado || blockedByDate;
                 return (
                   <div
                     key={modulo.id}
@@ -99,8 +100,8 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
                   >
                     <div
                       className={`group bg-neutral-800 rounded-xl overflow-hidden p-4 shadow-lg flex flex-col h-full relative hover:z-10 ${
-                        modulo.bloqueado || blockedByDate ? "grayscale" : ""
-                      } ${blockedByDate ? "cursor-not-allowed" : "cursor-pointer"}`}
+                        blockedByDate ? "cursor-not-allowed" : "cursor-pointer"
+                      }`}
                       onClick={() => {
                         if (blockedByDate) {
                           setBlockedModulo(modulo);
@@ -135,7 +136,7 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
                           />
                         </div>
                       )}
-                      <div className="mb-2 flex flex-col items-center">
+                      <div className={`mb-2 flex flex-col items-center ${shouldGray ? "grayscale" : ""}`}>
                         <img
                           src={modulo.capa}
                           alt={modulo.nome}
@@ -186,12 +187,13 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
           const concluido = modulo.aulas.filter((a) => a.assistida).length;
           const progresso = total ? Math.round((concluido / total) * 100) : 0;
           const blockedByDate = !!(modulo.releaseDate && now < modulo.releaseDate);
+          const shouldGray = modulo.bloqueado || blockedByDate;
           return (
             <div
               key={modulo.id}
               className={`group relative snap-start flex-shrink-0 w-[16%] rounded-xl shadow-lg overflow-hidden hover:z-10 ${
-                modulo.bloqueado || blockedByDate ? "grayscale" : ""
-              } ${blockedByDate ? "cursor-not-allowed" : "cursor-pointer"}`}
+                blockedByDate ? "cursor-not-allowed" : "cursor-pointer"
+              }`}
               onClick={() => {
                 if (blockedByDate) {
                   setBlockedModulo(modulo);
@@ -229,13 +231,13 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
               <img
                 src={modulo.capa}
                 alt={modulo.nome}
-                className="w-full aspect-[3/4] object-cover rounded-xl transition-transform duration-300 ease-out group-hover:scale-105"
+                className={`w-full aspect-[3/4] object-cover rounded-xl transition-transform duration-300 ease-out group-hover:scale-105 ${shouldGray ? "grayscale" : ""}`}
                 onError={(e) =>
                   (e.currentTarget.src =
                     "https://placehold.co/300x400?text=Sem+Capa")
                 }
               />
-              <div className="p-3 flex flex-col items-center">
+              <div className={`p-3 flex flex-col items-center ${shouldGray ? "grayscale" : ""}`}>
                 <h2 className="text-base font-semibold text-center text-white">
                   {modulo.nome}
                 </h2>
