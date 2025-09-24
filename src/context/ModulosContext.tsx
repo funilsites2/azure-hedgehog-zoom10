@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useContext, useEffect, useRef, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 type Aula = {
   id: number;
@@ -72,7 +73,6 @@ type ModulosContextType = {
   duplicarModulo: (moduloId: number) => void;
 };
 
-const STORAGE_KEY = "modulos_area_membros";
 const ENROLLMENT_KEY = "aluno_enrollment_date";
 const MS_DAY = 24 * 60 * 60 * 1000;
 
@@ -93,115 +93,86 @@ function getEnrollmentDate(): number {
   }
 }
 
-const getInitialModulos = (): Modulo[] => {
-  const data = localStorage.getItem(STORAGE_KEY);
-  if (data) {
-    try {
-      return JSON.parse(data);
-    } catch {}
-  }
-  // Seed inicial: offsets 0 (liberado no dia da matrícula)
-  return [
-    {
-      id: 1,
-      nome: "Módulo 1",
-      capa: "https://placehold.co/400x200/222/fff?text=Módulo+1",
-      linha: "Linha A",
-      releaseOffsetDays: 0,
-      aulas: [
-        {
-          id: 1,
-          titulo: "Aula 1",
-          videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
-          assistida: true,
-          bloqueado: false,
-          releaseOffsetDays: 0,
-          started: false,
-          descricao: "Introdução ao módulo 1 e visão geral.",
-        },
-        {
-          id: 2,
-          titulo: "Aula 2",
-          videoUrl: "https://www.youtube.com/embed/ysz5S6PUM-U",
-          assistida: false,
-          bloqueado: false,
-          releaseOffsetDays: 0,
-          started: false,
-          descricao: "Conceitos fundamentais para continuar.",
-        },
-      ],
-    },
-    {
-      id: 2,
-      nome: "Módulo 2",
-      capa: "https://placehold.co/400x200/333/fff?text=Módulo+2",
-      linha: "Linha B",
-      releaseOffsetDays: 0,
-      aulas: [
-        {
-          id: 3,
-          titulo: "Aula 1",
-          videoUrl: "https://www.youtube.com/embed/ScMzIvxBSi4",
-          assistida: false,
-          bloqueado: false,
-          releaseOffsetDays: 0,
-          started: false,
-          descricao: "Iniciando o módulo 2 com práticas.",
-        },
-      ],
-    },
-  ];
-};
+// Seed inicial para popular o DB vazio
+const seedDefaults = (): Modulo[] => [
+  {
+    id: 1,
+    nome: "Módulo 1",
+    capa: "https://placehold.co/400x200/222/fff?text=Módulo+1",
+    linha: "Linha A",
+    releaseOffsetDays: 0,
+    aulas: [
+      {
+        id: 1,
+        titulo: "Aula 1",
+        videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
+        assistida: true,
+        bloqueado: false,
+        releaseOffsetDays: 0,
+        started: false,
+        descricao: "Introdução ao módulo 1 e visão geral.",
+      },
+      {
+        id: 2,
+        titulo: "Aula 2",
+        videoUrl: "https://www.youtube.com/embed/ysz5S6PUM-U",
+        assistida: false,
+        bloqueado: false,
+        releaseOffsetDays: 0,
+        started: false,
+        descricao: "Conceitos fundamentais para continuar.",
+      },
+    ],
+  },
+  {
+    id: 2,
+    nome: "Módulo 2",
+    capa: "https://placehold.co/400x200/333/fff?text=Módulo+2",
+    linha: "Linha B",
+    releaseOffsetDays: 0,
+    aulas: [
+      {
+        id: 3,
+        titulo: "Aula 1",
+        videoUrl: "https://www.youtube.com/embed/ScMzIvxBSi4",
+        assistida: false,
+        bloqueado: false,
+        releaseOffsetDays: 0,
+        started: false,
+        descricao: "Iniciando o módulo 2 com práticas.",
+      },
+    ],
+  },
+];
 
-// Ajusta bloqueios com base na matrícula + offset; migra dados antigos com releaseDate absoluto para offset.
+// Recalcula bloqueios com base na matrícula + offset e dependência sequencial
 const initializeBlocks = (mods: Modulo[]): Modulo[] => {
   const now = Date.now();
   const enrollment = getEnrollmentDate();
 
   return mods.map((m) => {
-    // Migrar/normalizar offset do módulo
-    let moduleOffset =
+    const moduleOffset =
       typeof m.releaseOffsetDays === "number" && isFinite(m.releaseOffsetDays)
         ? Math.max(0, Math.round(m.releaseOffsetDays))
-        : undefined;
-
-    if (moduleOffset === undefined && (m as any).releaseDate) {
-      const diff = Math.max(0, Math.round(((m as any).releaseDate - enrollment) / MS_DAY));
-      moduleOffset = diff;
-    }
-    if (moduleOffset === undefined) moduleOffset = 0;
+        : 0;
 
     const moduleEffectiveRelease = enrollment + moduleOffset * MS_DAY;
-    const moduleBlocked =
-      (m.bloqueado ?? false) || moduleEffectiveRelease > now;
+    const moduleBlocked = (m.bloqueado ?? false) || moduleEffectiveRelease > now;
 
-    // Normaliza aulas
-    const aulas = m.aulas.map((a, i, arr) => {
-      let aulaOffset =
+    const aulas = (m.aulas ?? []).map((a, i, arr) => {
+      const aulaOffset =
         typeof a.releaseOffsetDays === "number" && isFinite(a.releaseOffsetDays)
           ? Math.max(0, Math.round(a.releaseOffsetDays))
-          : undefined;
-
-      if (aulaOffset === undefined && a.releaseDate) {
-        const diff = Math.max(0, Math.round((a.releaseDate - enrollment) / MS_DAY));
-        aulaOffset = diff;
-      }
-      if (aulaOffset === undefined) {
-        // fallback: herda offset do módulo
-        aulaOffset = moduleOffset!;
-      }
+          : moduleOffset;
 
       const effectiveRelease = enrollment + aulaOffset * MS_DAY;
-      const alreadyStarted = a.started ?? false;
 
-      // Regra de bloqueio: por data OU sequencial
       if (effectiveRelease > now) {
         return {
           ...a,
           releaseOffsetDays: aulaOffset,
           releaseDate: effectiveRelease,
           bloqueado: true,
-          started: alreadyStarted,
         };
       }
 
@@ -211,7 +182,6 @@ const initializeBlocks = (mods: Modulo[]): Modulo[] => {
           releaseOffsetDays: aulaOffset,
           releaseDate: effectiveRelease,
           bloqueado: false,
-          started: alreadyStarted,
         };
       }
 
@@ -221,14 +191,12 @@ const initializeBlocks = (mods: Modulo[]): Modulo[] => {
         ...a,
         releaseOffsetDays: aulaOffset,
         releaseDate: effectiveRelease,
-        bloqueado: !prevAssistida,
-        started: alreadyStarted,
+        bloqueado: !prevAssistida || a.bloqueado === true,
       };
     });
 
     return {
       ...m,
-      releaseOffsetDays: moduleOffset,
       releaseDate: moduleEffectiveRelease,
       bloqueado: moduleBlocked,
       aulas,
@@ -241,86 +209,303 @@ const ModulosContext = createContext<ModulosContextType | undefined>(undefined);
 export const ModulosProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const [modulos, setModulos] = useState<Modulo[]>(() =>
-    initializeBlocks(getInitialModulos())
-  );
+  const [modulos, setModulos] = useState<Modulo[]>([]);
+  const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
 
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(modulos));
-  }, [modulos]);
+  async function fetchFromDB() {
+    const { data, error } = await supabase
+      .from("modules")
+      .select(`
+        id, nome, capa, linha, external_url, release_offset_days, bloqueado, order_index,
+        lessons:lessons ( id, module_id, titulo, video_url, descricao, release_offset_days, bloqueado, order_index )
+      `)
+      .order("order_index", { ascending: true });
 
-  const adicionarModulo = (
-    nome: string,
-    capa: string,
-    aulas: Omit<
-      Aula,
-      "id" | "assistida" | "bloqueado" | "releaseDate" | "releaseOffsetDays" | "started"
-    >[] = [],
-    linha: string = "",
-    delayDays: number = 0,
-    externalUrl?: string
-  ) => {
-    const now = Date.now();
-    setModulos((prev) =>
-      initializeBlocks([
-        ...prev,
-        {
-          id: now,
-          nome,
-          capa,
-          linha,
-          externalUrl,
-          releaseOffsetDays: Math.max(0, Math.round(delayDays)),
-          aulas: aulas.map((a, i) => ({
-            id: now + i + 1,
+    if (error) throw error;
+
+    const mapped: Modulo[] =
+      (data ?? []).map((m: any) => ({
+        id: Number(m.id),
+        nome: m.nome,
+        capa: m.capa,
+        linha: m.linha ?? "",
+        externalUrl: m.external_url ?? undefined,
+        releaseOffsetDays: m.release_offset_days ?? 0,
+        bloqueado: m.bloqueado ?? false,
+        aulas: (m.lessons ?? [])
+          .sort((a: any, b: any) => (a.order_index ?? 0) - (b.order_index ?? 0))
+          .map((a: any) => ({
+            id: Number(a.id),
             titulo: a.titulo,
-            videoUrl: a.videoUrl,
-            descricao: a.descricao,
+            videoUrl: a.video_url,
+            descricao: a.descricao ?? "",
+            releaseOffsetDays: a.release_offset_days ?? 0,
+            bloqueado: a.bloqueado ?? false,
             assistida: false,
-            bloqueado: i !== 0, // sequencial
-            releaseOffsetDays: Math.max(0, Math.round(delayDays)),
             started: false,
           })),
-        },
-      ])
-    );
-  };
+      })) ?? [];
 
-  const adicionarAula = (
-    moduloId: number,
-    titulo: string,
-    videoUrl: string,
-    delayDays: number = 0,
-    descricao: string = ""
+    if (mapped.length === 0) {
+      // Seeder
+      const seed = seedDefaults();
+      for (const m of seed) {
+        await supabase.from("modules").insert({
+          id: m.id,
+          nome: m.nome,
+          capa: m.capa,
+          linha: m.linha,
+          external_url: m.externalUrl ?? null,
+          release_offset_days: m.releaseOffsetDays ?? 0,
+          bloqueado: m.bloqueado ?? false,
+          order_index: 0,
+        });
+        for (let i = 0; i < m.aulas.length; i++) {
+          const a = m.aulas[i];
+          await supabase.from("lessons").insert({
+            id: a.id,
+            module_id: m.id,
+            titulo: a.titulo,
+            video_url: a.videoUrl,
+            descricao: a.descricao ?? null,
+            release_offset_days: a.releaseOffsetDays ?? 0,
+            bloqueado: a.bloqueado ?? false,
+            order_index: i,
+          });
+        }
+      }
+      return fetchFromDB();
+    }
+
+    setModulos(initializeBlocks(mapped));
+  }
+
+  useEffect(() => {
+    fetchFromDB();
+
+    // Realtime: escuta alterações em modules e lessons
+    const ch = supabase
+      .channel("modules_lessons_realtime")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "modules" },
+        () => fetchFromDB()
+      )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "lessons" },
+        () => fetchFromDB()
+      )
+      .subscribe();
+
+    channelRef.current = ch;
+    return () => {
+      if (channelRef.current) supabase.removeChannel(channelRef.current);
+    };
+  }, []);
+
+  const adicionarModulo: ModulosContextType["adicionarModulo"] = (
+    nome,
+    capa,
+    aulas = [],
+    linha = "",
+    delayDays = 0,
+    externalUrl
   ) => {
     const now = Date.now();
-    setModulos((prev) =>
-      initializeBlocks(
-        prev.map((m) =>
-          m.id === moduloId
-            ? {
-                ...m,
-                aulas: [
-                  ...m.aulas,
-                  {
-                    id: now,
-                    titulo,
-                    videoUrl,
-                    descricao,
-                    assistida: false,
-                    bloqueado: true, // só desbloqueia quando chegar a vez + data
-                    releaseOffsetDays: Math.max(0, Math.round(delayDays)),
-                    started: false,
-                  },
-                ],
-              }
-            : m
-        )
-      )
-    );
+    const moduleId = now;
+
+    const run = async () => {
+      await supabase.from("modules").insert({
+        id: moduleId,
+        nome,
+        capa,
+        linha,
+        external_url: externalUrl ?? null,
+        release_offset_days: Math.max(0, Math.round(delayDays)),
+        bloqueado: false,
+        order_index: 0,
+      });
+
+      for (let i = 0; i < aulas.length; i++) {
+        const a = aulas[i];
+        await supabase.from("lessons").insert({
+          id: moduleId + i + 1,
+          module_id: moduleId,
+          titulo: a.titulo,
+          video_url: a.videoUrl,
+          descricao: a.descricao ?? null,
+          release_offset_days: Math.max(0, Math.round(delayDays)),
+          bloqueado: i !== 0, // sequencial
+          order_index: i,
+        });
+      }
+
+      await fetchFromDB();
+    };
+    void run();
   };
 
-  const marcarAulaAssistida = (moduloId: number, aulaId: number) => {
+  const adicionarAula: ModulosContextType["adicionarAula"] = (
+    moduloId,
+    titulo,
+    videoUrl,
+    delayDays = 0,
+    descricao = ""
+  ) => {
+    const now = Date.now();
+    const run = async () => {
+      const { count } = await supabase
+        .from("lessons")
+        .select("*", { count: "exact", head: true })
+        .eq("module_id", moduloId);
+
+      const orderIndex = count ?? 0;
+
+      await supabase.from("lessons").insert({
+        id: now,
+        module_id: moduloId,
+        titulo,
+        video_url: videoUrl,
+        descricao: descricao || null,
+        release_offset_days: Math.max(0, Math.round(delayDays)),
+        bloqueado: true,
+        order_index: orderIndex,
+      });
+      await fetchFromDB();
+    };
+    void run();
+  };
+
+  const editarModulo: ModulosContextType["editarModulo"] = (
+    moduloId,
+    novoNome,
+    novaCapa,
+    novasAulas = [],
+    linha = "",
+    delayDays = 0,
+    externalUrl
+  ) => {
+    const run = async () => {
+      await supabase
+        .from("modules")
+        .update({
+          nome: novoNome,
+          capa: novaCapa,
+          linha,
+          external_url: externalUrl ?? null,
+          release_offset_days: Math.max(0, Math.round(delayDays)),
+        })
+        .eq("id", moduloId);
+
+      // Recria aulas conforme lista passada (mantendo ordem)
+      await supabase.from("lessons").delete().eq("module_id", moduloId);
+
+      for (let i = 0; i < novasAulas.length; i++) {
+        const a = novasAulas[i];
+        await supabase.from("lessons").insert({
+          id: moduloId + i + 1,
+          module_id: moduloId,
+          titulo: a.titulo,
+          video_url: a.videoUrl,
+          descricao: a.descricao ?? null,
+          release_offset_days: Math.max(0, Math.round(delayDays)),
+          bloqueado: i !== 0,
+          order_index: i,
+        });
+      }
+
+      await fetchFromDB();
+    };
+    void run();
+  };
+
+  const setModuloBloqueado: ModulosContextType["setModuloBloqueado"] = (
+    moduloId,
+    bloqueado
+  ) => {
+    const run = async () => {
+      await supabase.from("modules").update({ bloqueado }).eq("id", moduloId);
+      await fetchFromDB();
+    };
+    void run();
+  };
+
+  const setAulaBloqueada: ModulosContextType["setAulaBloqueada"] = (
+    moduloId,
+    aulaId,
+    bloqueado
+  ) => {
+    const run = async () => {
+      await supabase
+        .from("lessons")
+        .update({ bloqueado })
+        .eq("id", aulaId)
+        .eq("module_id", moduloId);
+      await fetchFromDB();
+    };
+    void run();
+  };
+
+  const setAulaReleaseDays: ModulosContextType["setAulaReleaseDays"] = (
+    moduloId,
+    aulaId,
+    delayDays
+  ) => {
+    const run = async () => {
+      await supabase
+        .from("lessons")
+        .update({ release_offset_days: Math.max(0, Math.round(delayDays)) })
+        .eq("id", aulaId)
+        .eq("module_id", moduloId);
+      await fetchFromDB();
+    };
+    void run();
+  };
+
+  const duplicarModulo: ModulosContextType["duplicarModulo"] = (moduloId) => {
+    const original = modulos.find((m) => m.id === moduloId);
+    if (!original) return;
+
+    const run = async () => {
+      const now = Date.now();
+      const newModuleId = now + 1;
+
+      await supabase.from("modules").insert({
+        id: newModuleId,
+        nome: `${original.nome} (Cópia)`,
+        capa: original.capa,
+        linha: original.linha,
+        external_url: original.externalUrl ?? null,
+        release_offset_days: original.releaseOffsetDays ?? 0,
+        bloqueado: original.bloqueado ?? false,
+        order_index: 0,
+      });
+
+      for (let i = 0; i < original.aulas.length; i++) {
+        const a = original.aulas[i];
+        await supabase.from("lessons").insert({
+          id: now + i + 2,
+          module_id: newModuleId,
+          titulo: a.titulo,
+          video_url: a.videoUrl,
+          descricao: a.descricao ?? null,
+          release_offset_days: a.releaseOffsetDays ?? 0,
+          bloqueado: i !== 0,
+          order_index: i,
+        });
+      }
+
+      await fetchFromDB();
+    };
+    void run();
+  };
+
+  // Progresso do aluno continua local (por usuário)
+  const marcarAulaAssistida: ModulosContextType["marcarAulaAssistida"] = (
+    moduloId,
+    aulaId
+  ) => {
     setModulos((prev) =>
       initializeBlocks(
         prev.map((m) => {
@@ -340,7 +525,10 @@ export const ModulosProvider: React.FC<{ children: React.ReactNode }> = ({
     );
   };
 
-  const marcarAulaIniciada = (moduloId: number, aulaId: number) => {
+  const marcarAulaIniciada: ModulosContextType["marcarAulaIniciada"] = (
+    moduloId,
+    aulaId
+  ) => {
     setModulos((prev) =>
       prev.map((m) =>
         m.id === moduloId
@@ -353,130 +541,6 @@ export const ModulosProvider: React.FC<{ children: React.ReactNode }> = ({
           : m
       )
     );
-  };
-
-  const editarModulo = (
-    moduloId: number,
-    novoNome: string,
-    novaCapa: string,
-    novasAulas: Omit<
-      Aula,
-      "id" | "assistida" | "bloqueado" | "releaseDate" | "releaseOffsetDays" | "started"
-    >[] = [],
-    linha: string = "",
-    delayDays: number = 0,
-    externalUrl?: string
-  ) => {
-    const now = Date.now();
-    const offset = Math.max(0, Math.round(delayDays));
-    setModulos((prev) =>
-      initializeBlocks(
-        prev.map((m) => {
-          if (m.id !== moduloId) return m;
-
-          const aulasAtualizadas: Aula[] =
-            novasAulas && novasAulas.length > 0
-              ? novasAulas.map((a, idx) => ({
-                  id: m.aulas[idx]?.id ?? now + idx + 1,
-                  titulo: a.titulo,
-                  videoUrl: a.videoUrl,
-                  descricao: a.descricao ?? m.aulas[idx]?.descricao,
-                  assistida: m.aulas[idx]?.assistida ?? false,
-                  bloqueado: false,
-                  releaseOffsetDays: offset,
-                  started: m.aulas[idx]?.started ?? false,
-                }))
-              : m.aulas.map((aExistente) => ({
-                  ...aExistente,
-                  releaseOffsetDays: offset,
-                }));
-
-          return {
-            ...m,
-            nome: novoNome,
-            capa: novaCapa,
-            linha,
-            externalUrl,
-            releaseOffsetDays: offset,
-            aulas: aulasAtualizadas,
-          };
-        })
-      )
-    );
-  };
-
-  const setModuloBloqueado = (moduloId: number, bloqueado: boolean) => {
-    setModulos((prev) =>
-      initializeBlocks(
-        prev.map((m) => (m.id === moduloId ? { ...m, bloqueado } : m))
-      )
-    );
-  };
-
-  const setAulaBloqueada = (
-    moduloId: number,
-    aulaId: number,
-    bloqueado: boolean
-  ) => {
-    setModulos((prev) =>
-      initializeBlocks(
-        prev.map((m) =>
-          m.id === moduloId
-            ? {
-                ...m,
-                aulas: m.aulas.map((a) =>
-                  a.id === aulaId ? { ...a, bloqueado } : a
-                ),
-              }
-            : m
-        )
-      )
-    );
-  };
-
-  const setAulaReleaseDays = (
-    moduloId: number,
-    aulaId: number,
-    delayDays: number
-  ) => {
-    const offset = Math.max(0, Math.round(delayDays));
-    setModulos((prev) =>
-      initializeBlocks(
-        prev.map((m) =>
-          m.id === moduloId
-            ? {
-                ...m,
-                aulas: m.aulas.map((a) =>
-                  a.id === aulaId ? { ...a, releaseOffsetDays: offset } : a
-                ),
-              }
-            : m
-        )
-      )
-    );
-  };
-
-  const duplicarModulo = (moduloId: number) => {
-    const original = modulos.find((m) => m.id === moduloId);
-    if (!original) return;
-    const now = Date.now();
-    const clonedAulas = original.aulas.map((a, idx) => ({
-      ...a,
-      id: now + idx + 1,
-      assistida: false,
-      started: false,
-      // mantém offset para cada aula
-      releaseOffsetDays: a.releaseOffsetDays,
-    }));
-    const cloned: Modulo = {
-      ...original,
-      id: now + 1,
-      nome: `${original.nome} (Cópia)`,
-      aulas: clonedAulas,
-      releaseOffsetDays: original.releaseOffsetDays,
-      externalUrl: original.externalUrl,
-    };
-    setModulos((prev) => initializeBlocks([...prev, cloned]));
   };
 
   return (
