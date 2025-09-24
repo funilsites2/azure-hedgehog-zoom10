@@ -412,7 +412,7 @@ export default function Admin() {
                         <img
                           src={m.capa}
                           alt={m.nome}
-                          className="w-full h-32 object-cover rounded mb-2"
+                          className="w-full h-[420px] md:h-[280px] object-cover object-center rounded mb-2"
                         />
                         <h3 className="font-semibold mb-2">{m.nome}</h3>
                         <div className="mt-auto flex gap-2 flex-wrap">
@@ -470,7 +470,7 @@ export default function Admin() {
                         <img
                           src={m.capa}
                           alt={m.nome}
-                          className="w-full h-32 object-cover rounded mb-2"
+                          className="w-full h-[280px] object-cover object-center rounded mb-2"
                         />
                         <h3 className="font-semibold mb-2">{m.nome}</h3>
                         <div className="mt-auto flex gap-2 flex-wrap">
