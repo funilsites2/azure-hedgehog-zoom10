@@ -113,7 +113,7 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
                     >
                       {blockedByDate && (
                         <>
-                          <div className="absolute top-0 inset-x-0 bg-red-600 text-white text-xs text-center py-1 rounded-t-xl">
+                          <div className="absolute top-0 inset-x-0 bg-gradient-to-r from-orange-500 via-amber-500 to-orange-400 text-white text-xs text-center py-1 rounded-t-xl">
                             Bloqueado até {new Date(modulo.releaseDate!).toLocaleDateString()}
                           </div>
                           <div
@@ -204,7 +204,7 @@ export const ModuloCarousel: React.FC<ModuloCarouselProps> = ({
             >
               {blockedByDate && (
                 <>
-                  <div className="absolute top-0 inset-x-0 bg-red-600 text-white text-xs text-center py-1 z-20 rounded-t-xl">
+                  <div className="absolute top-0 inset-x-0 bg-gradient-to-r from-orange-500 via-amber-500 to-orange-400 text-white text-xs text-center py-1 z-20 rounded-t-xl">
                     Bloqueado até {new Date(modulo.releaseDate!).toLocaleDateString()}
                   </div>
                   <div
