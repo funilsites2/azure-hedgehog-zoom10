@@ -1,0 +1,6 @@
+{
+	"appId": "com.example.azurehedgehogzoom",
+	"appName": "azure-hedgehog-zoom",
+	"webDir": "dist",
+	"packageClassList": []
+}
