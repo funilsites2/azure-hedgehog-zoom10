@@ -67,6 +67,9 @@ export const ModuleForm: React.FC<ModuleFormProps> = ({
   const [isCreatingNewLinha, setIsCreatingNewLinha] = useState(false);
   const [delayDays, setDelayDays] = useState<number>(initialDelayDays);
 
+  const isAddModuleAction = submitLabel.toLowerCase().includes("adicionar");
+  const isAddingLesson = editingIndex === null;
+
   const notifyAulasChange = (nextAulas: AulaInput[]) => {
     try {
       onAulasChange?.(nextAulas);
@@ -116,8 +119,6 @@ export const ModuleForm: React.FC<ModuleFormProps> = ({
   const handleSubmit = () => {
     if (!nome.trim() || !capa.trim() || !linha.trim()) return;
     onSubmit(nome, capa, aulas, linha, delayDays);
-    // Limpa somente o estado local do formulário; não notifica mudança de aulas aqui
-    // para não sobrescrever o delay salvo com um valor antigo.
     setNome("");
     setCapa("");
     setLinha("");
@@ -212,7 +213,15 @@ export const ModuleForm: React.FC<ModuleFormProps> = ({
           }
         />
         <div className="flex gap-2">
-          <Button type="button" onClick={handleAddAula}>
+          <Button
+            type="button"
+            onClick={handleAddAula}
+            className={
+              isAddingLesson
+                ? "gap-2 rounded-full border border-emerald-500/30 bg-emerald-600 text-white hover:bg-emerald-700 hover:border-emerald-500/50 shadow-sm"
+                : undefined
+            }
+          >
             <Plus size={16} />
             {editingIndex !== null ? "Atualizar Aula" : "Adicionar Aula"}
           </Button>
@@ -238,7 +247,17 @@ export const ModuleForm: React.FC<ModuleFormProps> = ({
       </div>
 
       <div className="flex gap-2">
-        <Button type="button" onClick={handleSubmit}>{submitLabel}</Button>
+        <Button
+          type="button"
+          onClick={handleSubmit}
+          className={
+            isAddModuleAction
+              ? "rounded-full border border-emerald-500/30 bg-emerald-600 text-white hover:bg-emerald-700 hover:border-emerald-500/50 shadow-sm"
+              : undefined
+          }
+        >
+          {submitLabel}
+        </Button>
         {onCancel && (
           <Button variant="secondary" onClick={onCancel}>
             Cancelar

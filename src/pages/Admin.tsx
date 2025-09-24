@@ -165,6 +165,7 @@ export default function Admin() {
                     descricao: "",
                   });
                 }}
+                className="rounded-full border border-emerald-500/30 bg-emerald-600 text-white hover:bg-emerald-700 hover:border-emerald-500/50 shadow-sm disabled:opacity-60 disabled:cursor-not-allowed"
               >
                 Adicionar Aula Existente
               </Button>
@@ -182,7 +183,6 @@ export default function Admin() {
                 const m = modulos.find((mod) => mod.id === editandoId);
                 if (!m) return null;
 
-                // Usa o offset salvo (dias após matrícula). Fallback: calcula pelos dados antigos.
                 const computedDelayDays =
                   typeof m.releaseOffsetDays === "number"
                     ? m.releaseOffsetDays
