@@ -188,6 +188,20 @@ export const ModuleForm: React.FC<ModuleFormProps> = ({
         onChange={(e) => setDelayDays(Number(e.target.value))}
       />
 
+      <div className="flex gap-2">
+        <Button
+          type="button"
+          onClick={handleSubmit}
+          className={
+            isPrimarySubmit
+              ? "rounded-full border border-emerald-500/30 bg-emerald-600 text-white hover:bg-emerald-700 hover:border-emerald-500/50 shadow-sm"
+              : undefined
+          }
+        >
+          {submitLabel}
+        </Button>
+      </div>
+
       <div className="space-y-2">
         <h3 className="font-semibold text-lg">Aulas</h3>
         <input
@@ -248,24 +262,13 @@ export const ModuleForm: React.FC<ModuleFormProps> = ({
         </ul>
       </div>
 
-      <div className="flex gap-2">
-        <Button
-          type="button"
-          onClick={handleSubmit}
-          className={
-            isPrimarySubmit
-              ? "rounded-full border border-emerald-500/30 bg-emerald-600 text-white hover:bg-emerald-700 hover:border-emerald-500/50 shadow-sm"
-              : undefined
-          }
-        >
-          {submitLabel}
-        </Button>
-        {onCancel && (
+      {onCancel && (
+        <div className="flex gap-2">
           <Button variant="secondary" onClick={onCancel}>
             Cancelar
           </Button>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 };
