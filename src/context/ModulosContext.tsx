@@ -23,6 +23,7 @@ type Modulo = {
   releaseDate?: number; // calculado dinamicamente a partir da matrícula + offset
   releaseOffsetDays?: number; // dias após a matrícula
   externalUrl?: string; // URL externa de compra (opcional)
+  trailerUrl?: string; // URL do trailer (opcional)
 };
 
 type ModulosContextType = {
@@ -36,7 +37,8 @@ type ModulosContextType = {
     >[],
     linha?: string,
     delayDays?: number,
-    externalUrl?: string
+    externalUrl?: string,
+    trailerUrl?: string
   ) => void;
   adicionarAula: (
     moduloId: number,
@@ -57,7 +59,8 @@ type ModulosContextType = {
     >[],
     linha?: string,
     delayDays?: number,
-    externalUrl?: string
+    externalUrl?: string,
+    trailerUrl?: string
   ) => void;
   setModuloBloqueado: (moduloId: number, bloqueado: boolean) => void;
   setAulaBloqueada: (
@@ -216,7 +219,7 @@ export const ModulosProvider: React.FC<{ children: React.ReactNode }> = ({
     const { data, error } = await supabase
       .from("modules")
       .select(`
-        id, nome, capa, linha, external_url, release_offset_days, bloqueado, order_index,
+        id, nome, capa, linha, external_url, trailer_url, release_offset_days, bloqueado, order_index,
         lessons:lessons ( id, module_id, titulo, video_url, descricao, release_offset_days, bloqueado, order_index )
       `)
       .order("order_index", { ascending: true });
@@ -230,6 +233,7 @@ export const ModulosProvider: React.FC<{ children: React.ReactNode }> = ({
         capa: m.capa,
         linha: m.linha ?? "",
         externalUrl: m.external_url ?? undefined,
+        trailerUrl: m.trailer_url ?? undefined,
         releaseOffsetDays: m.release_offset_days ?? 0,
         bloqueado: m.bloqueado ?? false,
         aulas: (m.lessons ?? [])
@@ -256,6 +260,7 @@ export const ModulosProvider: React.FC<{ children: React.ReactNode }> = ({
           capa: m.capa,
           linha: m.linha,
           external_url: m.externalUrl ?? null,
+          trailer_url: m.trailerUrl ?? null,
           release_offset_days: m.releaseOffsetDays ?? 0,
           bloqueado: m.bloqueado ?? false,
           order_index: 0,
@@ -310,7 +315,8 @@ export const ModulosProvider: React.FC<{ children: React.ReactNode }> = ({
     aulas = [],
     linha = "",
     delayDays = 0,
-    externalUrl
+    externalUrl,
+    trailerUrl
   ) => {
     const now = Date.now();
     const moduleId = now;
@@ -322,6 +328,7 @@ export const ModulosProvider: React.FC<{ children: React.ReactNode }> = ({
         capa,
         linha,
         external_url: externalUrl ?? null,
+        trailer_url: trailerUrl ?? null,
         release_offset_days: Math.max(0, Math.round(delayDays)),
         bloqueado: false,
         order_index: 0,
@@ -384,7 +391,8 @@ export const ModulosProvider: React.FC<{ children: React.ReactNode }> = ({
     novasAulas = [],
     linha = "",
     delayDays = 0,
-    externalUrl
+    externalUrl,
+    trailerUrl
   ) => {
     const run = async () => {
       await supabase
@@ -394,6 +402,7 @@ export const ModulosProvider: React.FC<{ children: React.ReactNode }> = ({
           capa: novaCapa,
           linha,
           external_url: externalUrl ?? null,
+          trailer_url: trailerUrl ?? null,
           release_offset_days: Math.max(0, Math.round(delayDays)),
         })
         .eq("id", moduloId);
@@ -477,6 +486,7 @@ export const ModulosProvider: React.FC<{ children: React.ReactNode }> = ({
         capa: original.capa,
         linha: original.linha,
         external_url: original.externalUrl ?? null,
+        trailer_url: original.trailerUrl ?? null,
         release_offset_days: original.releaseOffsetDays ?? 0,
         bloqueado: original.bloqueado ?? false,
         order_index: 0,

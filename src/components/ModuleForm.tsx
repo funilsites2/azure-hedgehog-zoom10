@@ -26,13 +26,15 @@ interface ModuleFormProps {
   initialAulas?: AulaInput[];
   initialDelayDays?: number;
   initialExternalUrl?: string;
+  initialTrailerUrl?: string;
   onSubmit: (
     nome: string,
     capa: string,
     aulas: AulaInput[],
     linha: string,
     delayDays: number,
-    externalUrl?: string
+    externalUrl?: string,
+    trailerUrl?: string
   ) => void;
   onCancel?: () => void;
   submitLabel?: string;
@@ -46,6 +48,7 @@ export const ModuleForm: React.FC<ModuleFormProps> = ({
   initialAulas = [],
   initialDelayDays = 0,
   initialExternalUrl = "",
+  initialTrailerUrl = "",
   onSubmit,
   onCancel,
   submitLabel = "Salvar",
@@ -62,6 +65,7 @@ export const ModuleForm: React.FC<ModuleFormProps> = ({
   const [aulas, setAulas] = useState<AulaInput[]>(initialAulas);
   const [delayDays, setDelayDays] = useState<number>(initialDelayDays);
   const [externalUrl, setExternalUrl] = useState<string>(initialExternalUrl);
+  const [trailerUrl, setTrailerUrl] = useState<string>(initialTrailerUrl);
 
   const [isCreatingNewLinha, setIsCreatingNewLinha] = useState(false);
   const [isEditingLinha, setIsEditingLinha] = useState(false);
@@ -76,13 +80,22 @@ export const ModuleForm: React.FC<ModuleFormProps> = ({
 
   const handleSubmit = () => {
     if (!nome.trim() || !capa.trim() || !linha.trim()) return;
-    onSubmit(nome, capa, aulas, linha, delayDays, externalUrl?.trim() || undefined);
+    onSubmit(
+      nome,
+      capa,
+      aulas,
+      linha,
+      delayDays,
+      externalUrl?.trim() || undefined,
+      trailerUrl?.trim() || undefined
+    );
     setNome("");
     setCapa("");
     setLinha("");
     setAulas([]);
     setDelayDays(0);
     setExternalUrl("");
+    setTrailerUrl("");
     setIsCreatingNewLinha(false);
     setIsEditingLinha(false);
   };
@@ -107,6 +120,13 @@ export const ModuleForm: React.FC<ModuleFormProps> = ({
         placeholder="URL externa de compra (opcional)"
         value={externalUrl}
         onChange={(e) => setExternalUrl(e.target.value)}
+      />
+
+      <input
+        className="w-full p-2 rounded bg-neutral-800 text-white"
+        placeholder="URL do trailer (opcional)"
+        value={trailerUrl}
+        onChange={(e) => setTrailerUrl(e.target.value)}
       />
 
       <Select
