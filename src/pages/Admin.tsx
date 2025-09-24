@@ -17,6 +17,7 @@ import { LogoSettings } from "@/components/LogoSettings";
 import { Footer } from "@/components/Footer";
 import UserMenu from "@/components/UserMenu";
 import { showSuccess } from "@/utils/toast";
+import LessonsEditor from "@/components/LessonsEditor";
 
 export default function Admin() {
   const modulosCtx = useModulos();
@@ -308,6 +309,22 @@ export default function Admin() {
                         }
                       }}
                     />
+
+                    <LessonsEditor
+                      initialAulas={m.aulas}
+                      onChange={(newAulas: AulaInput[]) => {
+                        editarModulo(
+                          m.id,
+                          m.nome,
+                          m.capa,
+                          newAulas,
+                          m.linha,
+                          computedDelayDays
+                        );
+                        showSuccess("Aulas atualizadas");
+                      }}
+                    />
+
                     <div className="mt-6">
                       <h3 className="font-semibold mb-2">
                         Dias (após matrícula) para liberar cada aula
