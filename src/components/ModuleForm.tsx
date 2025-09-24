@@ -200,14 +200,19 @@ export const ModuleForm: React.FC<ModuleFormProps> = ({
         />
       )}
 
-      <input
-        type="number"
-        min={0}
-        className="w-full p-2 rounded bg-neutral-800 text-white"
-        placeholder="Dias para liberar o módulo"
-        value={delayDays}
-        onChange={(e) => setDelayDays(Number(e.target.value))}
-      />
+      <div className="space-y-1">
+        <span className="text-sm text-neutral-300">
+          Dias ( apos a matricula ) para liberar esse modulo
+        </span>
+        <input
+          type="number"
+          min={0}
+          className="w-full p-2 rounded bg-neutral-800 text-white"
+          placeholder="Dias para liberar o módulo"
+          value={delayDays}
+          onChange={(e) => setDelayDays(Number(e.target.value))}
+        />
+      </div>
 
       <div className="flex gap-2">
         <Button
