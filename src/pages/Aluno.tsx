@@ -248,19 +248,18 @@ export default function Aluno() {
         </div>
         <nav className="flex flex-col mt-4 space-y-2">
           {MENU_ITEMS.map((item) => (
-            <Link
+            <button
               key={item.key}
-              to={item.key === "modulos" ? "/aluno" : `/${item.key}`}
               onClick={() => {
                 setMobileMenuOpen(false);
                 setMobileTab(item.key);
                 if (item.key === "modulos") setModuloSelecionado(null);
               }}
-              className="flex items-center gap-3 px-4 py-3 text-neutral-300 hover:bg-green-600 hover:text-white rounded"
+              className="flex items-center gap-3 px-4 py-3 text-neutral-300 hover:bg-green-600 hover:text-white rounded text-left"
             >
               <item.icon size={20} className="text-green-500" />
               <span>{item.label}</span>
-            </Link>
+            </button>
           ))}
           <Link
             to="/perfil"
