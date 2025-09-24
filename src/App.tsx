@@ -9,6 +9,7 @@ import Admin from "./pages/Admin";
 import Aluno from "./pages/Aluno";
 import Perfil from "./pages/Perfil";
 import Login from "./pages/Login";
+import HomeLoginButton from "./components/HomeLoginButton";
 
 const queryClient = new QueryClient();
 
@@ -18,6 +19,7 @@ const App = () => (
       <Toaster />
       <Sonner />
       <HashRouter>
+        <HomeLoginButton />
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/login" element={<Login />} />
